@@ -1,117 +1,127 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { WEBSITE_ROUTES } from "../../pages/website/routes.enum";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const navLinks = [
-    { label: "Home", path: WEBSITE_ROUTES.HOME },
-    { label: "About", path: WEBSITE_ROUTES.ABOUT },
-    { label: "Contact", path: WEBSITE_ROUTES.CONTACT },
-];
+const Navbar = () => {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-export default function Navbar() {
-    const [isOpen, setIsOpen] = useState(false);
-    const location = useLocation();
+    const toggleMobileMenu = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
 
-    const isActive = (path: string) =>
-        location.pathname === path;
+    // Define navigation links for easy mapping and maintainability
+    const navLinks = [
+        { name: 'For Professionals', path: '/professionals' },
+        { name: 'For institutes', path: '/institutes' },
+        { name: 'About us', path: '/about' },
+        { name: 'Contact us', path: '/contact' },
+    ];
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/90 backdrop-blur-md">
-            <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                {/* Logo */}
-                <Link
-                    to={WEBSITE_ROUTES.HOME}
-                    className="flex items-center gap-2 select-none"
-                >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white text-sm font-bold">
-                        M
-                    </span>
-                    <span className="text-slate-900 font-semibold text-base tracking-tight">
-                        Med<span className="text-blue-600">HirePro</span>
-                    </span>
-                </Link>
+        <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+            {/* Desktop & Tablet Container */}
+            <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-20">
 
-                {/* Desktop Nav */}
-                <nav className="hidden md:flex items-center gap-1">
-                    {navLinks.map(({ label, path }) => (
-                        <Link
-                            key={path}
-                            to={path}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
-                                isActive(path)
-                                    ? "text-blue-600 bg-blue-50"
-                                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                            }`}
-                        >
-                            {label}
+                    {/* Left Side: Logo & Main Navigation */}
+                    <div className="flex items-center gap-10 lg:gap-14">
+                        {/* Logo */}
+                        <Link to="/" className="flex-shrink-0 flex items-center">
+                            <span className="text-[#0d47a1] font-bold text-xl tracking-tight">
+                                MedHirePro
+                            </span>
                         </Link>
-                    ))}
-                </nav>
 
-                {/* CTA + Mobile toggle */}
-                <div className="flex items-center gap-3">
-                    <Link
-                        to="/user/dashboard"
-                        className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-                    >
-                        Get Started
-                    </Link>
+                        {/* Desktop Navigation Links */}
+                        <div className="hidden md:flex space-x-6 lg:space-x-8">
+                            {navLinks.map((link) => (
+                                <Link
+                                    key={link.name}
+                                    to={link.path}
+                                    className="text-slate-600 hover:text-[#0d47a1] font-medium text-[15px] transition-colors duration-200"
+                                >
+                                    {link.name}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
 
-                    {/* Hamburger */}
-                    <button
-                        onClick={() => setIsOpen((o) => !o)}
-                        className="md:hidden flex flex-col justify-center items-center h-9 w-9 rounded-md text-slate-600 hover:bg-slate-100 transition-colors"
-                        aria-label="Toggle menu"
-                    >
-                        <span
-                            className={`block h-0.5 w-5 bg-current transition-transform duration-200 ${
-                                isOpen ? "translate-y-1 rotate-45" : "-translate-y-0.5"
-                            }`}
-                        />
-                        <span
-                            className={`block h-0.5 w-5 bg-current transition-opacity duration-200 ${
-                                isOpen ? "opacity-0" : "opacity-100"
-                            }`}
-                        />
-                        <span
-                            className={`block h-0.5 w-5 bg-current transition-transform duration-200 ${
-                                isOpen ? "-translate-y-1 -rotate-45" : "translate-y-0.5"
-                            }`}
-                        />
-                    </button>
+                    {/* Right Side: Auth Buttons (Desktop) */}
+                    <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+                        <Link
+                            to="/login"
+                            className="text-[#334155] hover:text-[#0d47a1] font-semibold text-[15px] transition-colors duration-200"
+                        >
+                            Login
+                        </Link>
+                        <Link
+                            to="/signup"
+                            className="bg-[#0b5cd5] hover:bg-[#094bb3] text-white px-6 py-2.5 rounded-md font-medium text-[15px] transition-colors duration-200 shadow-sm"
+                        >
+                            Sign Up
+                        </Link>
+                    </div>
+
+                    {/* Mobile menu button (Hamburger) */}
+                    <div className="flex items-center md:hidden">
+                        <button
+                            onClick={toggleMobileMenu}
+                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition-colors"
+                            aria-expanded="false"
+                        >
+                            <span className="sr-only">Open main menu</span>
+                            {/* Icon switches between Hamburger and Close based on state */}
+                            {!isMobileMenuOpen ? (
+                                <svg className="block h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            ) : (
+                                <svg className="block h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* Mobile menu */}
+            {/* Mobile Menu Panel (Slide down) */}
             <div
-                className={`md:hidden overflow-hidden transition-all duration-200 ease-in-out ${
-                    isOpen ? "max-h-64 border-t border-slate-100" : "max-h-0"
-                }`}
+                className={`md:hidden absolute w-full bg-white border-b border-gray-200 shadow-lg transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'opacity-100 visible top-[80px]' : 'opacity-0 invisible -top-full'
+                    }`}
             >
-                <nav className="flex flex-col gap-1 px-4 py-3">
-                    {navLinks.map(({ label, path }) => (
+                <div className="px-4 pt-2 pb-6 space-y-1 sm:px-6">
+                    {navLinks.map((link) => (
                         <Link
-                            key={path}
-                            to={path}
-                            onClick={() => setIsOpen(false)}
-                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                isActive(path)
-                                    ? "text-blue-600 bg-blue-50"
-                                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                            }`}
+                            key={link.name}
+                            to={link.path}
+                            className="block px-3 py-3 rounded-md text-base font-medium text-slate-600 hover:text-[#0d47a1] hover:bg-blue-50 transition-colors"
+                            onClick={() => setIsMobileMenuOpen(false)} // Close menu on click
                         >
-                            {label}
+                            {link.name}
                         </Link>
                     ))}
-                    <Link
-                        to="/user/dashboard"
-                        onClick={() => setIsOpen(false)}
-                        className="mt-2 flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
-                    >
-                        Get Started
-                    </Link>
-                </nav>
+
+                    {/* Mobile Auth Buttons */}
+                    <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3 px-3">
+                        <Link
+                            to="/login"
+                            className="block text-center w-full text-slate-700 hover:text-[#0d47a1] font-semibold py-2.5 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            Login
+                        </Link>
+                        <Link
+                            to="/signup"
+                            className="block text-center w-full bg-[#0b5cd5] text-white px-5 py-2.5 rounded-md font-medium hover:bg-[#094bb3] transition-colors shadow-sm"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            Sign Up
+                        </Link>
+                    </div>
+                </div>
             </div>
-        </header>
+        </nav>
     );
-}
+};
+
+export default Navbar;
