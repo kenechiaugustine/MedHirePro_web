@@ -1,11 +1,16 @@
-import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import Hero from "../../components/Hero";
+import TrustedBy from "../../components/TrustedBy";
 
 export default function HomePage() {
     return (
         <div>
             <Navbar />
-            <h1>Home page</h1>
+            <main className="flex-grow">
+                <Hero />
+                <TrustedBy />
+            </main>
             <Footer />
         </div>
     );
