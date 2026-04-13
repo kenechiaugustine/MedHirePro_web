@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
+import professionalsImg from '../../assets/jpeg/professionals.jpg';
 
 const Hero = () => {
     return (
-        <section className="relative w-full bg-[#fcfdfe] min-h-[calc(100vh-80px)] flex items-center overflow-hidden">
+        <section className="relative w-full bg-[#fcfdfe] lg:min-h-[calc(100vh-80px)] flex items-center overflow-hidden">
 
             {/* MOBILE & TABLET BACKGROUND (Hidden on Desktop) */}
             <div className="absolute inset-0 lg:hidden z-0">
                 <img
-                    src="https://placehold.co/800x1000/e2e8f0/64748b?text=Medical+Background"
+                    src={professionalsImg}
                     alt="Healthcare Professionals"
                     className="w-full h-full object-cover"
                 />
@@ -19,7 +20,7 @@ const Hero = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
                     {/* LEFT COLUMN: Text Content */}
-                    <div className="max-w-2xl">
+                    <div className="max-w-full lg:max-w-2xl">
 
                         {/* NCDC Badge */}
                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e0f4f9] text-[#00838f] text-[11px] sm:text-xs font-bold tracking-wide uppercase mb-6 sm:mb-8">
@@ -31,16 +32,16 @@ const Hero = () => {
 
                         {/* Main Heading */}
                         <h1 className="text-4xl sm:text-5xl lg:text-[64px] font-extrabold text-[#0a192f] leading-[1.1] tracking-tight">
-                            Connecting <br className="hidden sm:block" />
+                            Connecting <br className="hidden lg:block" />
                             <span className="text-[#0d47a1] italic font-bold">Verified</span>
-                            <br />
-                            Healthcare <br className="hidden sm:block" />
-                            Talent to Quality <br className="hidden sm:block" />
+                            <br className="lg:block" />
+                            Healthcare <br className="hidden lg:block" />
+                            Talent to Quality <br className="hidden lg:block" />
                             Care.
                         </h1>
 
                         {/* Subheading */}
-                        <p className="mt-6 text-slate-600 text-base sm:text-lg max-w-[500px] leading-relaxed">
+                        <p className="mt-6 text-slate-600 text-base sm:text-lg max-w-full lg:max-w-[500px] leading-relaxed">
                             The trusted recruitment platform for Nigeria's medical ecosystem. We bridge the gap between world-class clinicians and premier medical institutions.
                         </p>
 
@@ -82,7 +83,7 @@ const Hero = () => {
                     <div className="hidden lg:block relative h-full min-h-[600px] w-full rounded-[2rem] overflow-hidden shadow-2xl">
                         {/* Main Desktop Image */}
                         <img
-                            src="https://placehold.co/800x1000/e2e8f0/64748b?text=Healthcare+Professionals"
+                            src={professionalsImg}
                             alt="Healthcare Professionals"
                             className="absolute inset-0 w-full h-full object-cover"
                         />
