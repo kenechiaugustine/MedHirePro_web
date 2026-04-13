@@ -10,14 +10,14 @@ const Navbar = () => {
 
     // Define navigation links for easy mapping and maintainability
     const navLinks = [
-        { name: 'For Professionals', path: '/professionals' },
-        { name: 'For institutes', path: '/institutes' },
+        { name: 'For Professionals', path: '/professional' },
+        { name: 'For Institutes', path: '/institute' },
         { name: 'About us', path: '/about' },
         { name: 'Contact us', path: '/contact' },
     ];
 
     return (
-        <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <nav className="bg-white/70 backdrop-blur-md shadow-md sticky top-0 z-50">
             {/* Desktop & Tablet Container */}
             <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-20">

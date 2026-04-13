@@ -3,4 +3,11 @@ export const WEBSITE_ROUTES = {
     HOME: '/',
     ABOUT: '/about',
     CONTACT: '/contact',
+    PROFESSIONAL: '/professional',
+    INSTITUTE: '/institute',
+    PRIVACY: '/privacy',
+    TERMS: '/terms',
+    FAQ: '/faq',
+    LOGIN: '/login',
+    SIGNUP: '/signup',
 };

@@ -57,7 +57,7 @@ const Hero = () => {
                             </Link>
 
                             <Link
-                                to="/recruit"
+                                to="/signup"
                                 className="bg-[#eaf1ff] hover:bg-[#dbe6fe] text-[#0b5cd5] px-6 sm:px-8 py-3.5 rounded-lg font-medium text-[15px] text-center transition-colors duration-200"
                             >
                                 Recruit with Us

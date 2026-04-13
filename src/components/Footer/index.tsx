@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
     // Define footer links for easy maintenance
     const footerLinks = [
-        { name: 'For Professionals', path: '/professionals' },
-        { name: 'For Institutes', path: '/institutes' },
+        { name: 'For Professionals', path: '/professional' },
+        { name: 'For Institutes', path: '/institute' },
         { name: 'About us', path: '/about' },
         { name: 'Contact us', path: '/contact' },
         { name: 'Privacy Policy', path: '/privacy' },
