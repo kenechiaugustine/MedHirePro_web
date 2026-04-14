@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { WEBSITE_ROUTES } from '../../pages/website/routes.enum';
 
 const CallToAction = () => {
     return (
@@ -25,14 +26,14 @@ const CallToAction = () => {
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-5">
                             <Link
-                                to="/signup"
+                                to={WEBSITE_ROUTES.SIGNUP}
                                 className="w-full sm:w-auto bg-white text-[#094298] font-bold px-8 py-3.5 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
                             >
                                 Create Free Account
                             </Link>
 
                             <Link
-                                to="/contact"
+                                to={WEBSITE_ROUTES.CONTACT}
                                 className="w-full sm:w-auto bg-[#135ad1] hover:bg-[#114eb5] text-white font-bold px-8 py-3.5 rounded-xl border border-blue-400/30 transition-colors shadow-sm"
                             >
                                 Schedule a Demo

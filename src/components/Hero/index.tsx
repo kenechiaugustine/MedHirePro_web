@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import professionalsImg from '../../assets/jpeg/professionals.jpg';
+import { WEBSITE_ROUTES } from '../../pages/website/routes.enum';
 
 const Hero = () => {
     return (
@@ -48,7 +49,7 @@ const Hero = () => {
                         {/* CTA Buttons */}
                         <div className="mt-8 flex flex-col sm:flex-row gap-4 sm:items-center">
                             <Link
-                                to="/signup"
+                                to={WEBSITE_ROUTES.SIGNUP}
                                 className="bg-[#0b5cd5] hover:bg-[#094bb3] text-white px-6 sm:px-8 py-3.5 rounded-lg font-medium text-[15px] flex items-center justify-center gap-2 transition-all duration-200 shadow-md shadow-blue-500/20"
                             >
                                 Join as a Professional
@@ -58,7 +59,7 @@ const Hero = () => {
                             </Link>
 
                             <Link
-                                to="/signup"
+                                to={WEBSITE_ROUTES.SIGNUP}
                                 className="bg-[#eaf1ff] hover:bg-[#dbe6fe] text-[#0b5cd5] px-6 sm:px-8 py-3.5 rounded-lg font-medium text-[15px] text-center transition-colors duration-200"
                             >
                                 Recruit with Us
