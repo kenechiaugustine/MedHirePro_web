@@ -1,5 +1,5 @@
 export const WEBSITE_ROUTES = {
-    NOT_FOUND: '*',
+    // public routes
     HOME: '/',
     ABOUT: '/about',
     CONTACT: '/contact',
@@ -8,6 +8,8 @@ export const WEBSITE_ROUTES = {
     PRIVACY: '/privacy',
     TERMS: '/terms',
     FAQ: '/faq',
+
+    // authentication routes
     LOGIN: '/login',
     SIGNUP: '/signup',
 };
