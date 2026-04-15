@@ -175,7 +175,7 @@ const AboutUs = () => {
       </div>
 
       <p className="text-gray-500 mt-4 md:mt-0 max-w-md">
-        Combining 50+ years of healthcare logistics and software engineering.
+        Combining 8+ years of healthcare logistics and software engineering.
       </p>
     </div>
 
@@ -185,8 +185,8 @@ const AboutUs = () => {
       {/* LEFT PROFILE */}
       <div className="bg-white rounded-2xl shadow-md overflow-hidden">
         <img
-          src="/team1.jpg" // replace with your image
-          alt="Dr Marcus Chen"
+          src="assets/jpg/chibuike.jpg" // replace with your image
+          alt="Med Lab Sct . Obasi Chibuike"
           className="w-full h-64 object-cover"
         />
         <div className="p-6">
@@ -194,7 +194,7 @@ const AboutUs = () => {
             Founder & CEO
           </p>
           <h3 className="text-lg font-bold text-gray-900 mt-1">
-            Dr. Marcus Chen
+            Med Lab Sct . Obasi Chibuike
           </h3>
           <p className="text-gray-600 text-sm mt-3">
             “Our mission is to ensure no hospital operates below its highest
@@ -206,16 +206,16 @@ const AboutUs = () => {
       {/* RIGHT PROFILE (TALL CARD) */}
       <div className="bg-white rounded-2xl shadow-md overflow-hidden md:col-span-2">
         <img
-          src="/team2.jpg" // replace with your image
-          alt="Sarah Olaitan"
+          src="assets/jpg/Kene.jpg" // replace with your image
+          alt="Arionye Kenechukwu O,Software Engineer"
           className="w-full h-80 object-cover"
         />
         <div className="p-6">
           <p className="text-xs text-blue-600 font-semibold uppercase">
-            Chief Product Officer
+            co-founder & CTO
           </p>
           <h3 className="text-lg font-bold text-gray-900 mt-1">
-            Sarah Olaitan
+            Arionye Kenechukwu O,Software Engineer
           </h3>
         </div>
       </div>
@@ -223,7 +223,7 @@ const AboutUs = () => {
       {/* SMALL PROFILE */}
       <div className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4">
         <img
-          src="/team3.jpg"
+          src="assets" // replace with your image
           alt="Dr James Kalu"
           className="w-14 h-14 rounded-full object-cover"
         />

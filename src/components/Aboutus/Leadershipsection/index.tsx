@@ -15,7 +15,7 @@ const LeadershipSection = () => {
           </div>
 
           <p className="text-gray-500 mt-4 md:mt-0 max-w-md">
-            Combining 50+ years of healthcare logistics and software engineering.
+            Combining 8+ years of healthcare logistics and software engineering.
           </p>
         </div>
 
@@ -24,18 +24,18 @@ const LeadershipSection = () => {
 
           {/* LEFT PROFILE */}
           <ProfileCard
-            image="https://via.placeholder.com/300x200?text=Dr.+Marcus+Chen"
+            image="assets/jpg/chibuike.jpg" // replace with your image
             role="Founder & CEO"
-            name="Dr. Marcus Chen"
+            name="Med Lab Sct . Obasi Chibuike"
             quote="Our mission is to ensure no hospital operates below its highest potential."
             type="large"
           />
 
           {/* RIGHT PROFILE (TALL CARD) */}
           <ProfileCard
-            image="https://via.placeholder.com/300x200?text=Sarah+Olaitan"
-            role="Chief Product Officer"
-            name="Sarah Olaitan"
+            image="assets/jpg/Kene.jpg" // replace with your image
+            role="co-founder & CTO"
+            name="Arionye Kenechukwu O,Software Engineer"
             type="tall" quote={undefined}          />
 
           {/* SMALL PROFILE */}
