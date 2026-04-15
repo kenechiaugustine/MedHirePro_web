@@ -30,7 +30,7 @@ const AboutusHero = () => {
         <div className="relative">
           <div className="rounded-2xl overflow-hidden shadow-xl">
             <img
-              src="https://via.placeholder.com/600x400?text=About+Image"
+              src="assets//jpeg/Aboutus.jpg" // replace with your image
               alt="Digital Healthcare"
               className="w-full h-full object-cover"
             />

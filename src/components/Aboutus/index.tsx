@@ -36,7 +36,7 @@ const AboutUs = () => {
         <div className="relative">
           <div className="rounded-2xl overflow-hidden shadow-xl">
             <img
-              src="/about-image.jpg" // replace with your image path
+              src="assets//jpeg/Aboutus.jpg" // replace with your image path
               alt="Digital Healthcare"
               className="w-full h-full object-cover"
             />
