@@ -1,11 +1,12 @@
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import Hero from "../../components/Hero";
-import TrustedBy from "../../components/TrustedBy";
-import Features from "../../components/Features";
-import HowItWorks from "../../components/HowItWorks";
-import Testimonials from "../../components/Testimonials";
-import CallToAction from "../../components/CallToAction";
+import CallToAction from "../../components/website/CallToAction";
+import Features from "../../components/website/Features";
+import Footer from "../../components/website/Footer";
+import Hero from "../../components/website/Hero";
+import HowItWorks from "../../components/website/HowItWorks";
+import Navbar from "../../components/website/Navbar";
+import Testimonials from "../../components/website/Testimonials";
+import TrustedBy from "../../components/website/TrustedBy";
+
 
 export default function HomePage() {
     return (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { WEBSITE_ROUTES } from '../../pages/website/routes.enum';
+import { WEBSITE_ROUTES } from '../../../pages/website/routes.enum';
 
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import heroimage from '../../assets/heroimage.png';
-import { WEBSITE_ROUTES } from '../../pages/website/routes.enum';
+import heroimage from '../../../assets/heroimage.png';
+import { WEBSITE_ROUTES } from '../../../pages/website/routes.enum';
 
-const Hero = () => { 
+const Hero = () => {
     return (
         <section className="relative w-full bg-[#fcfdfe] lg:min-h-[calc(100vh-80px)] flex items-center overflow-hidden">
 
