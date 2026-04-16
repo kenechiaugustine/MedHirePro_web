@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 // add a link icon 
 import { BsLink45Deg } from 'react-icons/bs';
 import { HiArrowRight } from 'react-icons/hi';
-import ChibuikeImg from '../../../assets/Chibuike.jpg';
+import ChibuikeImg from '../../../assets/myprofilepicture.png';
 import KeneImg from '../../../assets/Kene.jpeg';
 
 const Leadership = () => {
@@ -12,7 +12,7 @@ const Leadership = () => {
             name: 'Med Lab Sct. Obasi Chibuike',
             role: 'FOUNDER & CEO',
             bio: '"Our mission is to ensure no hospital operates below its highest potential."',
-            linkedin: 'https://linkedin.com',
+            linkedin: 'https://www.linkedin.com/in/chibuike-obasi-aa1169218',
             image: ChibuikeImg,
         },
         cto: {

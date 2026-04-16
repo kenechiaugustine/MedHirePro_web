@@ -1,3 +1,5 @@
+import Abouthero from '../../../assets/AboutHero.png';  
+
 const AboutHero = () => {
   return (
     <section className="bg-[#fcfdfe] pt-12 pb-20 lg:pt-20 lg:pb-32 overflow-hidden">
@@ -36,7 +38,7 @@ const AboutHero = () => {
             {/* Main Image Container */}
             <div className="relative rounded-[2rem] overflow-hidden shadow-2xl h-[400px] sm:h-[500px] lg:h-[650px] w-full z-10">
               <img
-                src="https://placehold.co/800x1000/0a46a1/4fd1c5?text=Digital+Clinician+HUD"
+                src={Abouthero}
                 alt="Digital Clinician analyzing data"
                 className="absolute inset-0 w-full h-full object-cover"
               />
