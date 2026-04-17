@@ -20,7 +20,7 @@ const BridgingTheGap = () => {
 
                         <p className="text-slate-600 text-[15px] sm:text-base leading-relaxed">
                             Medical staffing is broken. Institutions face chronic shortages while talented
-                            clinicians struggle with fragmented job markets. MedHirePro.ng was built to
+                            clinicians struggle with fragmented job markets. MedHirePro was built to
                             bridge this divide through surgical efficiency.
                         </p>
                     </div>
