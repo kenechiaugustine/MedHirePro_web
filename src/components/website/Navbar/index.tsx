@@ -33,7 +33,7 @@ const Navbar = () => {
                         </Link>
 
                         {/* Desktop Navigation Links */}
-                        <div className="hidden md:flex space-x-6 lg:space-x-8">
+                        <div className="hidden lg:flex space-x-6 xl:space-x-8">
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
@@ -47,7 +47,7 @@ const Navbar = () => {
                     </div>
 
                     {/* Right Side: Auth Buttons (Desktop) */}
-                    <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+                    <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
                         <Link
                             to={WEBSITE_ROUTES.LOGIN}
                             className="text-[#334155] hover:text-[#0d47a1] font-semibold text-[15px] transition-colors duration-200"
@@ -63,7 +63,7 @@ const Navbar = () => {
                     </div>
 
                     {/* Mobile menu button (Hamburger) */}
-                    <div className="flex items-center md:hidden">
+                    <div className="flex items-center lg:hidden">
                         <button
                             onClick={toggleMobileMenu}
                             className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition-colors"
@@ -87,7 +87,7 @@ const Navbar = () => {
 
             {/* Mobile Menu Panel (Slide down) */}
             <div
-                className={`md:hidden absolute w-full bg-white border-b border-gray-200 shadow-lg transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'opacity-100 visible top-[80px]' : 'opacity-0 invisible -top-full'
+                className={`lg:hidden absolute w-full bg-white border-b border-gray-200 shadow-lg transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'opacity-100 visible top-[80px]' : 'opacity-0 invisible -top-full'
                     }`}
             >
                 <div className="px-4 pt-2 pb-6 space-y-1 sm:px-6">
