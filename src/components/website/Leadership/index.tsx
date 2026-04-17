@@ -9,8 +9,8 @@ import KeneImg from '../../../assets/Kene.jpeg';
 const Leadership = () => {
     const leaders = {
         ceo: {
-            name: 'Med Lab Sct. Obasi Chibuike',
-            role: 'FOUNDER & CEO',
+            name: 'Mls. Obasi Chibuike',
+            role: 'FOUNDER ',
             bio: '"Our mission is to ensure no hospital operates below its highest potential."',
             linkedin: 'https://www.linkedin.com/in/chibuike-obasi-aa1169218',
             image: ChibuikeImg,
@@ -40,7 +40,7 @@ const Leadership = () => {
                         <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0a192f] mt-2">Architects of the Future</h2>
                     </div>
                     <p className="text-slate-500 text-sm sm:text-base max-w-md lg:text-right">
-                        Combining 50+ years of healthcare logistics and software engineering.
+                        Combining 8+ years of healthcare logistics and software engineering.
                     </p>
                 </div>
 
