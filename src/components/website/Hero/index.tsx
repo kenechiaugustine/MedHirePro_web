@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import professionalsImg from '../../assets/jpeg/professionals.jpg';
-import { WEBSITE_ROUTES } from '../../pages/website/routes.enum';
+import heroimage from '../../../assets/heroimage.png';
+import { WEBSITE_ROUTES } from '../../../pages/website/routes.enum';
 
 const Hero = () => {
     return (
@@ -9,7 +9,7 @@ const Hero = () => {
             {/* MOBILE & TABLET BACKGROUND (Hidden on Desktop) */}
             <div className="absolute inset-0 lg:hidden z-0">
                 <img
-                    src={professionalsImg}
+                    src={heroimage}
                     alt="Healthcare Professionals"
                     className="w-full h-full object-cover"
                 />
@@ -84,7 +84,7 @@ const Hero = () => {
                     <div className="hidden lg:block relative h-full min-h-[600px] w-full rounded-[2rem] overflow-hidden shadow-2xl">
                         {/* Main Desktop Image */}
                         <img
-                            src={professionalsImg}
+                            src={heroimage}
                             alt="Healthcare Professionals"
                             className="absolute inset-0 w-full h-full object-cover"
                         />

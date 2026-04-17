@@ -1,5 +1,5 @@
-import Footer from "../../../components/Footer";
-import Navbar from "../../../components/Navbar";
+import Footer from "../../../components/website/Footer";
+import Navbar from "../../../components/website/Navbar";
 
 export default function PrivacyPage() {
     return (

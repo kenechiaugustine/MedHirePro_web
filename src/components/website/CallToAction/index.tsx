@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { WEBSITE_ROUTES } from '../../pages/website/routes.enum';
+import { WEBSITE_ROUTES } from '../../../pages/website/routes.enum';
 
 const CallToAction = () => {
     return (

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { WEBSITE_ROUTES } from "./website/routes.enum";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/website/Navbar";
+import Footer from "../components/website/Footer";
 
 export default function NotFound() {
     return (
@@ -18,7 +18,7 @@ export default function NotFound() {
                     <p className="text-lg text-gray-600 mb-8">
                         The page you are looking for doesn't exist or has been moved.
                     </p>
-                    
+
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
                             to={WEBSITE_ROUTES.HOME}
