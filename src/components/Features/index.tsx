@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { WEBSITE_ROUTES } from '../../pages/website/routes.enum';
 
 const Features = () => {
     return (
@@ -77,7 +78,7 @@ const Features = () => {
 
                         {/* CTA Button */}
                         <Link
-                            to="/signup"
+                            to={WEBSITE_ROUTES.SIGNUP}
                             className="mt-10 block w-full bg-[#066b77] hover:bg-[#055a64] text-white text-center font-medium py-3.5 rounded-xl transition-colors duration-200"
                         >
                             Get Started
@@ -141,7 +142,7 @@ const Features = () => {
 
                         {/* CTA Button */}
                         <Link
-                            to="/signup"
+                            to={WEBSITE_ROUTES.SIGNUP}
                             className="mt-10 block w-full bg-[#4631ab] hover:bg-[#39288c] text-white text-center font-medium py-3.5 rounded-xl transition-colors duration-200"
                         >
                             Post a Job

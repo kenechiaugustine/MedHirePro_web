@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom';
+import { WEBSITE_ROUTES } from '../../pages/website/routes.enum';
 
 const Footer = () => {
     // Define footer links for easy maintenance
     const footerLinks = [
-        { name: 'For Professionals', path: '/professional' },
-        { name: 'For Institutes', path: '/institute' },
-        { name: 'About us', path: '/about' },
-        { name: 'Contact us', path: '/contact' },
-        { name: 'Privacy Policy', path: '/privacy' },
-        { name: 'Terms of Service', path: '/terms' },
+        { name: 'For Professionals', path: WEBSITE_ROUTES.PROFESSIONAL },
+        { name: 'For Institutes', path: WEBSITE_ROUTES.INSTITUTE },
+        { name: 'About us', path: WEBSITE_ROUTES.ABOUT },
+        { name: 'Contact us', path: WEBSITE_ROUTES.CONTACT },
+        { name: 'Privacy Policy', path: WEBSITE_ROUTES.PRIVACY },
+        { name: 'Terms of Service', path: WEBSITE_ROUTES.TERMS },
     ];
 
     // Get current year for dynamic copyright
@@ -24,7 +25,7 @@ const Footer = () => {
 
                     {/* Left Side: Brand and Copyright */}
                     <div className="flex flex-col space-y-2">
-                        <Link to="/" className="text-slate-800 font-bold text-lg tracking-tight">
+                        <Link to={WEBSITE_ROUTES.HOME} className="text-slate-800 font-bold text-lg tracking-tight">
                             MedHirePro
                         </Link>
                         <p className="text-slate-500 text-[14px]">

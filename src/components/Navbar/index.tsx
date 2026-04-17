@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { WEBSITE_ROUTES } from '../../pages/website/routes.enum';
 
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -10,10 +11,10 @@ const Navbar = () => {
 
     // Define navigation links for easy mapping and maintainability
     const navLinks = [
-        { name: 'For Professionals', path: '/professional' },
-        { name: 'For Institutes', path: '/institute' },
-        { name: 'About us', path: '/about' },
-        { name: 'Contact us', path: '/contact' },
+        { name: 'For Professionals', path: WEBSITE_ROUTES.PROFESSIONAL },
+        { name: 'For Institutes', path: WEBSITE_ROUTES.INSTITUTE },
+        { name: 'About us', path: WEBSITE_ROUTES.ABOUT },
+        { name: 'Contact us', path: WEBSITE_ROUTES.CONTACT },
     ];
 
     return (
@@ -25,7 +26,7 @@ const Navbar = () => {
                     {/* Left Side: Logo & Main Navigation */}
                     <div className="flex items-center gap-10 lg:gap-14">
                         {/* Logo */}
-                        <Link to="/" className="flex-shrink-0 flex items-center">
+                        <Link to={WEBSITE_ROUTES.HOME} className="flex-shrink-0 flex items-center">
                             <span className="text-[#0d47a1] font-bold text-xl tracking-tight">
                                 MedHirePro
                             </span>
@@ -48,13 +49,13 @@ const Navbar = () => {
                     {/* Right Side: Auth Buttons (Desktop) */}
                     <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
                         <Link
-                            to="/login"
+                            to={WEBSITE_ROUTES.LOGIN}
                             className="text-[#334155] hover:text-[#0d47a1] font-semibold text-[15px] transition-colors duration-200"
                         >
                             Login
                         </Link>
                         <Link
-                            to="/signup"
+                            to={WEBSITE_ROUTES.SIGNUP}
                             className="bg-[#0b5cd5] hover:bg-[#094bb3] text-white px-6 py-2.5 rounded-md font-medium text-[15px] transition-colors duration-200 shadow-sm"
                         >
                             Sign Up
@@ -104,14 +105,14 @@ const Navbar = () => {
                     {/* Mobile Auth Buttons */}
                     <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3 px-3">
                         <Link
-                            to="/login"
+                            to={WEBSITE_ROUTES.LOGIN}
                             className="block text-center w-full text-slate-700 hover:text-[#0d47a1] font-semibold py-2.5 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             Login
                         </Link>
                         <Link
-                            to="/signup"
+                            to={WEBSITE_ROUTES.SIGNUP}
                             className="block text-center w-full bg-[#0b5cd5] text-white px-5 py-2.5 rounded-md font-medium hover:bg-[#094bb3] transition-colors shadow-sm"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
