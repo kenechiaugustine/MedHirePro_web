@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import docpat from '../../../assets/docpat.png';
 import { WEBSITE_ROUTES } from '../../../pages/website/routes.enum';
 
 const ProfessionalHero = () => {
@@ -50,7 +51,7 @@ const ProfessionalHero = () => {
                         {/* Main Image Container */}
                         <div className="relative rounded-[2rem] overflow-hidden shadow-2xl h-[450px] sm:h-[550px] lg:h-[650px] w-full z-10">
                             <img
-                                src="https://placehold.co/600x400/0b5cd5/white?text=Verified+Healthcare+Professional"
+                                src={docpat}
                                 alt="Verified Healthcare Professional"
                                 className="absolute inset-0 w-full h-full object-cover"
                             />
