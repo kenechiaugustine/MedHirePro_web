@@ -1,15 +1,23 @@
+import CallToAction from "../../../components/website/CallToAction";
+import FAQ from "../../../components/website/FAQ";
 import Footer from "../../../components/website/Footer";
+import InstitutionalTrust from "../../../components/website/InstitutionalTrust";
 import Navbar from "../../../components/website/Navbar";
+import ProfessionalAdvantage from "../../../components/website/ProfessionalAdvantage";
+import ProfessionalHero from "../../../components/website/ProfessionalHero";
+import Testimonials from "../../../components/website/Testimonials";
 
 export default function ProfessionalPage() {
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="min-h-screen flex flex-col font-sans">
             <Navbar />
-            <main className="flex-grow flex items-center justify-center pt-24 pb-12">
-                <div className="container mx-auto px-4 text-center">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">For Professionals</h1>
-                    <p className="text-lg text-gray-600">Information for healthcare professionals will be available here soon.</p>
-                </div>
+            <main className="flex-grow">
+                <ProfessionalHero />
+                <ProfessionalAdvantage />
+                <InstitutionalTrust />
+                <Testimonials />
+                <FAQ />
+                <CallToAction />
             </main>
             <Footer />
         </div>

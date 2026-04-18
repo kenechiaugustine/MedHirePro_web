@@ -1,2 +1,3 @@
-// Other components goes here
-// eg components used in the Admin Dashboard, Client Dashboard, and User Dashboard
+// Shared form input components — reusable across dashboards and auth flows
+export { default as EmailInput } from './EmailInput';
+export { default as PasswordInput } from './PasswordInput';
