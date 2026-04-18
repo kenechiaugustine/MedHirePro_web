@@ -90,6 +90,7 @@ const ContactHero = () => {
                                         <option value="Technical Support">Technical Support</option>
                                         <option value="Advisory Services">Advisory Services</option>
                                         <option value="Billing Enquiry">Billing Enquiry</option>
+                                        <option value="Legal and Compliance">Legal and Compliance</option>
                                         <option value="Other">Other</option>
                                     </select>
                                     {/* Custom dropdown arrow */}
