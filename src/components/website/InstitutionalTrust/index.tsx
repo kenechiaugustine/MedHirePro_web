@@ -1,5 +1,5 @@
 import { MdVerifiedUser, MdShield, MdLock } from 'react-icons/md';
-
+import institution from '../../../assets/institution.jpg';
 const InstitutionalTrust = () => {
     const features = [
         {
@@ -71,7 +71,7 @@ const InstitutionalTrust = () => {
                         {/* RIGHT COLUMN: Image (Hidden on Mobile) */}
                         <div className="hidden md:block relative w-full h-full min-h-[500px]">
                             <img
-                                src="https://placehold.co/600x400"
+                                src={institution}
                                 alt="Doctor reviewing digital records on a tablet"
                                 className="absolute inset-0 w-full h-full object-cover"
                             />
