@@ -1,5 +1,5 @@
 import CallToAction from "../../../components/website/CallToAction";
-import FAQ from "../../../components/website/FAQ";
+ import FAQ from "../../../components/website/FAQ";
 import Footer from "../../../components/website/Footer";
 import InstitutionalTrust from "../../../components/website/InstitutionalTrust";
 import Navbar from "../../../components/website/Navbar";
