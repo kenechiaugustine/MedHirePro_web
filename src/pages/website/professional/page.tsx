@@ -11,7 +11,7 @@ export default function ProfessionalPage() {
     return (
         <div className="min-h-screen flex flex-col font-sans">
             <Navbar />
-            <main className="flex-grow">
+            <main className="grow">
                 <ProfessionalHero />
                 <ProfessionalAdvantage />
                 <InstitutionalTrust />
