@@ -1,6 +1,8 @@
 import { MdPeople, MdVerifiedUser } from 'react-icons/md';
 import { HiOutlineTemplate } from 'react-icons/hi';
-
+import doctor from '../../../assets/doctor-uniform-standing-smiling_688921-4354.avif';
+import black from '../../../assets/portrait-black-man-doctor-healthcare-career-professional-service-smile-hospital-job-mindset-face-headshot-young-medical-person-cardiologist-with-leadership-happy-opportunity_5904.avif';
+import white from '../../../assets/white.avif';
 const InstituteEcosystem = () => {
     return (
         <section className="bg-[#fcfdfe] py-16 sm:py-24">
@@ -39,9 +41,9 @@ const InstituteEcosystem = () => {
                         {/* Overlapping Avatar Group */}
                         <div className="flex items-center mt-10">
                             <div className="flex -space-x-3">
-                                <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150" alt="Doctor 1" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-[3px] border-white object-cover shadow-sm z-30" />
-                                <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=150" alt="Doctor 2" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-[3px] border-white object-cover shadow-sm z-20" />
-                                <img src="https://images.unsplash.com/photo-1594824436998-d14472288301?auto=format&fit=crop&q=80&w=150" alt="Doctor 3" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-[3px] border-white object-cover shadow-sm z-10" />
+                                <img src={doctor} alt="Doctor 1" className="w-12 sm:h-12 rounded-full border-[3px] border-white object-cover shadow-sm z-30" />
+                                <img src={black} alt="Doctor 2" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-[3px] border-white object-cover shadow-sm z-20" />
+                                <img src={white} alt="Doctor 3" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-[3px] border-white object-cover shadow-sm z-10" />
                             </div>
                             <div className="ml-4 bg-[#eaf1ff] text-[#0a192f] text-[10px] sm:text-[11px] font-bold px-3 py-2 rounded-full tracking-wide">
                                 +5k Active Clinicians

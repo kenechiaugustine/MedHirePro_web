@@ -5,6 +5,7 @@ import { BsLink45Deg } from 'react-icons/bs';
 import { HiArrowRight } from 'react-icons/hi';
 import ChibuikeImg from '../../../assets/myprofilepicture.png';
 import KeneImg from '../../../assets/Kene.jpeg';
+import advisor from '../../../assets/advisor.jpg'
 
 const Leadership = () => {
     const leaders = {
@@ -108,7 +109,7 @@ const Leadership = () => {
                         className="col-span-1 lg:col-span-2 bg-white border border-gray-100 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-shadow group"
                     >
                         <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-gray-50">
-                            <img src={leaders.advisor.image} alt={leaders.advisor.name} className="w-full h-full object-cover" />
+                            <img src={advisor} alt={leaders.advisor.name} className="w-full h-full object-cover" />
                         </div>
                         <span className="text-[#066b77] text-[11px] font-bold tracking-wider uppercase mb-1">{leaders.advisor.role}</span>
                         <h3 className="text-xl font-bold text-[#0a192f]">{leaders.advisor.name}</h3>
