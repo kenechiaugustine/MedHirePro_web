@@ -25,13 +25,3 @@ export default function InstitutePage() {
     </div>
   );
 };
-
-
-// <Navbar />
-//     <InstituteHero />
-//     <TrustedByComp />
-//     <Vetting />
-//     <Features />
-//     <Testimonial />
-//     <Comparison />
-//     <CTA />
