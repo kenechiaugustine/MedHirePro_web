@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { HiShieldCheck } from 'react-icons/hi';
 import { MdInsertChartOutlined } from 'react-icons/md';
 import { WEBSITE_ROUTES } from '../../../pages/website/routes.enum';
+import adminim from '../../../assets/adminim.webp';
 
 const InstituteHero = () => {
   return (
@@ -60,7 +61,7 @@ const InstituteHero = () => {
             <div className="relative rounded-[2rem] overflow-hidden shadow-2xl h-[400px] sm:h-[500px] lg:h-[600px] w-full z-10 bg-[#1a365d]">
               <img
                 // Placeholder image with text
-                src="https://placehold.co/800x600/1a365d/ffffff?text=HEALTHCARE\nADMINISTRATION"
+                src={adminim}
                 alt="Healthcare Administration"
                 className="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-overlay"
               />
