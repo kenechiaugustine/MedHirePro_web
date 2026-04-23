@@ -1,12 +1,33 @@
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { HiOutlineUser } from 'react-icons/hi';
 import { MdWorkOutline } from 'react-icons/md';
-import EmailInput from '../../../app/EmailInput';
-import PasswordInput from '../../../app/PasswordInput';
+import { EmailInput, PasswordInput, SearchableSelect } from '../../../app';
 import { WEBSITE_ROUTES } from '../../../../pages/website/routes.enum';
 import docin from "../../../../assets/docin.png";
+import { medicalData } from '../../../../data/medicalData';
 
 const SignupAsProfessional = () => {
+    const [specialty, setSpecialty] = useState('');
+
+    // Transform medical data into options for SearchableSelect
+    const specialtyOptions = useMemo(() => {
+        return medicalData.departments.flatMap(dept => {
+            if (dept.specialties.length === 0) {
+                return [{
+                    label: dept.name,
+                    value: dept.name,
+                    group: 'General Services'
+                }];
+            }
+            return dept.specialties.map(spec => ({
+                label: spec,
+                value: spec,
+                group: dept.name
+            }));
+        });
+    }, []);
+
     return (
         <div className="flex-grow flex items-center justify-center px-4 sm:px-6 py-10 sm:py-16 relative z-10 w-full max-w-[1200px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center w-full">
@@ -95,29 +116,15 @@ const SignupAsProfessional = () => {
                         </div>
 
                         {/* Specialty */}
-                        <div className="flex flex-col gap-1.5">
-                            <label htmlFor="prof-specialty" className="text-[12px] font-bold text-[#0a192f]">
-                                Primary Specialty
-                            </label>
-                            <div className="relative flex items-center">
-                                <MdWorkOutline className="absolute left-3.5 text-slate-400 text-lg pointer-events-none" />
-                                <select
-                                    id="prof-specialty"
-                                    className="w-full appearance-none bg-[#f4f8fc] text-[14px] text-slate-700 rounded-lg pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-[#0b5cd5]/20 focus:bg-white transition-all border border-transparent focus:border-[#0b5cd5]/30 cursor-pointer"
-                                >
-                                    <option value="" disabled>Select your specialty</option>
-                                    <option value="general">General Practice</option>
-                                    <option value="surgery">Surgery</option>
-                                    <option value="pediatrics">Pediatrics</option>
-                                </select>
-
-                                <div className="absolute right-3.5 text-slate-400 pointer-events-none">
-                                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
+                        <SearchableSelect
+                            id="prof-specialty"
+                            label="Primary Specialty"
+                            placeholder="Select your specialty"
+                            options={specialtyOptions}
+                            value={specialty}
+                            onChange={setSpecialty}
+                            focusColor="#0b5cd5"
+                        />
 
                         <EmailInput
                             id="prof-email"
