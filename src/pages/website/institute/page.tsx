@@ -1,26 +1,37 @@
-import Navbar from "../../../components/website/Navbar";
-import HeroCard from "../../../components/HeroCard";
 import Footer from "../../../components/website/Footer";
-import TrustedByComp from "../../../components/TrustedByComp";
-import Vetting from "../../../components/Vetting";
-import Testimonial from "../../../components/Testimonial";
-import Features from "../../../components/Features";
-import Comparison from "../../../components/Comparison";
-import CTA from "../../../components/CTA";
+import InstituteCTA from "../../../components/website/InstituteCTA";
+import InstituteEcosystem from "../../../components/website/InstituteEcosystem";
+import InstituteHero from "../../../components/website/InstituteHero";
+import InstituteVetting from "../../../components/website/InstituteVetting";
+import Navbar from "../../../components/website/Navbar";
+import Testimonials from "../../../components/website/Testimonials";
+import TrustedBy from "../../../components/website/TrustedBy";
+import WhyMedHirePro from "../../../components/website/WhyMedHirePro";
 
-export default function HeroSection() {
+export default function InstitutePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col font-sans">
       <Navbar />
-<HeroCard/>
-      <TrustedByComp />
-      <Vetting />
-      <Features />
-      <Testimonial />
-      <Comparison />
-      <CTA />
-      
-  <Footer />
+      <main className="flex-grow">
+        <InstituteHero />
+        <TrustedBy />
+        <InstituteVetting />
+        <InstituteEcosystem />
+        <Testimonials />
+        <WhyMedHirePro />
+        <InstituteCTA />
+      </main>
+      <Footer />
     </div>
   );
-}
+};
+
+
+// <Navbar />
+//     <InstituteHero />
+//     <TrustedByComp />
+//     <Vetting />
+//     <Features />
+//     <Testimonial />
+//     <Comparison />
+//     <CTA />
