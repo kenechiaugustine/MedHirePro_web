@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { HiOutlineUser } from 'react-icons/hi';
 import { MdWorkOutline } from 'react-icons/md';
@@ -7,263 +6,154 @@ import PasswordInput from '../../../app/PasswordInput';
 import { WEBSITE_ROUTES } from '../../../../pages/website/routes.enum';
 import docin from "../../../../assets/docin.png";
 
-/* ✅ TYPE */
-type Specialty = {
-  name: string;
-  department: string;
-};
-
-/* ✅ FULL DATA */
-const medicalData = {
-  departments: [
-    {
-      name: "Internal Medicine",
-      specialties: [
-        "Cardiology","Nephrology","Gastroenterology","Endocrinology",
-        "Neurology","Respiratory","Dermatology","Infectious Diseases"
-      ]
-    },
-    {
-      name: "Surgery",
-      specialties: [
-        "General Surgery","Cardiothoracic Surgery","Neurosurgery",
-        "Paediatric Surgery","Plastic & Reconstructive Surgery",
-        "Urology","Orthopaedics & Trauma"
-      ]
-    },
-    {
-      name: "Obstetrics & Gynaecology",
-      specialties: []
-    },
-    {
-      name: "Paediatrics",
-      specialties: ["General Paediatrics","Neonatology"]
-    },
-    {
-      name: "Family Medicine",
-      specialties: ["General Practice","Primary Care"]
-    },
-    {
-      name: "Emergency Medicine",
-      specialties: ["Accident & Emergency","Casualty"]
-    },
-    {
-      name: "Anaesthesia & Intensive Care",
-      specialties: ["Anaesthesia","Intensive Care Unit","Pain Management"]
-    },
-    {
-      name: "Mental Health",
-      specialties: ["Psychiatry","Clinical Psychology"]
-    },
-    {
-      name: "Laboratory / Pathology",
-      specialties: [
-        "Chemical Pathology","Haematology & Blood Transfusion",
-        "Histopathology","Medical Microbiology","Immunology","Virology"
-      ]
-    },
-    {
-      name: "Radiology & Imaging",
-      specialties: [
-        "Radiography","Radiology","Interventional Radiology",
-        "Ultrasound","CT","MRI"
-      ]
-    },
-    {
-      name: "Pharmacy",
-      specialties: ["Clinical Pharmacy","Hospital Pharmacy","Pharmacology"]
-    },
-    {
-      name: "Nursing Services",
-      specialties: [
-        "General Nursing","Midwifery","Perioperative Nursing","ICU Nursing",
-        "Paediatric Nursing","Public Health Nursing","Theatre Nursing",
-        "Ophthalmic Nursing","Anaesthetic Nursing","Orthopaedic Nursing",
-        "Psychiatric Nursing"
-      ]
-    },
-    {
-      name: "Allied Health Services",
-      specialties: [
-        "Physiotherapy","Occupational Therapy","Speech Therapy","Audiology",
-        "Optometry","Ophthalmology","Dental","Dental Therapy",
-        "Dental Technology","Dietetics & Nutrition","Medical Social Work"
-      ]
-    },
-    {
-      name: "Public & Community Health",
-      specialties: [
-        "Public Health","Epidemiology","Environmental Health",
-        "Community Health","CHEW","JCHEW"
-      ]
-    },
-    {
-      name: "Administration & Support",
-      specialties: [
-        "Health Information Management","Hospital Administration",
-        "Human Resources","Finance","ICT / Health Informatics",
-        "Biomedical Engineering"
-      ]
-    }
-  ]
-};
-
 const SignupAsProfessional = () => {
-  const [query, setQuery] = useState<string>('');
-  const [selected, setSelected] = useState<Specialty | null>(null);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
+    return (
+        <div className="flex-grow flex items-center justify-center px-4 sm:px-6 py-10 sm:py-16 relative z-10 w-full max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center w-full">
 
-  const ref = useRef<HTMLDivElement | null>(null);
+                {/* Left Side */}
+                <div className="hidden lg:flex flex-col">
+                    <h1 className="text-4xl xl:text-5xl font-extrabold text-[#0a192f] leading-tight tracking-tight mb-6">
+                        Step into your <span className="text-[#0b5cd5]">next clinical role.</span>
+                    </h1>
 
-  /* 🔥 FLATTEN ALL SPECIALTIES */
-  const specialties: Specialty[] = medicalData.departments.flatMap(dept =>
-    dept.specialties.map(spec => ({
-      name: spec,
-      department: dept.name
-    }))
-  );
+                    <p className="text-slate-600 text-base leading-relaxed mb-10 max-w-md">
+                        Join Nigeria's elite network of healthcare professionals. Verification and credentialing happen once you're inside.
+                    </p>
 
-  /* 🔍 FILTER */
-  const filtered = specialties.filter(item =>
-    item.name.toLowerCase().includes(query.toLowerCase())
-  );
+                    {/* 🔥 Premium Image Block with Face Focus */}
+                    <div className="relative group rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(2,44,133,0.15)] mb-10 h-64 xl:h-80 w-full max-w-xl">
 
-  /* 👇 CLICK OUTSIDE */
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
+                        {/* Image */}
+                        <img
+                            src={docin}
+                            alt="Doctor writing"
+                            className="w-full h-full object-cover object-[50%_20%] transition-transform duration-700 ease-out group-hover:scale-105"
+                        />
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+                        {/* Gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-[#0a192f]/60 via-[#0b5cd5]/20 to-transparent"></div>
 
-  return (
-    <div className="flex-grow flex items-center justify-center px-4 py-10 w-full max-w-[1200px] mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 w-full">
+                        {/* Glow effect */}
+                        <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#0b5cd5]/20 to-[#066b77]/20 blur-xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
 
-        {/* LEFT */}
-        <div className="hidden lg:flex flex-col">
-          <h1 className="text-4xl font-extrabold text-[#0a192f] mb-6">
-            Step into your <span className="text-[#0b5cd5]">next clinical role.</span>
-          </h1>
-          <img src={docin} className="rounded-2xl" alt="Doctor writing" />
-        </div>
-
-        {/* RIGHT */}
-        <div className="bg-white rounded-2xl p-8 shadow border w-full max-w-md mx-auto">
-
-          <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
-
-            {/* NAME */}
-            <div>
-              <label className="text-xs font-bold">Full Name</label>
-              <div className="relative">
-                <HiOutlineUser className="absolute left-3 top-3 text-gray-400" />
-                <input type="text" className="w-full pl-10 py-3 bg-[#f4f8fc] rounded-lg" />
-              </div>
-            </div>
-
-            {/* 🔥 SEARCHABLE SPECIALTY */}
-            <div ref={ref}>
-              <label className="text-xs font-bold">Primary Specialty</label>
-
-              <div className="relative">
-                <MdWorkOutline className="absolute left-3 top-3 text-gray-400 z-10" />
-
-                <input
-                  type="text"
-                  value={selected ? selected.name : query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    setSelected(null);
-                    setIsOpen(true);
-                    setActiveIndex(-1);
-                  }}
-                  onFocus={() => setIsOpen(true)}
-                  onKeyDown={(e) => {
-                    if (!isOpen) return;
-
-                    if (e.key === "ArrowDown") {
-                      e.preventDefault();
-                      setActiveIndex(prev => Math.min(prev + 1, filtered.length - 1));
-                    }
-
-                    if (e.key === "ArrowUp") {
-                      e.preventDefault();
-                      setActiveIndex(prev => Math.max(prev - 1, 0));
-                    }
-
-                    if (e.key === "Enter" && activeIndex >= 0) {
-                      e.preventDefault();
-                      const item = filtered[activeIndex];
-                      if (item) {
-                        setSelected(item);
-                        setIsOpen(false);
-                        setQuery('');
-                      }
-                    }
-                  }}
-                  placeholder="Search specialty..."
-                  className="w-full pl-10 pr-8 py-3 bg-[#f4f8fc] rounded-lg outline-none"
-                />
-
-                {isOpen && (
-                  <div className="absolute z-20 mt-2 w-full bg-white border rounded-lg shadow max-h-60 overflow-y-auto">
-
-                    {filtered.length > 0 ? (
-                      filtered.map((item, i) => (
-                        <div
-                          key={`${item.name}-${i}`}
-                          onMouseEnter={() => setActiveIndex(i)}
-                          onClick={() => {
-                            setSelected(item);
-                            setIsOpen(false);
-                            setQuery('');
-                          }}
-                          className={`px-4 py-2 flex justify-between cursor-pointer ${
-                            i === activeIndex
-                              ? "bg-[#0b5cd5]/10"
-                              : "hover:bg-gray-50"
-                          }`}
-                        >
-                          <span>{item.name}</span>
-                          <span className="text-xs text-gray-400">
-                            {item.department}
-                          </span>
+                        {/* Floating badge */}
+                        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-md">
+                            <p className="text-[11px] font-semibold text-[#0a192f] tracking-wide">
+                                Verified Professionals Only
+                            </p>
                         </div>
-                      ))
-                    ) : (
-                      <div className="p-3 text-sm text-gray-400">
-                        No specialties found
-                      </div>
-                    )}
+                    </div>
 
-                  </div>
-                )}
-              </div>
+                    {/* Stats */}
+                    <div className="flex gap-12 mt-2">
+                        <div>
+                            <div className="text-2xl font-extrabold text-[#0b5cd5]">500+</div>
+                            <div className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">
+                                Partner Hospitals
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-2xl font-extrabold text-[#066b77]">12k+</div>
+                            <div className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">
+                                Verified Clinicians
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Side: Form */}
+                <div className="bg-white rounded-[2rem] p-6 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 w-full max-w-md mx-auto lg:mx-0">
+
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#e0f4f9] text-[#00838f] text-[10px] font-bold tracking-widest uppercase mb-6">
+                        <MdWorkOutline className="w-3.5 h-3.5" /> Healthcare Professional
+                    </div>
+
+                    <h2 className="text-xl sm:text-2xl font-bold text-[#0a192f] mb-2">
+                        Create your account
+                    </h2>
+                    <p className="text-slate-500 text-sm mb-6 sm:mb-8">
+                        Enter your basic details to get started.
+                    </p>
+
+                    <form className="flex flex-col gap-4 sm:gap-5" onSubmit={(e) => e.preventDefault()}>
+
+                        {/* Full Name */}
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor="prof-fullname" className="text-[12px] font-bold text-[#0a192f]">
+                                Full Name
+                            </label>
+                            <div className="relative flex items-center">
+                                <HiOutlineUser className="absolute left-3.5 text-slate-400 text-lg pointer-events-none" />
+                                <input
+                                    id="prof-fullname"
+                                    type="text"
+                                    placeholder="Dr. Olumide Adeleke"
+                                    className="w-full bg-[#f4f8fc] text-[14px] text-slate-700 rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#0b5cd5]/20 focus:bg-white transition-all border border-transparent focus:border-[#0b5cd5]/30"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Specialty */}
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor="prof-specialty" className="text-[12px] font-bold text-[#0a192f]">
+                                Primary Specialty
+                            </label>
+                            <div className="relative flex items-center">
+                                <MdWorkOutline className="absolute left-3.5 text-slate-400 text-lg pointer-events-none" />
+                                <select
+                                    id="prof-specialty"
+                                    className="w-full appearance-none bg-[#f4f8fc] text-[14px] text-slate-700 rounded-lg pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-[#0b5cd5]/20 focus:bg-white transition-all border border-transparent focus:border-[#0b5cd5]/30 cursor-pointer"
+                                >
+                                    <option value="" disabled>Select your specialty</option>
+                                    <option value="general">General Practice</option>
+                                    <option value="surgery">Surgery</option>
+                                    <option value="pediatrics">Pediatrics</option>
+                                </select>
+
+                                <div className="absolute right-3.5 text-slate-400 pointer-events-none">
+                                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <EmailInput
+                            id="prof-email"
+                            label="Professional Email"
+                            placeholder="olumide@hospital.ng"
+                            focusColor="#0b5cd5"
+                        />
+
+                        <PasswordInput
+                            id="prof-password"
+                            label="Password"
+                            focusColor="#0b5cd5"
+                        />
+
+                        <button
+                            type="submit"
+                            className="w-full bg-[#033eb5] hover:bg-[#022c85] text-white font-medium py-3.5 rounded-lg mt-1 sm:mt-2 transition-colors"
+                        >
+                            Create Professional Account
+                        </button>
+
+                        <p className="text-center text-[11px] text-slate-400 mt-1 sm:mt-2 px-2 sm:px-4 leading-relaxed">
+                            By signing up, you agree to our{' '}
+                            <Link to={WEBSITE_ROUTES.TERMS} className="text-[#0b5cd5] hover:underline">
+                                Terms of Service
+                            </Link>{' '}
+                            and{' '}
+                            <Link to={WEBSITE_ROUTES.PRIVACY} className="text-[#0b5cd5] hover:underline">
+                                Privacy Policy
+                            </Link>.
+                        </p>
+                    </form>
+                </div>
             </div>
-
-            <EmailInput id="prof-email" label="Professional Email" />
-            <PasswordInput id="prof-password" label="Password" />
-
-            <button type="submit" className="bg-[#033eb5] text-white py-3 rounded-lg">
-              Create Professional Account
-            </button>
-
-            <p className="text-xs text-center text-gray-400">
-              <Link to={WEBSITE_ROUTES.TERMS}>Terms</Link> •{" "}
-              <Link to={WEBSITE_ROUTES.PRIVACY}>Privacy</Link>
-            </p>
-
-          </form>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default SignupAsProfessional;
