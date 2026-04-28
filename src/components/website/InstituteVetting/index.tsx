@@ -1,4 +1,5 @@
 import { HiOutlineX, HiCheck } from 'react-icons/hi';
+import doctor from '../../../assets/doctor-uniform-standing-smiling_688921-4354.avif';
 
 const InstituteVetting = () => {
     return (
@@ -81,7 +82,7 @@ const InstituteVetting = () => {
                                 {/* Card Profile */}
                                 <div className="flex items-center gap-4">
                                     <img
-                                        src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=150"
+                                        src={doctor}
                                         alt="Dr. Chidi Okoro"
                                         className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border border-gray-100 shadow-sm"
                                     />
