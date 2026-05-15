@@ -10,6 +10,7 @@ import TermsPage from "./terms/page";
 import FAQPage from "./faq/page";
 import LoginPage from "./login/page";
 import SignupPage from "./signup/page";
+import PublicRoute from "../../components/auth/PublicRoute";
 
 const websiteRoutes: RouteObject[] = [
     { path: WEBSITE_ROUTES.HOME, element: <HomePage /> },
@@ -20,8 +21,7 @@ const websiteRoutes: RouteObject[] = [
     { path: WEBSITE_ROUTES.PRIVACY, element: <PrivacyPage /> },
     { path: WEBSITE_ROUTES.TERMS, element: <TermsPage /> },
     { path: WEBSITE_ROUTES.FAQ, element: <FAQPage /> },
-    { path: WEBSITE_ROUTES.LOGIN, element: <LoginPage /> },
-    { path: WEBSITE_ROUTES.SIGNUP, element: <SignupPage /> },
+    { path: WEBSITE_ROUTES.LOGIN, element: <PublicRoute><LoginPage /></PublicRoute> },
+    { path: WEBSITE_ROUTES.SIGNUP, element: <PublicRoute><SignupPage /></PublicRoute> },
 ];
-
 export default websiteRoutes;

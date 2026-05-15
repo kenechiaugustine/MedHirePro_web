@@ -13,9 +13,11 @@ interface SearchableSelectProps {
     options: Option[];
     value?: string;
     onChange: (value: string) => void;
+    onBlur?: () => void;
     id?: string;
     focusColor?: string;
     icon?: React.ReactNode;
+    error?: string;
 }
 
 const SearchableSelect = ({
@@ -24,9 +26,11 @@ const SearchableSelect = ({
     options,
     value,
     onChange,
+    onBlur,
     id = 'searchable-select',
     focusColor = '#0b5cd5',
     icon = <MdWorkOutline className="text-lg" />,
+    error,
 }: SearchableSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -46,12 +50,15 @@ const SearchableSelect = ({
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
+                if (isOpen) {
+                    setIsOpen(false);
+                }
+                if (onBlur) onBlur();
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [isOpen, onBlur]);
 
     const handleSelect = (optionValue: string) => {
         onChange(optionValue);
@@ -105,22 +112,22 @@ const SearchableSelect = ({
             </label>
 
             <div
-                className="relative flex items-center cursor-pointer"
+                className={`relative flex items-center cursor-pointer ${error ? 'animate-shake' : ''}`}
                 onClick={() => {
                     setIsOpen(!isOpen);
                     if (!isOpen) setTimeout(() => inputRef.current?.focus(), 0);
                 }}
             >
-                <div className="absolute left-3.5 text-slate-400 pointer-events-none">
+                <div className={`absolute left-3.5 pointer-events-none ${error ? 'text-red-400' : 'text-slate-400'}`}>
                     {icon}
                 </div>
 
                 <div
-                    className={`w-full bg-[#f4f8fc] text-[14px] text-slate-700 rounded-lg pl-10 pr-10 py-3 outline-none transition-all border border-transparent ${isOpen ? 'bg-white border-[#0b5cd5]/30' : ''}`}
+                    className={`w-full text-[14px] text-slate-700 rounded-lg pl-10 pr-10 py-3 outline-none transition-all border ${isOpen ? 'bg-white border-[#0b5cd5]/30' : error ? 'bg-red-50/30 border-red-500' : 'bg-[#f4f8fc] border-transparent'}`}
                     style={{
-                        boxShadow: isOpen ? `0 0 0 3px ${focusColor}33` : '',
-                        borderColor: isOpen ? `${focusColor}4d` : 'transparent',
-                        backgroundColor: isOpen ? '#ffffff' : '#f4f8fc'
+                        boxShadow: isOpen ? `0 0 0 3px ${focusColor}33` : error ? '0 0 0 3px #ef444433' : '',
+                        borderColor: isOpen ? `${focusColor}4d` : error ? '#ef4444' : 'transparent',
+                        backgroundColor: isOpen ? '#ffffff' : error ? 'rgb(254 242 242 / 0.3)' : '#f4f8fc'
                     }}
                 >
                     {selectedOption ? selectedOption.label : <span className="text-slate-400">{placeholder}</span>}
@@ -192,6 +199,7 @@ const SearchableSelect = ({
                     </div>
                 </div>
             )}
+            {error && <span className="text-[11px] text-red-500 font-medium">{error}</span>}
         </div>
     );
 };
