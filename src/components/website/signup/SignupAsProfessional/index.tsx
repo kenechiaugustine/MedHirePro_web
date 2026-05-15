@@ -1,14 +1,43 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { HiOutlineUser } from 'react-icons/hi';
 import { MdWorkOutline } from 'react-icons/md';
 import { EmailInput, PasswordInput, SearchableSelect } from '../../../app';
 import { WEBSITE_ROUTES } from '../../../../pages/website/routes.enum';
 import docin from "../../../../assets/docin.png";
 import { medicalData } from '../../../../data/medicalData';
+import { useAuth } from '../../../../hooks/useAuth';
+import toast from 'react-hot-toast';
 
 const SignupAsProfessional = () => {
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [specialty, setSpecialty] = useState('');
+
+    const [touched, setTouched] = useState({ fullName: false, email: false, password: false, specialty: false });
+    const [submitted, setSubmitted] = useState(false);
+
+    const getError = (field: 'fullName' | 'email' | 'password' | 'specialty', value: string) => {
+        if ((touched[field] || submitted) && !value) {
+            return 'This field is required';
+        }
+        if (field === 'email' && value && (touched[field] || submitted)) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                return 'Please enter a valid email address';
+            }
+        }
+        if (field === 'password' && value && (touched[field] || submitted)) {
+            if (value.length < 5) {
+                return 'Password must be at least 5 characters';
+            }
+        }
+        return undefined;
+    };
+    
+    const { signUpAsProfessional, loading } = useAuth();
+    const navigate = useNavigate();
 
     // Transform medical data into options for SearchableSelect
     const specialtyOptions = useMemo(() => {
@@ -27,6 +56,28 @@ const SignupAsProfessional = () => {
             }));
         });
     }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmitted(true);
+
+        const fullNameError = getError('fullName', fullName);
+        const emailError = getError('email', email);
+        const passwordError = getError('password', password);
+        const specialtyError = getError('specialty', specialty);
+
+        if (fullNameError || emailError || passwordError || specialtyError) {
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+        try {
+            await signUpAsProfessional(email, password, fullName, specialty);
+            toast.success('Account created successfully! Welcome to MedHirePro.');
+            navigate('/user');
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to create account');
+        }
+    };
 
     return (
         <div className="flex-grow flex items-center justify-center px-4 sm:px-6 py-10 sm:py-16 relative z-10 w-full max-w-[1200px] mx-auto">
@@ -97,22 +148,28 @@ const SignupAsProfessional = () => {
                         Enter your basic details to get started.
                     </p>
 
-                    <form className="flex flex-col gap-4 sm:gap-5" onSubmit={(e) => e.preventDefault()}>
+                    <form className="flex flex-col gap-4 sm:gap-5" onSubmit={handleSubmit}>
 
                         {/* Full Name */}
                         <div className="flex flex-col gap-1.5">
                             <label htmlFor="prof-fullname" className="text-[12px] font-bold text-[#0a192f]">
                                 Full Name
                             </label>
-                            <div className="relative flex items-center">
-                                <HiOutlineUser className="absolute left-3.5 text-slate-400 text-lg pointer-events-none" />
+                            <div className={`relative flex items-center ${getError('fullName', fullName) ? 'animate-shake' : ''}`}>
+                                <HiOutlineUser className={`absolute left-3.5 text-lg pointer-events-none ${getError('fullName', fullName) ? 'text-red-400' : 'text-slate-400'}`} />
                                 <input
                                     id="prof-fullname"
                                     type="text"
                                     placeholder="Dr. Olumide Adeleke"
-                                    className="w-full bg-[#f4f8fc] text-[14px] text-slate-700 rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#0b5cd5]/20 focus:bg-white transition-all border border-transparent focus:border-[#0b5cd5]/30"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    onBlur={() => setTouched((prev) => ({ ...prev, fullName: true }))}
+                                    className={`w-full text-[14px] text-slate-700 rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:bg-white transition-all border ${getError('fullName', fullName) ? 'border-red-500 bg-red-50/30 focus:ring-red-500/20 focus:border-red-500/30' : 'bg-[#f4f8fc] border-transparent focus:ring-[#0b5cd5]/20 focus:border-[#0b5cd5]/30'}`}
                                 />
                             </div>
+                            {getError('fullName', fullName) && (
+                                <span className="text-[11px] text-red-500 font-medium">{getError('fullName', fullName)}</span>
+                            )}
                         </div>
 
                         {/* Specialty */}
@@ -123,7 +180,9 @@ const SignupAsProfessional = () => {
                             options={specialtyOptions}
                             value={specialty}
                             onChange={setSpecialty}
+                            onBlur={() => setTouched((prev) => ({ ...prev, specialty: true }))}
                             focusColor="#0b5cd5"
+                            error={getError('specialty', specialty)}
                         />
 
                         <EmailInput
@@ -131,19 +190,28 @@ const SignupAsProfessional = () => {
                             label="Professional Email"
                             placeholder="olumide@hospital.ng"
                             focusColor="#0b5cd5"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+                            error={getError('email', email)}
                         />
 
                         <PasswordInput
                             id="prof-password"
                             label="Password"
                             focusColor="#0b5cd5"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
+                            error={getError('password', password)}
                         />
 
                         <button
                             type="submit"
-                            className="w-full bg-[#033eb5] hover:bg-[#022c85] text-white font-medium py-3.5 rounded-lg mt-1 sm:mt-2 transition-colors"
+                            disabled={loading}
+                            className="w-full bg-[#033eb5] hover:bg-[#022c85] text-white font-medium py-3.5 rounded-lg mt-1 sm:mt-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Create Professional Account
+                            {loading ? 'Creating Account...' : 'Create Professional Account'}
                         </button>
 
                         <p className="text-center text-[11px] text-slate-400 mt-1 sm:mt-2 px-2 sm:px-4 leading-relaxed">

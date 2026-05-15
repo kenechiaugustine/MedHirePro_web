@@ -1,12 +1,69 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import { HiOutlineBadgeCheck } from "react-icons/hi";
 import { EmailInput, PasswordInput } from "../../../components/app";
 import heroimage from "../../../assets/heroimage.png";
 import { WEBSITE_ROUTES } from "../routes.enum";
+import { useAuth } from "../../../hooks/useAuth";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [touched, setTouched] = useState({ email: false, password: false });
+    const [submitted, setSubmitted] = useState(false);
+
+    const getError = (field: 'email' | 'password', value: string) => {
+        if ((touched[field] || submitted) && !value) {
+            return 'This field is required';
+        }
+        if (field === 'email' && value && (touched[field] || submitted)) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                return 'Please enter a valid email address';
+            }
+        }
+        if (field === 'password' && value && (touched[field] || submitted)) {
+            if (value.length < 5) {
+                return 'Password must be at least 5 characters';
+            }
+        }
+        return undefined;
+    };
+    
+    const { signIn, loading } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmitted(true);
+
+        const emailError = getError('email', email);
+        const passwordError = getError('password', password);
+
+        if (emailError || passwordError) {
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+        try {
+            const user = await signIn(email, password);
+            toast.success('Logged in successfully!');
+            
+            if (user?.user_type === 'professional') {
+                navigate('/user');
+            } else if (user?.user_type === 'institute') {
+                navigate('/client');
+            } else if (user?.user_type === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to login');
+        }
+    };
     return (
         <div className="flex flex-col h-screen overflow-hidden">
 
@@ -92,12 +149,16 @@ export default function LoginPage() {
                         </p>
 
                         {/* FORM */}
-                        <form className="space-y-5">
+                        <form className="space-y-5" onSubmit={handleSubmit}>
 
                             <EmailInput
                                 id="login-email"
                                 label="EMAIL ADDRESS"
                                 placeholder="you@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+                                error={getError('email', email)}
                             />
 
                             {/* PASSWORD with forgot link */}
@@ -117,6 +178,10 @@ export default function LoginPage() {
                                     id="login-password"
                                     label=""
                                     placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
+                                    error={getError('password', password)}
                                 />
                             </div>
 
@@ -128,9 +193,10 @@ export default function LoginPage() {
 
                             <button
                                 type="submit"
-                                className="w-full bg-blue-700 text-white py-2.5 rounded-md hover:bg-blue-800 transition font-medium"
+                                disabled={loading}
+                                className="w-full bg-blue-700 text-white py-2.5 rounded-md hover:bg-blue-800 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Sign In →
+                                {loading ? 'Signing In...' : 'Sign In →'}
                             </button>
                         </form>
 
