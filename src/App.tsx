@@ -1,10 +1,9 @@
 import AppRouter from './router'
 import { Toaster } from 'react-hot-toast'
-import { AuthProvider } from './context/AuthContext'
 
 function App() {
   return (
-    <AuthProvider>
+    <>
       <AppRouter />
       <Toaster
         position="bottom-center"
@@ -16,7 +15,7 @@ function App() {
           className: 'dark:bg-gray-800 dark:text-white'
         }}
       />
-    </AuthProvider>
+    </>
   )
 }
 
