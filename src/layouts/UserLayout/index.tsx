@@ -2,13 +2,13 @@ import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState, useRef } from "react";
 import { USER_ROUTES } from "../../pages/user/routes.enum";
-import { 
-    LayoutDashboard, 
-    ShieldCheck, 
-    Search, 
-    Briefcase, 
-    UserCircle, 
-    Settings, 
+import {
+    LayoutDashboard,
+    ShieldCheck,
+    Search,
+    Briefcase,
+    UserCircle,
+    Settings,
     LogOut,
     Menu,
     PlusSquare,
@@ -37,7 +37,15 @@ export default function UserLayout() {
         navigate('/login');
     };
 
-    const userName = (user as any)?.full_name || 'Dr. Amadi';
+    let userName = 'User';
+    if (user?.user_type === 'professional') {
+        userName = (user as any).full_name || 'User';
+    } else if (user?.user_type === 'institute') {
+        userName = (user as any).facility_name || 'User';
+    }
+
+    const avatarUrl = (user as any)?.avatar_url || (user as any)?.profile_image_url || (user as any)?.image_url;
+    const firstLetter = userName.charAt(0).toUpperCase();
 
     const navItems = [
         { name: "Dashboard", path: USER_ROUTES.DASHBOARD, icon: LayoutDashboard },
@@ -54,14 +62,14 @@ export default function UserLayout() {
         <div className="min-h-screen bg-[#f8fafc] flex">
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
-                <div 
+                <div
                     className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
                     onClick={closeSidebar}
                 />
             )}
 
             {/* Sidebar */}
-            <aside 
+            <aside
                 className={clsx(
                     "fixed top-0 left-0 z-50 h-screen w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:flex-shrink-0 shadow-sm",
                     sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -88,8 +96,8 @@ export default function UserLayout() {
                                 onClick={closeSidebar}
                                 className={clsx(
                                     "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-                                    isActive 
-                                        ? "bg-blue-50 text-[#0b5cff] shadow-sm ring-1 ring-blue-100" 
+                                    isActive
+                                        ? "bg-blue-50 text-[#0b5cff] shadow-sm ring-1 ring-blue-100"
                                         : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                                 )}
                             >
@@ -101,7 +109,7 @@ export default function UserLayout() {
                 </nav>
 
                 <div className="p-4 border-t border-slate-200 bg-slate-50/50 mt-auto">
-                    <button 
+                    <button
                         onClick={handleLogout}
                         className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                     >
@@ -124,7 +132,7 @@ export default function UserLayout() {
                         <Link to={USER_ROUTES.NOTIFICATIONS} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
                             <Bell className="w-5 h-5" />
                         </Link>
-                        <button 
+                        <button
                             onClick={() => setSidebarOpen(true)}
                             className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
                         >
@@ -132,7 +140,7 @@ export default function UserLayout() {
                         </button>
                     </div>
                 </header>
-                
+
                 <div className="p-4 md:p-6 lg:p-8 flex-1 w-full max-w-[1600px] mx-auto">
                     {/* Top Nav (Desktop) */}
                     <div className="hidden lg:flex justify-between items-center mb-8">
@@ -142,7 +150,13 @@ export default function UserLayout() {
                                 <Bell className="w-5 h-5" />
                             </Link>
                             <Link to={USER_ROUTES.PROFILE} className="flex items-center gap-3 bg-white p-1.5 pr-4 rounded-full border border-slate-200 shadow-sm hover:border-blue-100 transition-colors">
-                                <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=250&auto=format&fit=crop" alt="Profile" className="w-9 h-9 rounded-full object-cover" />
+                                {avatarUrl ? (
+                                    <img src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full object-cover" />
+                                ) : (
+                                    <div className="w-9 h-9 rounded-full bg-[#0b5cff] text-white flex items-center justify-center font-bold text-sm">
+                                        {firstLetter}
+                                    </div>
+                                )}
                                 <span className="text-sm font-bold text-[#0a192f]">{userName}</span>
                             </Link>
                         </div>
