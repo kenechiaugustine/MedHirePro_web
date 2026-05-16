@@ -10,7 +10,7 @@ import TermsPage from "./terms/page";
 import FAQPage from "./faq/page";
 import LoginPage from "./login/page";
 import SignupPage from "./signup/page";
-import PublicRoute from "../../components/auth/PublicRoute";
+import PublicRoute from "../../router/auth/PublicRoute";
 
 const websiteRoutes: RouteObject[] = [
     { path: WEBSITE_ROUTES.HOME, element: <HomePage /> },

@@ -7,7 +7,7 @@ import clientRoutes from "../pages/client/routes";
 import AdminLayout from "../layouts/AdminLayout";
 import ClientLayout from "../layouts/ClientLayout";
 import UserLayout from "../layouts/UserLayout";
-import ProtectedRoute from "../components/auth/ProtectedRoute";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
 export default function AppRouter() {
     return (

@@ -8,9 +8,9 @@ interface ProtectedRouteProps {
     allowedRoles?: UserType[];
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-    children, 
-    allowedRoles 
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+    children,
+    allowedRoles
 }) => {
     const { user, loading } = useAuth();
     const location = useLocation();
@@ -34,7 +34,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     if (allowedRoles && !allowedRoles.includes(user.user_type)) {
         // Role not authorized, redirect to their respective dashboard
         console.warn(`User role ${user.user_type} not authorized for this route.`);
-        
+
         if (user.user_type === 'professional') {
             return <Navigate to="/user" replace />;
         } else if (user.user_type === 'institute') {
@@ -42,7 +42,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         } else if (user.user_type === 'admin') {
             return <Navigate to="/admin" replace />;
         }
-        
+
         return <Navigate to="/" replace />;
     }
 
