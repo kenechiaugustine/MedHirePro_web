@@ -32,7 +32,10 @@ export const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, Fetch
     await mutex.waitForUnlock();
     let result = await baseQuery(args, api, extraOptions);
 
-    if (result.error && result.error.status === 401) {
+    const url = typeof args === 'string' ? args : args.url;
+    const isAuthRequest = url.includes('/auth/login') || url.includes('/auth/admin/login');
+
+    if (result.error && result.error.status === 401 && !isAuthRequest) {
         if (!mutex.isLocked()) {
             const release = await mutex.acquire();
 
@@ -59,18 +62,23 @@ export const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, Fetch
                     );
 
                     if (refreshResult.data) {
-                        const { access_token, refresh_token } = refreshResult.data as IRefreshTokenResponse;
+                        const { access_token, refresh_token, user_role } = refreshResult.data as IRefreshTokenResponse;
                         await setTokenItem(TOKEN_KEY.AUTH_TOKEN, access_token);
                         await setTokenItem(TOKEN_KEY.REFRESH_TOKEN, refresh_token);
+                        if (user_role) {
+                            await setTokenItem(TOKEN_KEY.USER_ROLE, user_role);
+                        }
                         result = await baseQuery(args, api, extraOptions);
                     } else {
                         await clearTokenItem(TOKEN_KEY.AUTH_TOKEN);
                         await clearTokenItem(TOKEN_KEY.REFRESH_TOKEN);
+                        await clearTokenItem(TOKEN_KEY.USER_ROLE);
                         window.location.href = WEBSITE_ROUTES.LOGIN;
                     }
                 } else {
                     await clearTokenItem(TOKEN_KEY.AUTH_TOKEN);
                     await clearTokenItem(TOKEN_KEY.REFRESH_TOKEN);
+                    await clearTokenItem(TOKEN_KEY.USER_ROLE);
                     window.location.href = WEBSITE_ROUTES.LOGIN;
                 }
             } finally {

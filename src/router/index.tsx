@@ -7,29 +7,44 @@ import clientRoutes from "../pages/client/routes";
 import AdminLayout from "../layouts/AdminLayout";
 import ClientLayout from "../layouts/ClientLayout";
 import UserLayout from "../layouts/UserLayout";
+import ProtectedRoute from "../components/guards/ProtectedRoute";
+import GuestRoute from "../components/guards/GuestRoute";
+import { WEBSITE_ROUTES } from "../pages/website/routes.enum";
 
 export default function AppRouter() {
+    // Identify which website routes need the GuestRoute guard (auth pages)
+    const guestPaths = [WEBSITE_ROUTES.LOGIN, WEBSITE_ROUTES.SIGNUP];
+
     return (
         <Router>
             <Routes>
-                {/* Website Routes */}
-                {websiteRoutes.map((route) => (
-                    <Route key={route.path} path={route.path} element={route.element} />
-                ))}
+                {/* Website Routes — login/signup wrapped with GuestRoute */}
+                {websiteRoutes.map((route) => {
+                    const isGuestRoute = guestPaths.includes(route.path as string);
+                    return (
+                        <Route
+                            key={route.path}
+                            path={route.path}
+                            element={
+                                isGuestRoute ? (
+                                    <GuestRoute>{route.element}</GuestRoute>
+                                ) : (
+                                    route.element
+                                )
+                            }
+                        />
+                    );
+                })}
 
-                <Route path="/admin" element={<AdminLayout />}>
-
-                    {/* Redirect to dashboard */}
-                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
-
-                    {/* Admin Routes */}
-                    {adminRoutes.map((route) => (
-                        <Route key={route.path} path={route.path} element={route.element} />
-                    ))}
-                </Route>
-
-                <Route path="/user" element={<UserLayout />}>
-
+                {/* User (Professional) Routes — requires 'professional' role */}
+                <Route
+                    path="/user"
+                    element={
+                        <ProtectedRoute allowedRoles={['professional']}>
+                            <UserLayout />
+                        </ProtectedRoute>
+                    }
+                >
                     {/* Redirect to dashboard */}
                     <Route index element={<Navigate to="/user/dashboard" replace />} />
 
@@ -39,13 +54,38 @@ export default function AppRouter() {
                     ))}
                 </Route>
 
-                <Route path="/client" element={<ClientLayout />}>
-
+                {/* Client (Institute) Routes — requires 'institute' role */}
+                <Route
+                    path="/client"
+                    element={
+                        <ProtectedRoute allowedRoles={['institute']}>
+                            <ClientLayout />
+                        </ProtectedRoute>
+                    }
+                >
                     {/* Redirect to dashboard */}
                     <Route index element={<Navigate to="/client/dashboard" replace />} />
 
                     {/* Client Routes */}
                     {clientRoutes.map((route) => (
+                        <Route key={route.path} path={route.path} element={route.element} />
+                    ))}
+                </Route>
+
+                {/* Admin Routes — requires 'admin' role */}
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute allowedRoles={['admin']}>
+                            <AdminLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    {/* Redirect to dashboard */}
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+
+                    {/* Admin Routes */}
+                    {adminRoutes.map((route) => (
                         <Route key={route.path} path={route.path} element={route.element} />
                     ))}
                 </Route>

@@ -30,4 +30,5 @@ export const getCurrentDate = () => {
 export const TOKEN_KEY = {
   AUTH_TOKEN: 'authToken',
   REFRESH_TOKEN: 'refreshToken',
+  USER_ROLE: 'userRole',
 } as const;
