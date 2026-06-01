@@ -22,22 +22,32 @@ export const RateType = {
 export type RateType = typeof RateType[keyof typeof RateType];
 
 export const ClinicalSetting = {
-    ACUTE_CARE_HOSPITAL: 'ACUTE_CARE_HOSPITAL',
-    OUTPATIENT_CLINIC: 'OUTPATIENT_CLINIC',
-    SPECIALTY_HOSPITAL: 'SPECIALTY_HOSPITAL',
-    LONG_TERM_CARE: 'LONG_TERM_CARE',
-    COMMUNITY_HEALTH: 'COMMUNITY_HEALTH'
+    ACUTE_CARE_HOSPITAL: 'Acute Care Hospital',
+    OUTPATIENT_CLINIC: 'Outpatient Clinic',
+    REHABILITATION_FACILITY: 'Rehabilitation Facility',
+    LONG_TERM_CARE: 'Long-Term Care Facility',
+    SKILLED_NURSING_FACILITY: 'Skilled Nursing Facility',
+    URGENT_CARE_CENTER: 'Urgent Care Center',
+    COMMUNITY_HEALTH_CENTER: 'Community Health Center',
+    TELEHEALTH: 'Telehealth'
 } as const;
 export type ClinicalSetting = typeof ClinicalSetting[keyof typeof ClinicalSetting];
 
 export const ClinicalSpecialty = {
-    GENERAL_PRACTICE: 'GENERAL_PRACTICE',
-    INTERNAL_MEDICINE: 'INTERNAL_MEDICINE',
-    PEDIATRICS: 'PEDIATRICS',
-    OBSTETRICS_GYNECOLOGY: 'OBSTETRICS_GYNECOLOGY',
-    SURGERY: 'SURGERY',
-    ANESTHESIOLOGY: 'ANESTHESIOLOGY',
-    CARDIOLOGY: 'CARDIOLOGY'
+    CARDIOLOGY: 'Cardiology',
+    EMERGENCY_MEDICINE: 'Emergency Medicine',
+    PEDIATRICS: 'Pediatrics',
+    INTERNAL_MEDICINE: 'Internal Medicine',
+    ANESTHESIOLOGY: 'Anesthesiology',
+    FAMILY_PRACTICE: 'Family Practice',
+    PULMONOLOGY: 'Pulmonology',
+    CRITICAL_CARE: 'Critical Care',
+    OBSTETRICS_GYNECOLOGY: 'Obstetrics & Gynecology',
+    PSYCHIATRY: 'Psychiatry',
+    SURGERY: 'Surgery',
+    GENERAL_PRACTICE: 'General Practice',
+    NURSING: 'Nursing',
+    PHARMACY: 'Pharmacy'
 } as const;
 export type ClinicalSpecialty = typeof ClinicalSpecialty[keyof typeof ClinicalSpecialty];
 

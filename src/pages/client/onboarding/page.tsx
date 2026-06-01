@@ -652,7 +652,7 @@ export default function InstituteOnboardingPage() {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting || uploadingLicense || uploadingProofAddress || uploadingRepId}
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-indigo-700 to-indigo-650 hover:from-indigo-800 hover:to-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:pointer-events-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-indigo-700 to-indigo-600 hover:from-indigo-800 hover:to-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:pointer-events-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
                                 >
                                     {isSubmitting ? (
                                         <>

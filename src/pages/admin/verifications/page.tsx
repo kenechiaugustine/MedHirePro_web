@@ -88,7 +88,7 @@ export default function AdminVerificationsPage() {
         return (
             <div className="flex h-64 items-center justify-center">
                 <div className="flex flex-col items-center gap-2">
-                    <FiLoader className="animate-spin h-8 w-8 text-teal-650" />
+                    <FiLoader className="animate-spin h-8 w-8 text-teal-600" />
                     <p className="text-slate-500 font-medium text-xs">Loading supervisor review queue...</p>
                 </div>
             </div>
