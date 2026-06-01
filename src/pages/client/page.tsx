@@ -1,16 +1,22 @@
 import { useGetMeQuery } from "../../redux/apis/userApi";
+import { useGetOnboardingStatusQuery } from "../../redux/apis/onboardingApi";
 import { Avatar } from "../../components/app";
+import { Link } from "react-router-dom";
 import { 
     FiHome, 
     FiAward, 
     FiShield, 
     FiCreditCard, 
     FiLayers, 
-    FiInfo 
+    FiInfo,
+    FiAlertCircle
 } from "react-icons/fi";
 
 export default function ClientDashboardPage() {
-    const { data: user, isLoading } = useGetMeQuery();
+    const { data: user, isLoading: isUserLoading } = useGetMeQuery();
+    const { data: onboarding, isLoading: isOnboardingLoading } = useGetOnboardingStatusQuery();
+
+    const isLoading = isUserLoading || isOnboardingLoading;
 
     if (isLoading) {
         return (
@@ -28,6 +34,64 @@ export default function ClientDashboardPage() {
 
     return (
         <div className="space-y-8 animate-fadeIn duration-300">
+            {/* Onboarding Verification Action Banner */}
+            {onboarding?.onboarding_status !== 'approved' && (
+                <div className={`p-6 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm ${
+                    onboarding?.onboarding_status === 'pending' 
+                    ? 'bg-blue-50 border-blue-200 text-blue-800' 
+                    : onboarding?.onboarding_status === 'rejected'
+                    ? 'bg-red-50 border-red-200 text-red-800'
+                    : 'bg-amber-50 border-amber-200 text-amber-800'
+                }`}>
+                    <div className="flex gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${
+                            onboarding?.onboarding_status === 'pending' 
+                            ? 'bg-blue-100 text-blue-600' 
+                            : onboarding?.onboarding_status === 'rejected'
+                            ? 'bg-red-100 text-red-600'
+                            : 'bg-amber-100 text-amber-600'
+                        }`}>
+                            <FiAlertCircle />
+                        </div>
+                        <div className="space-y-1">
+                            <h4 className="font-extrabold text-sm">
+                                {onboarding?.onboarding_status === 'pending' 
+                                    ? 'Corporate Dossier Under Audit' 
+                                    : onboarding?.onboarding_status === 'rejected'
+                                    ? 'Corporate Verification Rejected'
+                                    : 'Verify Your Institutional Facility Credentials'
+                                }
+                            </h4>
+                            <p className="text-xs font-medium opacity-90 leading-relaxed max-w-xl">
+                                {onboarding?.onboarding_status === 'pending' 
+                                    ? 'Our compliance registry is auditing your healthcare corporate credentials. Verified entities gain listing authority and campaign promotion priority.' 
+                                    : onboarding?.onboarding_status === 'rejected'
+                                    ? `Compliance Audit Rejected: ${onboarding?.submission?.rejection_reason || 'Flagged credentials'}. Please edit and re-upload correct business documents.`
+                                    : 'Your healthcare institution is currently unverified. Submit your facility licenses and corporate registration certificates to unlock listing campaigns.'
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    <Link
+                        to="/client/onboarding"
+                        className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow transition-all hover:-translate-y-0.5 active:translate-y-0 text-center flex-shrink-0 ${
+                            onboarding?.onboarding_status === 'pending' 
+                            ? 'bg-blue-600 text-white shadow-blue-500/10 hover:bg-blue-700' 
+                            : onboarding?.onboarding_status === 'rejected'
+                            ? 'bg-red-600 text-white shadow-red-500/10 hover:bg-red-700'
+                            : 'bg-amber-600 text-white shadow-amber-500/10 hover:bg-amber-700'
+                        }`}
+                    >
+                        {onboarding?.onboarding_status === 'pending' 
+                            ? 'Track Submission' 
+                            : onboarding?.onboarding_status === 'rejected'
+                            ? 'Correct Dossier'
+                            : 'Start Verification'
+                        }
+                    </Link>
+                </div>
+            )}
+
             {/* Welcome Banner */}
             <div className="relative overflow-hidden bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-500 rounded-2xl p-8 text-white shadow-lg">
                 {/* Decorative overlay background */}
@@ -85,15 +149,38 @@ export default function ClientDashboardPage() {
 
                 {/* Card 3: Account Status */}
                 <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${
+                        onboarding?.onboarding_status === 'approved' 
+                        ? 'bg-emerald-50 text-emerald-600' 
+                        : onboarding?.onboarding_status === 'pending'
+                        ? 'bg-blue-50 text-blue-600'
+                        : onboarding?.onboarding_status === 'rejected'
+                        ? 'bg-red-50 text-red-600'
+                        : 'bg-slate-50 text-slate-500'
+                    }`}>
                         <FiShield />
                     </div>
                     <div>
                         <span className="text-xs font-bold text-slate-400 block tracking-wider uppercase">
                             Verification Rank
                         </span>
-                        <span className="text-sm font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/50 inline-block mt-0.5">
-                            Active Institution
+                        <span className={`text-xs font-extrabold px-2.5 py-1 rounded-md border inline-block mt-0.5 ${
+                            onboarding?.onboarding_status === 'approved' 
+                            ? 'text-emerald-700 bg-emerald-50 border-emerald-200/50' 
+                            : onboarding?.onboarding_status === 'pending'
+                            ? 'text-blue-700 bg-blue-50 border-blue-200/50 animate-pulse'
+                            : onboarding?.onboarding_status === 'rejected'
+                            ? 'text-red-700 bg-red-50 border-red-200/50'
+                            : 'text-slate-600 bg-slate-50 border-slate-200/50'
+                        }`}>
+                            {onboarding?.onboarding_status === 'approved' 
+                                ? 'Verified Recruiter' 
+                                : onboarding?.onboarding_status === 'pending'
+                                ? 'Audit In Progress'
+                                : onboarding?.onboarding_status === 'rejected'
+                                ? 'Audit Flagged'
+                                : 'Credentials Missing'
+                            }
                         </span>
                     </div>
                 </div>
