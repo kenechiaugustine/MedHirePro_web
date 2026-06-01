@@ -13,7 +13,8 @@ import {
     FiLogOut, 
     FiCompass,
     FiMenu,
-    FiX
+    FiX,
+    FiBriefcase
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -38,6 +39,7 @@ export default function UserLayout() {
         { name: "Dashboard", path: "/user/dashboard", icon: <FiGrid className="text-lg" /> },
         { name: "Verification", path: "/user/onboarding", icon: <FiCheckSquare className="text-lg" /> },
         { name: "Job Search", path: "/user/jobs", icon: <FiSearch className="text-lg" /> },
+        { name: "Locum Jobs", path: "/user/locum-jobs", icon: <FiBriefcase className="text-lg" /> },
         { name: "My Applications", path: "/user/applications", icon: <FiCompass className="text-lg" /> },
         { name: "Profile", path: "/user/profile", icon: <FiUser className="text-lg" /> },
         { name: "Settings", path: "/user/settings", icon: <FiSettings className="text-lg" /> },

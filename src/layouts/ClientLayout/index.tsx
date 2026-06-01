@@ -7,13 +7,13 @@ import { Avatar } from "../../components/app";
 import { 
     FiGrid, 
     FiUser, 
-    FiPlusCircle, 
     FiUsers, 
     FiSettings, 
     FiLogOut, 
     FiShield,
     FiMenu,
-    FiX
+    FiX,
+    FiList
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -36,10 +36,10 @@ export default function ClientLayout() {
 
     const sidebarLinks = [
         { name: "Dashboard", path: "/client/dashboard", icon: <FiGrid className="text-lg" /> },
-        { name: "Post a Job", path: "/client/post-job", icon: <FiPlusCircle className="text-lg" /> },
+        { name: "Verification", path: "/client/onboarding", icon: <FiShield className="text-lg" /> },
+        { name: "Job Listings", path: "/client/jobs", icon: <FiList className="text-lg" /> },
         { name: "Manage Applicants", path: "/client/applicants", icon: <FiUsers className="text-lg" /> },
-        { name: "Verification Status", path: "/client/onboarding", icon: <FiShield className="text-lg" /> },
-        { name: "Institution Profile", path: "/client/profile", icon: <FiUser className="text-lg" /> },
+        { name: "Institute Profile", path: "/client/profile", icon: <FiUser className="text-lg" /> },
         { name: "Settings", path: "/client/settings", icon: <FiSettings className="text-lg" /> },
     ];
 

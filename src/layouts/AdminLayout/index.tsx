@@ -12,7 +12,9 @@ import {
     FiCreditCard,
     FiCheckSquare,
     FiMenu,
-    FiX
+    FiX,
+    FiList,
+    FiBriefcase
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -36,8 +38,10 @@ export default function AdminLayout() {
     const sidebarLinks = [
         { name: "Overview Dashboard", path: "/admin/dashboard", icon: <FiGrid className="text-lg" /> },
         { name: "Verify Credentials", path: "/admin/verifications", icon: <FiCheckSquare className="text-lg" /> },
-        { name: "Users Management", path: "/admin/users", icon: <FiUsers className="text-lg" /> },
-        { name: "Credits Ledger", path: "/admin/credits", icon: <FiCreditCard className="text-lg" /> },
+        { name: "User Managements", path: "/admin/users", icon: <FiUsers className="text-lg" /> },
+        { name: "Job Listings", path: "/admin/jobs", icon: <FiList className="text-lg" /> },
+        { name: "Locum Jobs", path: "/admin/locum-jobs", icon: <FiBriefcase className="text-lg" /> },
+        { name: "Credit Ledger", path: "/admin/credits", icon: <FiCreditCard className="text-lg" /> },
         { name: "Admin Settings", path: "/admin/settings", icon: <FiSettings className="text-lg" /> },
     ];
 
