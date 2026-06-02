@@ -1,12 +1,27 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { WEBSITE_ROUTES } from '../../../pages/website/routes.enum';
+import { useAuth } from '../../../hooks/useAuth';
+import { useAppDispatch } from '../../../redux/hooks';
+import { logout } from '../../../redux/slices/authSlice';
+import { getRoleDashboard } from '../../guards/ProtectedRoute';
+import toast from 'react-hot-toast';
 
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { isAuthenticated, userRole } = useAuth();
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
+
+    const handleLogout = () => {
+        dispatch(logout());
+        toast.success("Successfully logged out!");
+        setIsMobileMenuOpen(false);
+        navigate(WEBSITE_ROUTES.HOME);
     };
 
     // Define navigation links for easy mapping and maintainability
@@ -48,18 +63,37 @@ const Navbar = () => {
 
                     {/* Right Side: Auth Buttons (Desktop) */}
                     <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-                        <Link
-                            to={WEBSITE_ROUTES.LOGIN}
-                            className="text-[#334155] hover:text-[#0d47a1] font-semibold text-[15px] transition-colors duration-200"
-                        >
-                            Login
-                        </Link>
-                        <Link
-                            to={WEBSITE_ROUTES.SIGNUP}
-                            className="bg-[#0b5cd5] hover:bg-[#094bb3] text-white px-6 py-2.5 rounded-md font-medium text-[15px] transition-colors duration-200 shadow-sm"
-                        >
-                            Sign Up
-                        </Link>
+                        {isAuthenticated ? (
+                            <>
+                                <Link
+                                    to={getRoleDashboard(userRole)}
+                                    className="text-[#334155] hover:text-[#0d47a1] font-semibold text-[15px] transition-colors duration-200"
+                                >
+                                    Dashboard
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-md font-medium text-[15px] transition-colors duration-200 shadow-sm cursor-pointer"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    to={WEBSITE_ROUTES.LOGIN}
+                                    className="text-[#334155] hover:text-[#0d47a1] font-semibold text-[15px] transition-colors duration-200"
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    to={WEBSITE_ROUTES.SIGNUP}
+                                    className="bg-[#0b5cd5] hover:bg-[#094bb3] text-white px-6 py-2.5 rounded-md font-medium text-[15px] transition-colors duration-200 shadow-sm"
+                                >
+                                    Sign Up
+                                </Link>
+                            </>
+                        )}
                     </div>
 
                     {/* Mobile menu button (Hamburger) */}
@@ -104,20 +138,40 @@ const Navbar = () => {
 
                     {/* Mobile Auth Buttons */}
                     <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3 px-3">
-                        <Link
-                            to={WEBSITE_ROUTES.LOGIN}
-                            className="block text-center w-full text-slate-700 hover:text-[#0d47a1] font-semibold py-2.5 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                            Login
-                        </Link>
-                        <Link
-                            to={WEBSITE_ROUTES.SIGNUP}
-                            className="block text-center w-full bg-[#0b5cd5] text-white px-5 py-2.5 rounded-md font-medium hover:bg-[#094bb3] transition-colors shadow-sm"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                            Sign Up
-                        </Link>
+                        {isAuthenticated ? (
+                            <>
+                                <Link
+                                    to={getRoleDashboard(userRole)}
+                                    className="block text-center w-full text-slate-700 hover:text-[#0d47a1] font-semibold py-2.5 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    Dashboard
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="block text-center w-full bg-red-600 text-white px-5 py-2.5 rounded-md font-medium hover:bg-red-700 transition-colors shadow-sm cursor-pointer"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    to={WEBSITE_ROUTES.LOGIN}
+                                    className="block text-center w-full text-slate-700 hover:text-[#0d47a1] font-semibold py-2.5 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    to={WEBSITE_ROUTES.SIGNUP}
+                                    className="block text-center w-full bg-[#0b5cd5] text-white px-5 py-2.5 rounded-md font-medium hover:bg-[#094bb3] transition-colors shadow-sm"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    Sign Up
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

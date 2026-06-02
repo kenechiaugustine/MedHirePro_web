@@ -1,14 +1,25 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { HiOutlineUser } from 'react-icons/hi';
 import { MdWorkOutline } from 'react-icons/md';
 import { EmailInput, PasswordInput, SearchableSelect } from '../../../app';
 import { WEBSITE_ROUTES } from '../../../../pages/website/routes.enum';
 import docin from "../../../../assets/docin.png";
 import { medicalData } from '../../../../data/medicalData';
+import { useRegisterProfessionalMutation } from '../../../../redux/apis/authApi';
+import { useAppDispatch } from '../../../../redux/hooks';
+import { setCredentials } from '../../../../redux/slices/authSlice';
+import toast from 'react-hot-toast';
 
 const SignupAsProfessional = () => {
+    const [fullName, setFullName] = useState('');
     const [specialty, setSpecialty] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const [registerProfessional, { isLoading }] = useRegisterProfessionalMutation();
 
     // Transform medical data into options for SearchableSelect
     const specialtyOptions = useMemo(() => {
@@ -27,6 +38,37 @@ const SignupAsProfessional = () => {
             }));
         });
     }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!fullName.trim() || !specialty.trim() || !email.trim() || !password.trim()) {
+            toast.error('Please fill in all fields.');
+            return;
+        }
+
+        try {
+            const result = await registerProfessional({
+                full_name: fullName,
+                specialty,
+                email,
+                password,
+            }).unwrap();
+
+            dispatch(setCredentials({
+                access_token: result.access_token,
+                refresh_token: result.refresh_token,
+                user_role: result.user_role,
+            }));
+
+            toast.success('Account created successfully!');
+            navigate('/user/dashboard', { replace: true });
+        } catch (err: unknown) {
+            const error = err as { data?: { detail?: string }; status?: number };
+            const message = error?.data?.detail || 'Registration failed. Please try again.';
+            toast.error(message);
+        }
+    };
 
     return (
         <div className="flex-grow flex items-center justify-center px-4 sm:px-6 py-10 sm:py-16 relative z-10 w-full max-w-[1200px] mx-auto">
@@ -97,7 +139,7 @@ const SignupAsProfessional = () => {
                         Enter your basic details to get started.
                     </p>
 
-                    <form className="flex flex-col gap-4 sm:gap-5" onSubmit={(e) => e.preventDefault()}>
+                    <form className="flex flex-col gap-4 sm:gap-5" onSubmit={handleSubmit}>
 
                         {/* Full Name */}
                         <div className="flex flex-col gap-1.5">
@@ -110,6 +152,8 @@ const SignupAsProfessional = () => {
                                     id="prof-fullname"
                                     type="text"
                                     placeholder="Dr. Olumide Adeleke"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
                                     className="w-full bg-[#f4f8fc] text-[14px] text-slate-700 rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#0b5cd5]/20 focus:bg-white transition-all border border-transparent focus:border-[#0b5cd5]/30"
                                 />
                             </div>
@@ -131,19 +175,34 @@ const SignupAsProfessional = () => {
                             label="Professional Email"
                             placeholder="olumide@hospital.ng"
                             focusColor="#0b5cd5"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
 
                         <PasswordInput
                             id="prof-password"
                             label="Password"
                             focusColor="#0b5cd5"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
 
                         <button
                             type="submit"
-                            className="w-full bg-[#033eb5] hover:bg-[#022c85] text-white font-medium py-3.5 rounded-lg mt-1 sm:mt-2 transition-colors"
+                            disabled={isLoading}
+                            className="w-full bg-[#033eb5] hover:bg-[#022c85] text-white font-medium py-3.5 rounded-lg mt-1 sm:mt-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Create Professional Account
+                            {isLoading ? (
+                                <span className="inline-flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    Creating account…
+                                </span>
+                            ) : (
+                                "Create Professional Account"
+                            )}
                         </button>
 
                         <p className="text-center text-[11px] text-slate-400 mt-1 sm:mt-2 px-2 sm:px-4 leading-relaxed">

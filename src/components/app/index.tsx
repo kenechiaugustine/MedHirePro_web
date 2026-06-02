@@ -2,3 +2,4 @@
 export { default as EmailInput } from './EmailInput';
 export { default as PasswordInput } from './PasswordInput';
 export { default as SearchableSelect } from './SearchableSelect';
+export { default as Avatar } from './Avatar';

@@ -1,12 +1,52 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import { HiOutlineBadgeCheck } from "react-icons/hi";
 import { EmailInput, PasswordInput } from "../../../components/app";
 import heroimage from "../../../assets/heroimage.png";
 import { WEBSITE_ROUTES } from "../routes.enum";
+import { useLoginWithEmailMutation } from "../../../redux/apis/authApi";
+import { useAppDispatch } from "../../../redux/hooks";
+import { setCredentials } from "../../../redux/slices/authSlice";
+import { getRoleDashboard } from "../../../components/guards/ProtectedRoute";
+import type { UserRole } from "../../../redux/apis/userApi/interface";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const [loginWithEmail, { isLoading }] = useLoginWithEmailMutation();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!email.trim() || !password.trim()) {
+            toast.error("Please fill in all fields.");
+            return;
+        }
+
+        try {
+            const result = await loginWithEmail({ email, password }).unwrap();
+
+            dispatch(setCredentials({
+                access_token: result.access_token,
+                refresh_token: result.refresh_token,
+                user_role: result.user_role,
+            }));
+
+            toast.success("Logged in successfully!");
+            navigate(getRoleDashboard(result.user_role as UserRole), { replace: true });
+        } catch (err: unknown) {
+            const error = err as { data?: { detail?: string }; status?: number };
+            const message = error?.data?.detail || "Login failed. Please check your credentials.";
+            toast.error(message);
+        }
+    };
+
     return (
         <div className="flex flex-col h-screen overflow-hidden">
 
@@ -92,12 +132,14 @@ export default function LoginPage() {
                         </p>
 
                         {/* FORM */}
-                        <form className="space-y-5">
+                        <form className="space-y-5" onSubmit={handleSubmit}>
 
                             <EmailInput
                                 id="login-email"
                                 label="EMAIL ADDRESS"
                                 placeholder="you@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
 
                             {/* PASSWORD with forgot link */}
@@ -117,6 +159,8 @@ export default function LoginPage() {
                                     id="login-password"
                                     label=""
                                     placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
 
@@ -128,9 +172,20 @@ export default function LoginPage() {
 
                             <button
                                 type="submit"
-                                className="w-full bg-blue-700 text-white py-2.5 rounded-md hover:bg-blue-800 transition font-medium"
+                                disabled={isLoading}
+                                className="w-full bg-blue-700 text-white py-2.5 rounded-md hover:bg-blue-800 transition font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                             >
-                                Sign In →
+                                {isLoading ? (
+                                    <span className="inline-flex items-center gap-2">
+                                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Signing in…
+                                    </span>
+                                ) : (
+                                    "Sign In →"
+                                )}
                             </button>
                         </form>
 
