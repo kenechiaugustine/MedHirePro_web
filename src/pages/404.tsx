@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { WEBSITE_ROUTES } from "./website/routes.enum";
 
 export default function NotFound() {
+    const navigate = useNavigate();
+
     return (
         <div className="flex flex-col min-h-screen">
             <main className="flex-grow flex items-center justify-center pt-24 pb-12">
@@ -17,17 +19,17 @@ export default function NotFound() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+                        >
+                            Go Back
+                        </button>
                         <Link
                             to={WEBSITE_ROUTES.HOME}
-                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
                         >
                             Return to Home
-                        </Link>
-                        <Link
-                            to={WEBSITE_ROUTES.CONTACT}
-                            className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
-                        >
-                            Contact Support
                         </Link>
                     </div>
                 </div>
