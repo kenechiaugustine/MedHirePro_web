@@ -8,6 +8,7 @@ import type {
     IAdminUserReferralsParams,
     IReassignJobRequest,
     IAdminReassignJobResponse,
+    IAdminUserUpdateRequest,
 } from './interface';
 
 export const adminApi = createApi({
@@ -53,6 +54,24 @@ export const adminApi = createApi({
             }),
             invalidatesTags: ['AdminUsers'],
         }),
+        readUserById: builder.query<IUser, string>({
+            query: (user_id) => ({
+                url: `/admin/users/${user_id}`,
+                method: 'GET',
+            }),
+            providesTags: (_result, _error, user_id) => [{ type: 'AdminUsers', id: user_id }, 'AdminUsers'],
+        }),
+        adminUpdateUserDetails: builder.mutation<IUser, IAdminUserUpdateRequest>({
+            query: ({ user_id, payload }) => ({
+                url: `/admin/users/${user_id}`,
+                method: 'PUT',
+                body: payload,
+            }),
+            invalidatesTags: (_result, _error, { user_id }) => [
+                { type: 'AdminUsers', id: user_id },
+                'AdminUsers',
+            ],
+        }),
     }),
 });
 
@@ -64,4 +83,7 @@ export const {
     useReadUserReferralsQuery,
     useLazyReadUserReferralsQuery,
     useAdminReassignJobOwnerMutation,
+    useReadUserByIdQuery,
+    useLazyReadUserByIdQuery,
+    useAdminUpdateUserDetailsMutation,
 } = adminApi;
