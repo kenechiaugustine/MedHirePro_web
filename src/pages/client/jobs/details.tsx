@@ -99,6 +99,32 @@ export default function ClientJobDetailsPage() {
         return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
     };
 
+    const getStatusStyles = (status: string) => {
+        switch (status) {
+            case 'ACCEPTED':
+                return 'bg-emerald-50 border-emerald-250 text-emerald-700';
+            case 'CREDENTIALING_REVIEW':
+                return 'bg-blue-50 border-blue-250 text-blue-700';
+            case 'DECLINED':
+                return 'bg-red-50 border-red-250 text-red-700';
+            default:
+                return 'bg-amber-50 border-amber-250 text-amber-700';
+        }
+    };
+
+    const getStatusDotColor = (status: string) => {
+        switch (status) {
+            case 'ACCEPTED':
+                return 'bg-emerald-500';
+            case 'CREDENTIALING_REVIEW':
+                return 'bg-blue-500';
+            case 'DECLINED':
+                return 'bg-red-500';
+            default:
+                return 'bg-amber-500';
+        }
+    };
+
     if (isJobLoading) {
         return (
             <div className="flex h-96 items-center justify-center">
@@ -419,149 +445,228 @@ export default function ClientJobDetailsPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 gap-6">
-                        {applications.map((app) => {
-                            const isProcessing = processingAppId === app._id;
-                            
-                            return (
-                                <div key={app._id} className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden flex flex-col md:flex-row hover:border-slate-350 transition-colors">
-                                    
-                                    {/* Left Accent Strip */}
-                                    <div className={`w-full md:w-2 ${
-                                        app.application_status === 'ACCEPTED'
-                                            ? 'bg-emerald-500'
-                                            : app.application_status === 'CREDENTIALING_REVIEW'
-                                            ? 'bg-blue-500'
-                                            : app.application_status === 'DECLINED'
-                                            ? 'bg-red-500'
-                                            : 'bg-indigo-500'
-                                    }`} />
+                    <>
+                        {/* Desktop Table Layout */}
+                        <div className="hidden lg:block bg-white rounded-2xl border border-slate-150 shadow-md overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-150 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                                            <th className="px-6 py-4">Applicant Ref</th>
+                                            <th className="px-6 py-4">Applied Date</th>
+                                            <th className="px-6 py-4">Credentials & Summary</th>
+                                            <th className="px-6 py-4">Status</th>
+                                            <th className="px-6 py-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 text-xs text-slate-750">
+                                        {applications.map((app) => {
+                                            const isProcessing = processingAppId === app._id;
+                                            
+                                            return (
+                                                <tr key={app._id} className="hover:bg-slate-50/50 transition-colors">
+                                                    <td className="px-6 py-5 max-w-xs space-y-1">
+                                                        <p className="font-extrabold text-slate-800">
+                                                            Ref: #{app._id.slice(-6).toUpperCase()}
+                                                        </p>
+                                                        <p className="text-[10px] text-slate-400 font-bold truncate">
+                                                            ID: {app.candidate_id}
+                                                        </p>
+                                                    </td>
 
-                                    <div className="p-5 flex-grow space-y-4">
-                                        {/* Applicant Card Header */}
-                                        <div className="flex flex-wrap items-start justify-between gap-3">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <h4 className="font-extrabold text-slate-850 text-xs">
-                                                        Practitioner Ref: #{app._id.slice(-6).toUpperCase()}
-                                                    </h4>
-                                                    <span className="text-[9px] text-slate-400 font-bold">
-                                                        ID: {app.candidate_id}
-                                                    </span>
-                                                </div>
-                                                <p className="text-[9px] text-slate-400 font-bold">
-                                                    Submitted: {new Date(app.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                    <td className="px-6 py-5 whitespace-nowrap text-slate-450 font-semibold">
+                                                        {new Date(app.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                    </td>
+
+                                                    <td className="px-6 py-5 max-w-md space-y-2">
+                                                        <p className="text-[10px] text-slate-550 font-medium line-clamp-2" title={app.clinical_summary}>
+                                                            {app.clinical_summary}
+                                                        </p>
+                                                        <div className="flex gap-2 flex-wrap">
+                                                            <a 
+                                                                href={app.curriculum_vitae_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-1 text-[9px] font-black px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-150 transition-colors"
+                                                            >
+                                                                <FiDownload /> Resume CV
+                                                            </a>
+                                                            {app.credentialing_packet_urls && app.credentialing_packet_urls.map((docUrl: string, dIdx: number) => (
+                                                                <a
+                                                                    key={dIdx}
+                                                                    href={docUrl}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="inline-flex items-center gap-1 text-[9px] font-black px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-650 border border-slate-200 transition-colors"
+                                                                >
+                                                                    <FiFileText /> Doc #{dIdx + 1}
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+
+                                                    <td className="px-6 py-5 whitespace-nowrap">
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${getStatusStyles(app.application_status)}`}>
+                                                            <span className={`h-1.5 w-1.5 rounded-full inline-block ${getStatusDotColor(app.application_status)}`} />
+                                                            {app.application_status.replace(/_/g, ' ')}
+                                                        </span>
+                                                    </td>
+
+                                                    <td className="px-6 py-5 text-right whitespace-nowrap space-x-2">
+                                                        {app.application_status !== 'DECLINED' && app.application_status !== 'ACCEPTED' && (
+                                                            <button
+                                                                onClick={() => handleDecline(app._id)}
+                                                                disabled={isProcessing || isStatusUpdating}
+                                                                className="p-2 text-red-655 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-150 rounded-lg cursor-pointer transition-colors inline-flex items-center"
+                                                                title="Decline Candidate"
+                                                            >
+                                                                <FiX className="text-sm" />
+                                                            </button>
+                                                        )}
+
+                                                        {app.application_status !== 'DECLINED' && (
+                                                            <>
+                                                                {/* Shortlist */}
+                                                                <button
+                                                                    onClick={() => handleShortlist(app._id, app.is_shortlisted)}
+                                                                    disabled={isProcessing || isShortlisting || app.application_status === 'ACCEPTED'}
+                                                                    className={`p-2 rounded-lg cursor-pointer transition-colors inline-flex items-center border ${
+                                                                        app.is_shortlisted
+                                                                            ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+                                                                            : 'bg-white hover:bg-slate-50 text-slate-500 border-slate-200'
+                                                                    }`}
+                                                                    title={app.is_shortlisted ? "Shortlisted" : "Shortlist Candidate"}
+                                                                >
+                                                                    <FiCheck className="text-sm" />
+                                                                </button>
+
+                                                                {/* Accept/Hire */}
+                                                                <button
+                                                                    onClick={() => handleAccept(app._id, app.is_accepted)}
+                                                                    disabled={isProcessing || isAccepting}
+                                                                    className={`p-2 rounded-lg cursor-pointer transition-colors inline-flex items-center border ${
+                                                                        app.is_accepted
+                                                                            ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
+                                                                            : 'bg-white hover:bg-slate-50 text-slate-500 border-slate-200'
+                                                                    }`}
+                                                                    title={app.is_accepted ? "Cancel Placement" : "Hire Candidate"}
+                                                                >
+                                                                    <FiCheckCircle className="text-sm" />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Mobile Responsive Cards Layout */}
+                        <div className="grid grid-cols-1 gap-4 lg:hidden">
+                            {applications.map((app) => {
+                                const isProcessing = processingAppId === app._id;
+                                
+                                return (
+                                    <div key={app._id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4 hover:border-slate-350 transition-colors">
+                                        
+                                        {/* Header */}
+                                        <div className="flex justify-between items-start">
+                                            <div className="space-y-1 max-w-[70%]">
+                                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase border ${getStatusStyles(app.application_status)}`}>
+                                                    <span className={`h-1.5 w-1.5 rounded-full inline-block ${getStatusDotColor(app.application_status)}`} />
+                                                    {app.application_status.replace(/_/g, ' ')}
+                                                </span>
+                                                <h4 className="font-extrabold text-slate-800 text-xs">
+                                                    Ref: #{app._id.slice(-6).toUpperCase()}
+                                                </h4>
+                                                <p className="text-[10px] text-slate-400 font-bold truncate">
+                                                    ID: {app.candidate_id}
                                                 </p>
                                             </div>
-
-                                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
-                                                app.application_status === 'ACCEPTED'
-                                                    ? 'bg-emerald-50 border-emerald-250 text-emerald-700'
-                                                    : app.application_status === 'CREDENTIALING_REVIEW'
-                                                    ? 'bg-blue-50 border-blue-250 text-blue-700'
-                                                    : app.application_status === 'DECLINED'
-                                                    ? 'bg-red-50 border-red-250 text-red-700'
-                                                    : 'bg-indigo-50 border-indigo-250 text-indigo-700'
-                                            }`}>
-                                                <span className={`h-1.5 w-1.5 rounded-full inline-block ${
-                                                    app.application_status === 'ACCEPTED' ? 'bg-emerald-500' :
-                                                    app.application_status === 'CREDENTIALING_REVIEW' ? 'bg-blue-500' :
-                                                    app.application_status === 'DECLINED' ? 'bg-red-500' : 'bg-indigo-500'
-                                                }`} />
-                                                {app.application_status.replace(/_/g, ' ')}
+                                            <span className="text-[9px] font-bold text-slate-450">
+                                                {new Date(app.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                                             </span>
                                         </div>
 
-                                        {/* Cover Letter / Summary */}
-                                        <div className="space-y-1 bg-slate-50/60 border border-slate-100 rounded-xl p-3.5 text-xs">
-                                            <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Clinical Capabilities summary</span>
-                                            <p className="text-slate-650 font-medium leading-relaxed whitespace-pre-line pt-1">
-                                                {app.clinical_summary}
-                                            </p>
+                                        {/* Summary Box */}
+                                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5 text-[11px] font-semibold text-slate-650 space-y-2">
+                                            <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Clinical summary</span>
+                                            <p className="font-medium text-slate-600 leading-relaxed whitespace-pre-line">{app.clinical_summary}</p>
                                         </div>
 
                                         {/* Supporting Documents / Files */}
-                                        <div className="space-y-2">
-                                            <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Submitted Qualifications Dossier</span>
-                                            
-                                            <div className="flex flex-wrap gap-2.5">
-                                                {/* CV Resume */}
-                                                <a 
-                                                    href={app.curriculum_vitae_url}
+                                        <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
+                                            <a 
+                                                href={app.curriculum_vitae_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1 text-[10px] font-black px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-150 hover:bg-indigo-100 text-indigo-750 transition-colors"
+                                            >
+                                                <FiDownload /> Resume CV
+                                            </a>
+                                            {app.credentialing_packet_urls && app.credentialing_packet_urls.map((docUrl, dIdx) => (
+                                                <a
+                                                    key={dIdx}
+                                                    href={docUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-150 text-indigo-700 text-[10px] font-black transition-colors"
+                                                    className="inline-flex items-center gap-1 text-[10px] font-black px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-650 transition-colors"
                                                 >
-                                                    <FiDownload /> Curriculum Vitae (CV)
+                                                    <FiFileText /> Doc #{dIdx + 1}
                                                 </a>
-
-                                                {/* Additional credentials */}
-                                                {app.credentialing_packet_urls && app.credentialing_packet_urls.map((docUrl, dIdx) => (
-                                                    <a
-                                                        key={dIdx}
-                                                        href={docUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-650 text-[10px] font-black transition-colors"
-                                                    >
-                                                        <FiFileText /> Credential Doc #{dIdx + 1}
-                                                    </a>
-                                                ))}
-                                            </div>
+                                            ))}
                                         </div>
 
-                                        {/* Action buttons for recruiting pipeline */}
-                                        <div className="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                                        {/* Active Action Buttons */}
+                                        <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100">
                                             {app.application_status !== 'DECLINED' && app.application_status !== 'ACCEPTED' && (
                                                 <button
-                                                    type="button"
                                                     onClick={() => handleDecline(app._id)}
                                                     disabled={isProcessing || isStatusUpdating}
-                                                    className="px-4 py-2 bg-white hover:bg-red-50 text-red-650 border border-red-150 hover:border-red-200 rounded-xl text-[10px] font-black flex items-center gap-1 cursor-pointer disabled:opacity-50 transition-all"
+                                                    className="px-3 py-2 text-[10px] font-black text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-150 rounded-xl cursor-pointer transition-colors"
                                                 >
-                                                    <FiX /> Decline Application
+                                                    Decline
                                                 </button>
                                             )}
 
                                             {app.application_status !== 'DECLINED' && (
                                                 <>
-                                                    {/* Shortlist button */}
+                                                    {/* Shortlist */}
                                                     <button
-                                                        type="button"
                                                         onClick={() => handleShortlist(app._id, app.is_shortlisted)}
                                                         disabled={isProcessing || isShortlisting || app.application_status === 'ACCEPTED'}
-                                                        className={`px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-1 cursor-pointer disabled:opacity-50 transition-all border ${
+                                                        className={`px-3 py-2 text-[10px] font-black rounded-xl cursor-pointer border transition-all ${
                                                             app.is_shortlisted
-                                                                ? 'bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-700'
-                                                                : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-650'
+                                                                ? 'bg-blue-50 border-blue-200 text-blue-700'
+                                                                : 'bg-white border-slate-200 text-slate-650'
                                                         }`}
                                                     >
-                                                        {app.is_shortlisted ? <FiCheck /> : <FiUser />} 
-                                                        {app.is_shortlisted ? 'Shortlisted for Review' : 'Shortlist Candidate'}
+                                                        {app.is_shortlisted ? 'Shortlisted' : 'Shortlist'}
                                                     </button>
 
-                                                    {/* Accept Hired button */}
+                                                    {/* Accept/Hire */}
                                                     <button
-                                                        type="button"
                                                         onClick={() => handleAccept(app._id, app.is_accepted)}
                                                         disabled={isProcessing || isAccepting}
-                                                        className={`px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-1 cursor-pointer disabled:opacity-50 transition-all shadow-sm border ${
+                                                        className={`px-3 py-2 text-[10px] font-black rounded-xl cursor-pointer border transition-all shadow-sm ${
                                                             app.is_accepted
-                                                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 shadow-emerald-600/10'
-                                                                : 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600 shadow-indigo-600/15'
+                                                                ? 'bg-emerald-600 border-emerald-600 text-white'
+                                                                : 'bg-indigo-600 border-indigo-600 text-white'
                                                         }`}
                                                     >
-                                                        {app.is_accepted ? <FiX /> : <FiCheckCircle />}
-                                                        {app.is_accepted ? 'Cancel Placement Hire' : 'Contract & Hire Practitioner'}
+                                                        {app.is_accepted ? 'Placed Hired' : 'Hire'}
                                                     </button>
                                                 </>
                                             )}
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+                    </>
                 )}
             </div>
         </div>
