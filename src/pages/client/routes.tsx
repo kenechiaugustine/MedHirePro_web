@@ -7,6 +7,7 @@ import PostPermanentJobPage from "./jobs/post-permanent";
 import PostLocumJobPage from "./jobs/post-locum";
 import ClientJobDetailsPage from "./jobs/details";
 import EditJobPage from "./jobs/edit";
+import ClientApplicantsPage from "./applicants/page";
 
 const clientRoutes: RouteObject[] = [
     { path: CLIENT_ROUTES.DASHBOARD, element: <ClientDashboardPage /> },
@@ -16,6 +17,7 @@ const clientRoutes: RouteObject[] = [
     { path: CLIENT_ROUTES.POST_LOCUM, element: <PostLocumJobPage /> },
     { path: CLIENT_ROUTES.DETAILS, element: <ClientJobDetailsPage /> },
     { path: CLIENT_ROUTES.EDIT, element: <EditJobPage /> },
+    { path: CLIENT_ROUTES.APPLICANTS, element: <ClientApplicantsPage /> },
 ];
 
 export default clientRoutes;

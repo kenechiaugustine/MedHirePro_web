@@ -6,4 +6,5 @@ export const CLIENT_ROUTES = {
     POST_LOCUM: '/client/jobs/post-locum',
     DETAILS: '/client/jobs/view/:id',
     EDIT: '/client/jobs/edit/:id',
+    APPLICANTS: '/client/applicants',
 };
