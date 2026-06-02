@@ -1,12 +1,9 @@
 import { Link } from "react-router-dom";
 import { WEBSITE_ROUTES } from "./website/routes.enum";
-import Navbar from "../components/website/Navbar";
-import Footer from "../components/website/Footer";
 
 export default function NotFound() {
     return (
         <div className="flex flex-col min-h-screen">
-            <Navbar />
             <main className="flex-grow flex items-center justify-center pt-24 pb-12">
                 <div className="container mx-auto px-4 text-center max-w-lg">
                     <p className="text-7xl font-bold tracking-tight text-gray-200 mb-4 select-none">
@@ -35,7 +32,6 @@ export default function NotFound() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </div>
     );
 }
