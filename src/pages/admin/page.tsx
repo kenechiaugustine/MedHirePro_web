@@ -1,164 +1,273 @@
-import { useGetMeQuery } from "../../redux/apis/userApi";
-import { Avatar } from "../../components/app";
+import { useReadAllUsersQuery } from "../../redux/apis/adminApi";
+import { useGetJobListingsQuery } from "../../redux/apis/jobsApi";
+import { useGetApplicationsQuery } from "../../redux/apis/applicationsApi";
+import { Link } from "react-router-dom";
 import { 
     FiShield, 
-    FiAward, 
-    FiActivity, 
-    FiSettings, 
-    FiTerminal, 
-    FiLock 
+    FiUsers, 
+    FiBriefcase, 
+    FiFileText,
+    FiUserCheck,
+    FiTrendingUp,
+    FiEye,
+    FiLoader
 } from "react-icons/fi";
 
 export default function AdminDashboardPage() {
-    const { data: user, isLoading } = useGetMeQuery();
+    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery();
+    const { data: jobs, isLoading: isJobsLoading } = useGetJobListingsQuery();
+    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery();
+
+    const isLoading = isUsersLoading || isJobsLoading || isAppsLoading;
 
     if (isLoading) {
         return (
-            <div className="flex h-64 items-center justify-center">
+            <div className="flex h-96 items-center justify-center">
                 <div className="flex flex-col items-center gap-2">
-                    <svg className="animate-spin h-8 w-8 text-teal-600" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    <p className="text-slate-500 font-medium text-xs">Loading supervisor metrics...</p>
+                    <FiLoader className="animate-spin h-8 w-8 text-teal-650" />
+                    <p className="text-slate-500 font-medium text-xs">Loading administration analytics...</p>
                 </div>
             </div>
         );
     }
 
+    // Counters calculations
+    const totalUsers = users?.length || 0;
+    const totalProfessionals = users?.filter(u => u.role === 'professional').length || 0;
+    const totalInstitutes = users?.filter(u => u.role === 'institute').length || 0;
+    const pendingOnboardings = users?.filter(u => u.onboarding_status === 'pending').length || 0;
+
+    const totalJobs = jobs?.length || 0;
+    const permanentJobs = jobs?.filter(j => j.job_type === 'PERMANENT').length || 0;
+    const locumJobs = jobs?.filter(j => j.job_type === 'LOCUM').length || 0;
+
+    const totalApps = applications?.length || 0;
+    const pendingApps = applications?.filter(a => a.application_status === 'SUBMITTED' || a.application_status === 'CREDENTIALING_REVIEW').length || 0;
+    const shortlistedApps = applications?.filter(a => a.is_shortlisted).length || 0;
+
+    // Get latest items
+    const latestUsers = users ? [...users].slice(-5).reverse() : [];
+    const latestJobs = jobs ? [...jobs].slice(-5).reverse() : [];
+
     return (
         <div className="space-y-8 animate-fadeIn duration-300">
-            {/* Welcome Banner */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-teal-800 rounded-2xl p-8 text-white shadow-lg border border-teal-500/10">
-                {/* Decorative overlay background */}
-                <div className="absolute right-0 bottom-0 opacity-10 translate-y-12 translate-x-6">
-                    <FiTerminal className="w-96 h-96" />
-                </div>
-
-                <div className="relative z-10 max-w-xl space-y-3">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-100 text-xs font-semibold backdrop-blur-md border border-teal-500/30">
-                        <FiLock className="w-3.5 h-3.5" /> High Security Supervisor Portal
+            {/* Console Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-teal-800 rounded-2xl p-6 md:p-8 text-white shadow-lg border border-teal-500/10">
+                <div className="space-y-2">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-100 text-xs font-semibold backdrop-blur-md border border-teal-500/20">
+                        <FiShield className="w-3.5 h-3.5" /> High Security Supervisor Console
                     </div>
-                    <h1 className="text-3xl font-extrabold tracking-tight">
-                        MedHirePro Control Console
-                    </h1>
-                    <p className="text-slate-300 text-sm leading-relaxed font-medium">
-                        Welcome, {user?.full_name || "Administrator"}. You have unrestricted supervisory control over the clinical network databases, credit operations, and user profiles.
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight">MedHirePro Telemetry Center</h1>
+                    <p className="text-slate-250 text-xs md:text-sm font-medium opacity-90 leading-relaxed font-sans max-w-2xl">
+                        Monitor active clinician placements, institutional vacancies, pending credentials onboarding files, and system transaction limits.
                     </p>
                 </div>
             </div>
 
-            {/* Quick Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Card 1: Supervisor Access Level */}
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-xl">
-                        <FiShield />
+            {/* Metrics Counters Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                {/* Total Users */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
+                    <div className="space-y-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Total Members</span>
+                        <span className="text-3xl font-black text-slate-800 block">{totalUsers}</span>
+                        <div className="text-[10px] font-semibold text-slate-400">
+                            <span className="text-teal-600 font-extrabold">{totalProfessionals}</span> Pract. / <span className="text-indigo-600 font-extrabold">{totalInstitutes}</span> Inst.
+                        </div>
                     </div>
-                    <div>
-                        <span className="text-xs font-bold text-slate-400 block tracking-wider uppercase">
-                            Supervision Index
-                        </span>
-                        <span className="text-lg font-black text-slate-800 block">
-                            Root Supervisor
-                        </span>
-                    </div>
-                </div>
-
-                {/* Card 2: Database Integrity */}
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
-                        <FiActivity />
-                    </div>
-                    <div>
-                        <span className="text-xs font-bold text-slate-400 block tracking-wider uppercase">
-                            Core Databases
-                        </span>
-                        <span className="text-sm font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/50 inline-block mt-0.5">
-                            Synced & Healthy
-                        </span>
+                    <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-650 flex items-center justify-center text-lg">
+                        <FiUsers />
                     </div>
                 </div>
 
-                {/* Card 3: Global System Status */}
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xl">
-                        <FiSettings />
+                {/* Open Jobs */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
+                    <div className="space-y-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Job Vacancies</span>
+                        <span className="text-3xl font-black text-slate-800 block">{totalJobs}</span>
+                        <div className="text-[10px] font-semibold text-slate-400">
+                            <span className="text-teal-600 font-extrabold">{permanentJobs}</span> Perm / <span className="text-indigo-600 font-extrabold">{locumJobs}</span> Locum Shifts
+                        </div>
                     </div>
-                    <div>
-                        <span className="text-xs font-bold text-slate-400 block tracking-wider uppercase">
-                            Cluster Nodes
-                        </span>
-                        <span className="text-sm font-extrabold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-md border border-sky-200/50 inline-block mt-0.5">
-                            Online (Region West)
-                        </span>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                        <FiBriefcase />
+                    </div>
+                </div>
+
+                {/* Total Applications */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
+                    <div className="space-y-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Applications</span>
+                        <span className="text-3xl font-black text-slate-800 block">{totalApps}</span>
+                        <div className="text-[10px] font-semibold text-slate-400">
+                            <span className="text-amber-600 font-extrabold">{pendingApps}</span> New / <span className="text-emerald-600 font-extrabold">{shortlistedApps}</span> Screened
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                        <FiFileText />
+                    </div>
+                </div>
+
+                {/* Pending Verification Audits */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
+                    <div className="space-y-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Pending Audits</span>
+                        <span className="text-3xl font-black text-slate-800 block">{pendingOnboardings}</span>
+                        <div className="text-[10px] font-semibold text-slate-400">
+                            Requires review files audit
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                        <FiUserCheck />
                     </div>
                 </div>
             </div>
 
-            {/* Account Details Panel */}
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-                    <h3 className="font-extrabold text-slate-800 text-sm tracking-wide uppercase">
-                        Administrator Profile Information
-                    </h3>
-                    <span className="text-[11px] font-bold text-slate-400">
-                        UID: {user?._id}
-                    </span>
-                </div>
-
-                <div className="p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
-                    {/* Large Avatar */}
-                    <div className="flex-shrink-0 flex flex-col items-center gap-3">
-                        <Avatar 
-                            name={user?.full_name || "Admin"} 
-                            avatarUrl={user?.avatar_url} 
-                            size="lg" 
-                            role="admin" 
-                        />
-                        <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-                            System Administrator
-                        </span>
+            {/* Split Data Panels */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                {/* Recent Registrations Table */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md overflow-hidden flex flex-col">
+                    <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                        <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <FiTrendingUp className="text-teal-600" /> Recent User Registrations
+                        </h3>
+                        <Link to="/admin/users" className="text-[10px] font-black text-teal-650 hover:underline">
+                            View All Users
+                        </Link>
                     </div>
 
-                    {/* Form-like profile display */}
-                    <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 w-full text-sm">
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                                Administrative Full Name
-                            </span>
-                            <p className="font-extrabold text-slate-800 bg-slate-50/60 border border-slate-100 rounded-lg p-3">
-                                {user?.full_name || "Administrator"}
-                            </p>
-                        </div>
+                    <div className="flex-grow overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold">
+                                    <th className="px-6 py-3">Member</th>
+                                    <th className="px-6 py-3">Role</th>
+                                    <th className="px-6 py-3">Status</th>
+                                    <th className="px-6 py-3 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {latestUsers.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
+                                            No user accounts registered yet.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    latestUsers.map((item) => (
+                                        <tr key={item._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
+                                            <td className="px-6 py-3.5">
+                                                <div className="font-extrabold text-slate-800 truncate max-w-[160px]">
+                                                    {item.full_name || item.facility_name || "New Member"}
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 truncate max-w-[160px] font-semibold">
+                                                    {item.email}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-3.5">
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                                                    item.role === 'admin' 
+                                                    ? 'bg-teal-50 text-teal-700 border border-teal-150' 
+                                                    : item.role === 'institute'
+                                                    ? 'bg-indigo-50 text-indigo-700 border border-indigo-150'
+                                                    : 'bg-blue-50 text-blue-700 border border-blue-150'
+                                                }`}>
+                                                    {item.role === 'institute' ? 'Client' : item.role}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3.5">
+                                                <span className={`w-2 h-2 rounded-full inline-block mr-1.5 ${
+                                                    item.is_active ? 'bg-emerald-500' : 'bg-slate-300'
+                                                }`} />
+                                                <span className="text-[10px] text-slate-500">
+                                                    {item.is_active ? 'Active' : 'Suspended'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3.5 text-right">
+                                                <Link 
+                                                    to="/admin/users" 
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-slate-200 hover:border-slate-350 hover:bg-slate-100 rounded text-[10px] font-bold text-slate-650"
+                                                >
+                                                    <FiEye /> View
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                                Administrative Secure Email
-                            </span>
-                            <p className="font-extrabold text-slate-800 bg-slate-50/60 border border-slate-100 rounded-lg p-3 truncate">
-                                {user?.email}
-                            </p>
+                {/* Recent Job Listings Panel */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md overflow-hidden flex flex-col">
+                    <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                        <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <FiBriefcase className="text-teal-600" /> Recent Job Campaigns
+                        </h3>
+                        <div className="flex gap-2">
+                            <Link to="/admin/jobs" className="text-[10px] font-black text-teal-650 hover:underline">
+                                View Openings
+                            </Link>
                         </div>
+                    </div>
 
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                                Role Access Clearence
-                            </span>
-                            <p className="font-extrabold text-slate-800 bg-slate-50/60 border border-slate-100 rounded-lg p-3 uppercase tracking-wider text-xs">
-                                LEVEL 3 (Global Admin)
-                            </p>
-                        </div>
-
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                                Superuser Integrity Status
-                            </span>
-                            <div className="flex items-center justify-between font-extrabold text-slate-800 bg-slate-50/60 border border-slate-100 rounded-lg p-3">
-                                <span>Superuser Active</span>
-                                <FiAward className="text-teal-500 text-base" />
-                            </div>
-                        </div>
+                    <div className="flex-grow overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold">
+                                    <th className="px-6 py-3">Campaign Title</th>
+                                    <th className="px-6 py-3">Type</th>
+                                    <th className="px-6 py-3">Setting</th>
+                                    <th className="px-6 py-3 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {latestJobs.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
+                                            No job listings posted yet.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    latestJobs.map((job) => (
+                                        <tr key={job._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
+                                            <td className="px-6 py-3.5">
+                                                <div className="font-extrabold text-slate-800 truncate max-w-[170px]">
+                                                    {job.position_title}
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 truncate max-w-[170px]">
+                                                    {job.clinical_specialty}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-3.5">
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                                                    job.job_type === 'PERMANENT' 
+                                                    ? 'bg-purple-50 text-purple-700 border border-purple-150' 
+                                                    : 'bg-amber-50 text-amber-700 border border-amber-150'
+                                                }`}>
+                                                    {job.job_type}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3.5 text-slate-500 font-semibold truncate max-w-[100px]">
+                                                {job.clinical_setting}
+                                            </td>
+                                            <td className="px-6 py-3.5 text-right">
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                                                    job.status === 'OPEN' 
+                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
+                                                    : 'bg-slate-50 text-slate-600 border border-slate-200'
+                                                }`}>
+                                                    {job.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
