@@ -25,7 +25,10 @@ import {
     JobStatus
 } from '../../../redux/apis/jobsApi/interface';
 
+import { useNavigate } from 'react-router-dom';
+
 export default function AdminLocumJobsPage() {
+    const navigate = useNavigate();
 
     // Query parameters
     const [searchTerm, setSearchTerm] = useState('');
@@ -428,7 +431,17 @@ export default function AdminLocumJobsPage() {
                                                 </span>
                                             </td>
 
-                                            <td className="px-6 py-4.5 text-right whitespace-nowrap">
+                                            <td className="px-6 py-4.5 text-right whitespace-nowrap space-x-2">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate(`/admin/jobs/${job._id}/applicants`);
+                                                    }}
+                                                    className="p-2 text-slate-600 hover:text-indigo-700 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg cursor-pointer transition-colors inline-flex items-center"
+                                                    title="View Applicants"
+                                                >
+                                                    <FiUsers className="text-xs" />
+                                                </button>
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();

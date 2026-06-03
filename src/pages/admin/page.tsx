@@ -2,10 +2,10 @@ import { useReadAllUsersQuery } from "../../redux/apis/adminApi";
 import { useGetJobListingsQuery } from "../../redux/apis/jobsApi";
 import { useGetApplicationsQuery } from "../../redux/apis/applicationsApi";
 import { Link } from "react-router-dom";
-import { 
-    FiShield, 
-    FiUsers, 
-    FiBriefcase, 
+import {
+    FiShield,
+    FiUsers,
+    FiBriefcase,
     FiFileText,
     FiUserCheck,
     FiTrendingUp,
@@ -14,9 +14,9 @@ import {
 } from "react-icons/fi";
 
 export default function AdminDashboardPage() {
-    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery();
-    const { data: jobs, isLoading: isJobsLoading } = useGetJobListingsQuery();
-    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery();
+    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 5 });
+    const { data: jobs, isLoading: isJobsLoading } = useGetJobListingsQuery({ limit: 5 });
+    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery({ limit: 5 });
 
     const isLoading = isUsersLoading || isJobsLoading || isAppsLoading;
 
@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
     const pendingApps = applications?.filter(a => a.application_status === 'SUBMITTED' || a.application_status === 'CREDENTIALING_REVIEW').length || 0;
     const shortlistedApps = applications?.filter(a => a.is_shortlisted).length || 0;
 
-    // Get latest items
+    // Get items
     const latestUsers = users ? [...users].slice(-5).reverse() : [];
     const latestJobs = jobs ? [...jobs].slice(-5).reverse() : [];
 
@@ -66,7 +66,7 @@ export default function AdminDashboardPage() {
 
             {/* Metrics Counters Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                
+
                 {/* Total Users */}
                 <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
                     <div className="space-y-2">
@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
 
             {/* Split Data Panels */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
+
                 {/* Recent Registrations Table */}
                 <div className="bg-white border border-slate-150 rounded-2xl shadow-md overflow-hidden flex flex-col">
                     <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
@@ -167,27 +167,25 @@ export default function AdminDashboardPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-3.5">
-                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                                                    item.role === 'admin' 
-                                                    ? 'bg-teal-50 text-teal-700 border border-teal-150' 
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${item.role === 'admin'
+                                                    ? 'bg-teal-50 text-teal-700 border border-teal-150'
                                                     : item.role === 'institute'
-                                                    ? 'bg-indigo-50 text-indigo-700 border border-indigo-150'
-                                                    : 'bg-blue-50 text-blue-700 border border-blue-150'
-                                                }`}>
+                                                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-150'
+                                                        : 'bg-blue-50 text-blue-700 border border-blue-150'
+                                                    }`}>
                                                     {item.role === 'institute' ? 'Client' : item.role}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-3.5">
-                                                <span className={`w-2 h-2 rounded-full inline-block mr-1.5 ${
-                                                    item.is_active ? 'bg-emerald-500' : 'bg-slate-300'
-                                                }`} />
+                                                <span className={`w-2 h-2 rounded-full inline-block mr-1.5 ${item.is_active ? 'bg-emerald-500' : 'bg-slate-300'
+                                                    }`} />
                                                 <span className="text-[10px] text-slate-500">
                                                     {item.is_active ? 'Active' : 'Suspended'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-3.5 text-right">
-                                                <Link 
-                                                    to="/admin/users" 
+                                                <Link
+                                                    to="/admin/users"
                                                     className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-slate-200 hover:border-slate-350 hover:bg-slate-100 rounded text-[10px] font-bold text-slate-650"
                                                 >
                                                     <FiEye /> View
@@ -243,11 +241,10 @@ export default function AdminDashboardPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-3.5">
-                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                                                    job.job_type === 'PERMANENT' 
-                                                    ? 'bg-purple-50 text-purple-700 border border-purple-150' 
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${job.job_type === 'PERMANENT'
+                                                    ? 'bg-purple-50 text-purple-700 border border-purple-150'
                                                     : 'bg-amber-50 text-amber-700 border border-amber-150'
-                                                }`}>
+                                                    }`}>
                                                     {job.job_type}
                                                 </span>
                                             </td>
@@ -255,11 +252,10 @@ export default function AdminDashboardPage() {
                                                 {job.clinical_setting}
                                             </td>
                                             <td className="px-6 py-3.5 text-right">
-                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                                                    job.status === 'OPEN' 
-                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${job.status === 'OPEN'
+                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
                                                     : 'bg-slate-50 text-slate-600 border border-slate-200'
-                                                }`}>
+                                                    }`}>
                                                     {job.status}
                                                 </span>
                                             </td>

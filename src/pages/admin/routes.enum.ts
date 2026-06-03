@@ -8,4 +8,5 @@ export const ADMIN_ROUTES = {
     LOCUM_JOBS: '/admin/locum-jobs',
     PROFILE: '/admin/profile',
     SETTINGS: '/admin/settings',
+    JOB_APPLICANTS: '/admin/jobs/:id/applicants',
 };
