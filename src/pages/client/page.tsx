@@ -1,36 +1,50 @@
 import { useGetMeQuery } from "../../redux/apis/userApi";
 import { useGetOnboardingStatusQuery } from "../../redux/apis/onboardingApi";
-import { Avatar } from "../../components/app";
+import { useGetMyJobListingsQuery } from "../../redux/apis/jobsApi";
+import { useGetApplicationsQuery } from "../../redux/apis/applicationsApi";
 import { Link } from "react-router-dom";
 import { 
-    FiHome, 
     FiAward, 
     FiShield, 
     FiCreditCard, 
     FiLayers, 
-    FiInfo,
-    FiAlertCircle
+    FiAlertCircle,
+    FiBriefcase,
+    FiFileText,
+    FiLoader
 } from "react-icons/fi";
 
 export default function ClientDashboardPage() {
     const { data: user, isLoading: isUserLoading } = useGetMeQuery();
     const { data: onboarding, isLoading: isOnboardingLoading } = useGetOnboardingStatusQuery();
+    const { data: myListings, isLoading: isListingsLoading } = useGetMyJobListingsQuery();
+    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery();
 
-    const isLoading = isUserLoading || isOnboardingLoading;
+    const isLoading = isUserLoading || isOnboardingLoading || isListingsLoading || isAppsLoading;
 
     if (isLoading) {
         return (
-            <div className="flex h-64 items-center justify-center">
+            <div className="flex h-96 items-center justify-center">
                 <div className="flex flex-col items-center gap-2">
-                    <svg className="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
+                    <FiLoader className="animate-spin h-8 w-8 text-indigo-600" />
                     <p className="text-slate-500 font-medium text-xs">Loading institutional metrics...</p>
                 </div>
             </div>
         );
     }
+
+    // Counters calculations
+    const totalListings = myListings?.length || 0;
+    const permanentJobs = myListings?.filter(j => j.job_type === 'PERMANENT').length || 0;
+    const locumShifts = myListings?.filter(j => j.job_type === 'LOCUM').length || 0;
+
+    const totalApps = applications?.length || 0;
+    const pendingApps = applications?.filter(a => a.application_status === 'SUBMITTED' || a.application_status === 'CREDENTIALING_REVIEW').length || 0;
+    const shortlistedApps = applications?.filter(a => a.is_shortlisted).length || 0;
+
+    // Latest items
+    const latestListings = myListings ? [...myListings].slice(-5).reverse() : [];
+    const latestApplications = applications ? [...applications].slice(-5).reverse() : [];
 
     return (
         <div className="space-y-8 animate-fadeIn duration-300">
@@ -93,8 +107,7 @@ export default function ClientDashboardPage() {
             )}
 
             {/* Welcome Banner */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-500 rounded-2xl p-8 text-white shadow-lg">
-                {/* Decorative overlay background */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-500 rounded-2xl p-6 md:p-8 text-white shadow-lg">
                 <div className="absolute right-0 bottom-0 opacity-10 translate-y-12 translate-x-6">
                     <FiLayers className="w-96 h-96" />
                 </div>
@@ -103,152 +116,212 @@ export default function ClientDashboardPage() {
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-indigo-100 text-xs font-semibold backdrop-blur-md">
                         <FiAward className="w-3.5 h-3.5" /> Premium Recruiting Partner
                     </div>
-                    <h1 className="text-3xl font-extrabold tracking-tight">
-                        Welcome, {user?.facility_name || "Institution"}!
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight">
+                        Recruiter Control Console
                     </h1>
-                    <p className="text-indigo-100 text-sm leading-relaxed font-medium">
+                    <p className="text-indigo-100 text-xs md:text-sm leading-relaxed font-medium">
                         Deploy your recruiting campaigns immediately. Acquire clinicians, check credentials, or purchase hiring credits to post more openings.
                     </p>
                 </div>
             </div>
 
-            {/* Quick Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Card 1: Credit Balance */}
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Recruiter Balance */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
+                    <div className="space-y-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Wallet Balance</span>
+                        <span className="text-2xl font-black text-slate-800 block">₦{(user?.credit_balance ?? 0) * 100}</span>
+                        <div className="text-[10px] text-indigo-600 font-extrabold">
+                            {user?.credit_balance ?? 0} Credits Available
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
                         <FiCreditCard />
                     </div>
-                    <div>
-                        <span className="text-xs font-bold text-slate-400 block tracking-wider uppercase">
-                            Recruiter Balance
-                        </span>
-                        <span className="text-2xl font-black text-slate-800">
-                            {user?.credit_balance ?? 0}
-                        </span>
-                        <span className="text-xs text-indigo-600 font-bold ml-1.5">
-                            (₦{(user?.credit_balance ?? 0) * 100})
-                        </span>
+                </div>
+
+                {/* Job Listings Count */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
+                    <div className="space-y-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Job Listings</span>
+                        <span className="text-3xl font-black text-slate-800 block">{totalListings}</span>
+                        <div className="text-[10px] text-slate-400 font-semibold">
+                            <span className="text-indigo-600 font-extrabold">{permanentJobs}</span> Perm / <span className="text-purple-600 font-extrabold">{locumShifts}</span> Locums
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+                        <FiBriefcase />
                     </div>
                 </div>
 
-                {/* Card 2: Facility Name */}
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
-                        <FiHome />
+                {/* Received Applications */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
+                    <div className="space-y-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Applications</span>
+                        <span className="text-3xl font-black text-slate-800 block">{totalApps}</span>
+                        <div className="text-[10px] text-slate-400 font-semibold">
+                            <span className="text-amber-600 font-extrabold">{pendingApps}</span> New / <span className="text-emerald-600 font-extrabold">{shortlistedApps}</span> Shortlisted
+                        </div>
                     </div>
-                    <div className="overflow-hidden">
-                        <span className="text-xs font-bold text-slate-400 block tracking-wider uppercase">
-                            Facility Type
-                        </span>
-                        <span className="text-lg font-extrabold text-slate-800 block truncate">
-                            {user?.facility_name || "Private Healthcare Center"}
-                        </span>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                        <FiFileText />
                     </div>
                 </div>
 
-                {/* Card 3: Account Status */}
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
-                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${
-                        onboarding?.onboarding_status === 'approved' 
-                        ? 'bg-emerald-50 text-emerald-600' 
-                        : onboarding?.onboarding_status === 'pending'
-                        ? 'bg-blue-50 text-blue-600'
-                        : onboarding?.onboarding_status === 'rejected'
-                        ? 'bg-red-50 text-red-600'
-                        : 'bg-slate-50 text-slate-500'
-                    }`}>
-                        <FiShield />
-                    </div>
-                    <div>
-                        <span className="text-xs font-bold text-slate-400 block tracking-wider uppercase">
-                            Verification Rank
-                        </span>
-                        <span className={`text-xs font-extrabold px-2.5 py-1 rounded-md border inline-block mt-0.5 ${
+                {/* Verification Level */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
+                    <div className="space-y-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Verification</span>
+                        <span className={`text-xs font-black px-2 py-0.5 rounded uppercase block mt-1.5 w-fit ${
                             onboarding?.onboarding_status === 'approved' 
-                            ? 'text-emerald-700 bg-emerald-50 border-emerald-200/50' 
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
                             : onboarding?.onboarding_status === 'pending'
-                            ? 'text-blue-700 bg-blue-50 border-blue-200/50 animate-pulse'
-                            : onboarding?.onboarding_status === 'rejected'
-                            ? 'text-red-700 bg-red-50 border-red-200/50'
-                            : 'text-slate-600 bg-slate-50 border-slate-200/50'
+                            ? 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
+                            : 'bg-slate-50 text-slate-600 border border-slate-200'
                         }`}>
-                            {onboarding?.onboarding_status === 'approved' 
-                                ? 'Verified Recruiter' 
-                                : onboarding?.onboarding_status === 'pending'
-                                ? 'Audit In Progress'
-                                : onboarding?.onboarding_status === 'rejected'
-                                ? 'Audit Flagged'
-                                : 'Credentials Missing'
-                            }
+                            {onboarding?.onboarding_status || 'not_started'}
                         </span>
+                        <div className="text-[10px] text-slate-400 font-semibold">
+                            Registry Audit Rank
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-650 flex items-center justify-center text-lg">
+                        <FiShield />
                     </div>
                 </div>
             </div>
 
-            {/* Account Details Panel */}
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-                    <h3 className="font-extrabold text-slate-800 text-sm tracking-wide uppercase">
-                        Institution Corporate Dossier
-                    </h3>
-                    <span className="text-[11px] font-bold text-slate-400">
-                        UID: {user?._id}
-                    </span>
-                </div>
-
-                <div className="p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
-                    {/* Large Avatar */}
-                    <div className="flex-shrink-0 flex flex-col items-center gap-3">
-                        <Avatar 
-                            name={user?.facility_name} 
-                            avatarUrl={user?.avatar_url} 
-                            size="lg" 
-                            role="institute" 
-                        />
-                        <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-                            Enterprise Recruiter
-                        </span>
+            {/* Split workspace data panels */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Recent job campaigns */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md overflow-hidden flex flex-col">
+                    <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                        <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <FiBriefcase className="text-indigo-650" /> Active Hiring Campaigns
+                        </h3>
+                        <div className="flex gap-2">
+                            <Link to="/client/jobs" className="text-[10px] font-black text-indigo-650 hover:underline">
+                                View Openings
+                            </Link>
+                        </div>
                     </div>
 
-                    {/* Form-like profile display */}
-                    <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 w-full text-sm">
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                                Hospital / Facility Name
-                            </span>
-                            <p className="font-extrabold text-slate-800 bg-slate-50/60 border border-slate-100 rounded-lg p-3">
-                                {user?.facility_name || "N/A"}
-                            </p>
-                        </div>
+                    <div className="flex-grow overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold">
+                                    <th className="px-6 py-3">Vacancy</th>
+                                    <th className="px-6 py-3">Type</th>
+                                    <th className="px-6 py-3">Setting</th>
+                                    <th className="px-6 py-3 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {latestListings.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
+                                            No active job campaigns posted.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    latestListings.map((job) => (
+                                        <tr key={job._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
+                                            <td className="px-6 py-3.5">
+                                                <div className="font-extrabold text-slate-800 truncate max-w-[170px]">
+                                                    {job.position_title}
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 truncate max-w-[170px]">
+                                                    {job.clinical_specialty}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-3.5">
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                                                    job.job_type === 'PERMANENT' 
+                                                    ? 'bg-purple-50 text-purple-700 border border-purple-150' 
+                                                    : 'bg-amber-50 text-amber-700 border border-amber-150'
+                                                }`}>
+                                                    {job.job_type}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3.5 text-slate-500 font-semibold truncate max-w-[100px]">
+                                                {job.clinical_setting}
+                                            </td>
+                                            <td className="px-6 py-3.5 text-right">
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                                                    job.status === 'OPEN' 
+                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
+                                                    : 'bg-slate-50 text-slate-600 border border-slate-200'
+                                                }`}>
+                                                    {job.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                                Corporate Email Address
-                            </span>
-                            <p className="font-extrabold text-slate-800 bg-slate-50/60 border border-slate-100 rounded-lg p-3 truncate">
-                                {user?.email}
-                            </p>
-                        </div>
+                {/* Recent applications */}
+                <div className="bg-white border border-slate-150 rounded-2xl shadow-md overflow-hidden flex flex-col">
+                    <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                        <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <FiFileText className="text-indigo-650" /> Candidate Applications
+                        </h3>
+                        <Link to="/client/applicants" className="text-[10px] font-black text-indigo-650 hover:underline">
+                            View Applicants
+                        </Link>
+                    </div>
 
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                                Account Hierarchy
-                            </span>
-                            <p className="font-extrabold text-slate-800 bg-slate-50/60 border border-slate-100 rounded-lg p-3">
-                                Recruiter Client Portal
-                            </p>
-                        </div>
-
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                                Daily Credits cap limit
-                            </span>
-                            <div className="flex items-center justify-between font-extrabold text-slate-800 bg-slate-50/60 border border-slate-100 rounded-lg p-3">
-                                <span>{user?.daily_credit_cap ?? 5} Credits / Day</span>
-                                <FiInfo className="text-indigo-500 text-base" />
-                            </div>
-                        </div>
+                    <div className="flex-grow overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold">
+                                    <th className="px-6 py-3">Applicant Ref</th>
+                                    <th className="px-6 py-3">Candidate ID</th>
+                                    <th className="px-6 py-3">Applied</th>
+                                    <th className="px-6 py-3 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {latestApplications.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
+                                            No clinician applications received yet.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    latestApplications.map((app) => (
+                                        <tr key={app._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
+                                            <td className="px-6 py-3.5">
+                                                <div className="font-extrabold text-slate-800">
+                                                    Practitioner Ref: #{app._id.slice(-6).toUpperCase()}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-3.5 text-slate-500 font-semibold truncate max-w-[150px]">
+                                                {app.candidate_id}
+                                            </td>
+                                            <td className="px-6 py-3.5 text-slate-450 font-bold text-[10px]">
+                                                {new Date(app.created_at || '').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            </td>
+                                            <td className="px-6 py-3.5 text-right">
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                                                    app.application_status === 'ACCEPTED' 
+                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
+                                                    : app.application_status === 'DECLINED'
+                                                    ? 'bg-red-50 text-red-700 border border-red-150'
+                                                    : 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
+                                                }`}>
+                                                    {app.application_status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

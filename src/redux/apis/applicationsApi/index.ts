@@ -36,6 +36,13 @@ export const applicationsApi = createApi({
             }),
             providesTags: ['UserApplications'],
         }),
+        checkApplied: builder.query<{ applied: boolean; application: IApplicationResponse | null }, { vacancy_id: string }>({
+            query: ({ vacancy_id }) => ({
+                url: '/applications/check-applied',
+                params: { vacancy_id },
+            }),
+            providesTags: ['Applications'],
+        }),
         getApplicationDetails: builder.query<IApplicationResponse, string>({
             query: (id) => ({
                 url: `/applications/${id}`,
@@ -92,4 +99,6 @@ export const {
     useShortlistApplicationMutation,
     useAcceptApplicationMutation,
     useUpdateApplicationStatusMutation,
+    useCheckAppliedQuery,
+    useLazyCheckAppliedQuery,
 } = applicationsApi;

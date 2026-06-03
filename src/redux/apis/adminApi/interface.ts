@@ -1,4 +1,5 @@
 import type { IJobListingResponse } from '../jobsApi/interface';
+import type { IUser } from '../userApi/interface';
 
 export interface IAdminUsersParams {
     page?: number;
@@ -32,4 +33,9 @@ export interface IReassignJobRequest {
 export interface IAdminReassignJobResponse {
     message: string;
     updated_job: IJobListingResponse;
+}
+
+export interface IAdminUserUpdateRequest {
+    user_id: string;
+    payload: Partial<IUser>;
 }

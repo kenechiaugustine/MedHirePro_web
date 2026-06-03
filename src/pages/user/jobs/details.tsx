@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { 
-    useGetApplicationsQuery,
+    useCheckAppliedQuery,
     useSubmitApplicationMutation
 } from '../../../redux/apis/applicationsApi';
 import { useGetOnboardingStatusQuery } from '../../../redux/apis/onboardingApi';
@@ -31,7 +31,7 @@ export default function ProfessionalJobDetailsPage() {
 
     // Queries
     const { data: job, isLoading: isJobLoading, error: jobError } = useGetJobListingDetailsQuery(id || '', { skip: !id });
-    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery({ vacancy_id: id || '' }, { skip: !id });
+    const { data: checkAppliedData, isLoading: isCheckAppliedLoading } = useCheckAppliedQuery({ vacancy_id: id || '' }, { skip: !id });
     const { data: onboarding } = useGetOnboardingStatusQuery();
 
     // Mutations
@@ -44,8 +44,8 @@ export default function ProfessionalJobDetailsPage() {
     const [cvUrl, setCvUrl] = useState('');
     const [credentialsList, setCredentialsList] = useState<string[]>([]);
 
-    const hasApplied = applications && applications.length > 0;
-    const activeApplication = hasApplied ? applications[0] : null;
+    const hasApplied = checkAppliedData?.applied || false;
+    const activeApplication = checkAppliedData?.application || null;
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'cv' | 'credential') => {
         const file = e.target.files?.[0];
@@ -117,7 +117,7 @@ export default function ProfessionalJobDetailsPage() {
         return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
     };
 
-    if (isJobLoading || isAppsLoading) {
+    if (isJobLoading || isCheckAppliedLoading) {
         return (
             <div className="flex h-96 items-center justify-center">
                 <div className="flex flex-col items-center gap-2">

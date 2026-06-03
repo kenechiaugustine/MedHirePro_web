@@ -5,4 +5,6 @@ export const USER_ROUTES = {
     LOCUM_JOBS: '/user/locum-jobs',
     JOB_DETAILS: '/user/jobs/view/:id',
     APPLICATIONS: '/user/applications',
+    PROFILE: '/user/profile',
+    SETTINGS: '/user/settings',
 };

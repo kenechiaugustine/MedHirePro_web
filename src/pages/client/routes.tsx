@@ -8,6 +8,8 @@ import PostLocumJobPage from "./jobs/post-locum";
 import ClientJobDetailsPage from "./jobs/details";
 import EditJobPage from "./jobs/edit";
 import ClientApplicantsPage from "./applicants/page";
+import ClientProfilePage from "./profile/page";
+import ClientSettingsPage from "./settings/page";
 
 const clientRoutes: RouteObject[] = [
     { path: CLIENT_ROUTES.DASHBOARD, element: <ClientDashboardPage /> },
@@ -18,6 +20,8 @@ const clientRoutes: RouteObject[] = [
     { path: CLIENT_ROUTES.DETAILS, element: <ClientJobDetailsPage /> },
     { path: CLIENT_ROUTES.EDIT, element: <EditJobPage /> },
     { path: CLIENT_ROUTES.APPLICANTS, element: <ClientApplicantsPage /> },
+    { path: CLIENT_ROUTES.PROFILE, element: <ClientProfilePage /> },
+    { path: CLIENT_ROUTES.SETTINGS, element: <ClientSettingsPage /> },
 ];
 
 export default clientRoutes;

@@ -12,6 +12,11 @@ export interface IUser {
     daily_credit_cap: number;
     is_active: boolean;
     is_deleted: boolean;
+    is_verified?: boolean;
+    onboarding_status?: string;
+    employment_status?: string | null;
+    current_workplace?: string | null;
+    referral_code?: string | null;
     created_at: string | null;
     updated_at: string | null;
 }

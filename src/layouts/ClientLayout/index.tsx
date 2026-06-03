@@ -170,12 +170,14 @@ export default function ClientLayout() {
                                 ₦{(user?.credit_balance ?? 0) * 100}
                             </span>
                         </div>
-                        <Avatar 
-                            name={user?.facility_name} 
-                            avatarUrl={user?.avatar_url} 
-                            size="sm" 
-                            role="institute" 
-                        />
+                        <Link to="/client/profile" className="hover:opacity-85 transition-opacity">
+                            <Avatar 
+                                name={user?.facility_name} 
+                                avatarUrl={user?.avatar_url} 
+                                size="sm" 
+                                role="institute" 
+                            />
+                        </Link>
                     </div>
                 </header>
 
