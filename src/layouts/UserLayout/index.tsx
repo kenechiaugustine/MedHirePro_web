@@ -172,12 +172,14 @@ export default function UserLayout() {
                                 ₦{(user?.credit_balance ?? 0) * 100}
                             </span>
                         </div>
-                        <Avatar 
-                            name={user?.full_name} 
-                            avatarUrl={user?.avatar_url} 
-                            size="sm" 
-                            role="professional" 
-                        />
+                        <Link to="/user/profile" className="hover:opacity-85 transition-opacity">
+                            <Avatar 
+                                name={user?.full_name} 
+                                avatarUrl={user?.avatar_url} 
+                                size="sm" 
+                                role="professional" 
+                            />
+                        </Link>
                     </div>
                 </header>
 

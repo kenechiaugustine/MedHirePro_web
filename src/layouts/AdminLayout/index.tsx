@@ -173,12 +173,14 @@ export default function AdminLayout() {
                                 Healthy
                             </span>
                         </div>
-                        <Avatar
-                            name={user?.full_name || "Admin"}
-                            avatarUrl={user?.avatar_url}
-                            size="sm"
-                            role="admin"
-                        />
+                        <Link to="/admin/profile" className="hover:opacity-85 transition-opacity">
+                            <Avatar
+                                name={user?.full_name || "Admin"}
+                                avatarUrl={user?.avatar_url}
+                                size="sm"
+                                role="admin"
+                            />
+                        </Link>
                     </div>
                 </header>
 
