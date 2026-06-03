@@ -7,4 +7,5 @@ export const CLIENT_ROUTES = {
     DETAILS: '/client/jobs/view/:id',
     EDIT: '/client/jobs/edit/:id',
     APPLICANTS: '/client/applicants',
+    PROFILE: '/client/profile',
 };

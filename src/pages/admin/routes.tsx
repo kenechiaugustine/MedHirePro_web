@@ -7,6 +7,7 @@ import AdminUserCreditHistoryPage from "./users/credit-history";
 import AdminUserReferralsPage from "./users/referrals";
 import AdminJobsPage from "./jobs/page";
 import AdminLocumJobsPage from "./locum-jobs/page";
+import AdminProfilePage from "./profile/page";
 
 const adminRoutes: RouteObject[] = [
     { path: ADMIN_ROUTES.DASHBOARD, element: <AdminDashboardPage /> },
@@ -16,6 +17,7 @@ const adminRoutes: RouteObject[] = [
     { path: ADMIN_ROUTES.USER_REFERRALS, element: <AdminUserReferralsPage /> },
     { path: ADMIN_ROUTES.JOBS, element: <AdminJobsPage /> },
     { path: ADMIN_ROUTES.LOCUM_JOBS, element: <AdminLocumJobsPage /> },
+    { path: ADMIN_ROUTES.PROFILE, element: <AdminProfilePage /> },
 ];
 
 export default adminRoutes;

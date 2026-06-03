@@ -41,7 +41,7 @@ export default function AdminLayout() {
         { name: "User Management", path: "/admin/users", icon: <FiUsers className="text-lg" /> },
         { name: "Job Listings", path: "/admin/jobs", icon: <FiList className="text-lg" /> },
         { name: "Locum Jobs", path: "/admin/locum-jobs", icon: <FiBriefcase className="text-lg" /> },
-        { name: "Admin Profile", path: "/admin/dashboard", icon: <FiUser className="text-lg" /> },
+        { name: "Admin Profile", path: "/admin/profile", icon: <FiUser className="text-lg" /> },
         { name: "Admin Settings", path: "/admin/settings", icon: <FiSettings className="text-lg" /> },
     ];
 

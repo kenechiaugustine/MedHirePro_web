@@ -6,4 +6,5 @@ export const ADMIN_ROUTES = {
     USER_REFERRALS: '/admin/users/:id/referrals',
     JOBS: '/admin/jobs',
     LOCUM_JOBS: '/admin/locum-jobs',
+    PROFILE: '/admin/profile',
 };
