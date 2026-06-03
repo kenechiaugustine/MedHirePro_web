@@ -7,6 +7,7 @@ import ProfessionalLocumSearchPage from "./jobs/locum";
 import ProfessionalJobDetailsPage from "./jobs/details";
 import ProfessionalApplicationsPage from "./applications";
 import UserProfilePage from "./profile/page";
+import UserSettingsPage from "./settings/page";
 
 const userRoutes: RouteObject[] = [
     { path: USER_ROUTES.DASHBOARD, element: <UserDashboardPage /> },
@@ -16,6 +17,7 @@ const userRoutes: RouteObject[] = [
     { path: USER_ROUTES.JOB_DETAILS, element: <ProfessionalJobDetailsPage /> },
     { path: USER_ROUTES.APPLICATIONS, element: <ProfessionalApplicationsPage /> },
     { path: USER_ROUTES.PROFILE, element: <UserProfilePage /> },
+    { path: USER_ROUTES.SETTINGS, element: <UserSettingsPage /> },
 ];
 
 export default userRoutes;

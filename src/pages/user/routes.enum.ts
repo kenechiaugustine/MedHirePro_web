@@ -6,4 +6,5 @@ export const USER_ROUTES = {
     JOB_DETAILS: '/user/jobs/view/:id',
     APPLICATIONS: '/user/applications',
     PROFILE: '/user/profile',
+    SETTINGS: '/user/settings',
 };

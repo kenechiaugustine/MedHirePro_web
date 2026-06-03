@@ -8,4 +8,5 @@ export const CLIENT_ROUTES = {
     EDIT: '/client/jobs/edit/:id',
     APPLICANTS: '/client/applicants',
     PROFILE: '/client/profile',
+    SETTINGS: '/client/settings',
 };

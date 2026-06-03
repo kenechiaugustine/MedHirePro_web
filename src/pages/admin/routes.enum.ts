@@ -7,4 +7,5 @@ export const ADMIN_ROUTES = {
     JOBS: '/admin/jobs',
     LOCUM_JOBS: '/admin/locum-jobs',
     PROFILE: '/admin/profile',
+    SETTINGS: '/admin/settings',
 };
