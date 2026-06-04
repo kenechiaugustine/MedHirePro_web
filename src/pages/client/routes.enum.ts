@@ -9,4 +9,5 @@ export const CLIENT_ROUTES = {
     APPLICANTS: '/client/applicants',
     PROFILE: '/client/profile',
     SETTINGS: '/client/settings',
+    REFERRALS: '/client/referrals',
 };

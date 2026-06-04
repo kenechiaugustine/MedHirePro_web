@@ -3,11 +3,11 @@ import { useGetOnboardingStatusQuery } from "../../redux/apis/onboardingApi";
 import { useGetMyJobListingsQuery } from "../../redux/apis/jobsApi";
 import { useGetApplicationsQuery } from "../../redux/apis/applicationsApi";
 import { Link } from "react-router-dom";
-import { 
-    FiAward, 
-    FiShield, 
-    FiCreditCard, 
-    FiLayers, 
+import {
+    FiAward,
+    FiShield,
+    FiCreditCard,
+    FiLayers,
     FiAlertCircle,
     FiBriefcase,
     FiFileText,
@@ -50,57 +50,54 @@ export default function ClientDashboardPage() {
         <div className="space-y-8 animate-fadeIn duration-300">
             {/* Onboarding Verification Action Banner */}
             {onboarding?.onboarding_status !== 'approved' && (
-                <div className={`p-6 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm ${
-                    onboarding?.onboarding_status === 'pending' 
-                    ? 'bg-blue-50 border-blue-200 text-blue-800' 
-                    : onboarding?.onboarding_status === 'rejected'
-                    ? 'bg-red-50 border-red-200 text-red-800'
-                    : 'bg-amber-50 border-amber-200 text-amber-800'
-                }`}>
+                <div className={`p-6 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm ${onboarding?.onboarding_status === 'pending'
+                        ? 'bg-blue-50 border-blue-200 text-blue-800'
+                        : onboarding?.onboarding_status === 'rejected'
+                            ? 'bg-red-50 border-red-200 text-red-800'
+                            : 'bg-amber-50 border-amber-200 text-amber-800'
+                    }`}>
                     <div className="flex gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${
-                            onboarding?.onboarding_status === 'pending' 
-                            ? 'bg-blue-100 text-blue-600' 
-                            : onboarding?.onboarding_status === 'rejected'
-                            ? 'bg-red-100 text-red-600'
-                            : 'bg-amber-100 text-amber-600'
-                        }`}>
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${onboarding?.onboarding_status === 'pending'
+                                ? 'bg-blue-100 text-blue-600'
+                                : onboarding?.onboarding_status === 'rejected'
+                                    ? 'bg-red-100 text-red-600'
+                                    : 'bg-amber-100 text-amber-600'
+                            }`}>
                             <FiAlertCircle />
                         </div>
                         <div className="space-y-1">
                             <h4 className="font-extrabold text-sm">
-                                {onboarding?.onboarding_status === 'pending' 
-                                    ? 'Corporate Dossier Under Audit' 
+                                {onboarding?.onboarding_status === 'pending'
+                                    ? 'Corporate Dossier Under Audit'
                                     : onboarding?.onboarding_status === 'rejected'
-                                    ? 'Corporate Verification Rejected'
-                                    : 'Verify Your Institutional Facility Credentials'
+                                        ? 'Corporate Verification Rejected'
+                                        : 'Verify Your Institutional Facility Credentials'
                                 }
                             </h4>
                             <p className="text-xs font-medium opacity-90 leading-relaxed max-w-xl">
-                                {onboarding?.onboarding_status === 'pending' 
-                                    ? 'Our compliance registry is auditing your healthcare corporate credentials. Verified entities gain listing authority and campaign promotion priority.' 
+                                {onboarding?.onboarding_status === 'pending'
+                                    ? 'Our compliance registry is auditing your healthcare corporate credentials. Verified entities gain listing authority and campaign promotion priority.'
                                     : onboarding?.onboarding_status === 'rejected'
-                                    ? `Compliance Audit Rejected: ${onboarding?.submission?.rejection_reason || 'Flagged credentials'}. Please edit and re-upload correct business documents.`
-                                    : 'Your healthcare institution is currently unverified. Submit your facility licenses and corporate registration certificates to unlock listing campaigns.'
+                                        ? `Compliance Audit Rejected: ${onboarding?.submission?.rejection_reason || 'Flagged credentials'}. Please edit and re-upload correct business documents.`
+                                        : 'Your healthcare institution is currently unverified. Submit your facility licenses and corporate registration certificates to unlock listing campaigns.'
                                 }
                             </p>
                         </div>
                     </div>
                     <Link
                         to="/client/onboarding"
-                        className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow transition-all hover:-translate-y-0.5 active:translate-y-0 text-center flex-shrink-0 ${
-                            onboarding?.onboarding_status === 'pending' 
-                            ? 'bg-blue-600 text-white shadow-blue-500/10 hover:bg-blue-700' 
-                            : onboarding?.onboarding_status === 'rejected'
-                            ? 'bg-red-600 text-white shadow-red-500/10 hover:bg-red-700'
-                            : 'bg-amber-600 text-white shadow-amber-500/10 hover:bg-amber-700'
-                        }`}
+                        className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow transition-all hover:-translate-y-0.5 active:translate-y-0 text-center flex-shrink-0 ${onboarding?.onboarding_status === 'pending'
+                                ? 'bg-blue-600 text-white shadow-blue-500/10 hover:bg-blue-700'
+                                : onboarding?.onboarding_status === 'rejected'
+                                    ? 'bg-red-600 text-white shadow-red-500/10 hover:bg-red-700'
+                                    : 'bg-amber-600 text-white shadow-amber-500/10 hover:bg-amber-700'
+                            }`}
                     >
-                        {onboarding?.onboarding_status === 'pending' 
-                            ? 'Track Submission' 
+                        {onboarding?.onboarding_status === 'pending'
+                            ? 'Track Submission'
                             : onboarding?.onboarding_status === 'rejected'
-                            ? 'Correct Dossier'
-                            : 'Start Verification'
+                                ? 'Correct Dossier'
+                                : 'Start Verification'
                         }
                     </Link>
                 </div>
@@ -131,7 +128,7 @@ export default function ClientDashboardPage() {
                 <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
                     <div className="space-y-2">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Wallet Balance</span>
-                        <span className="text-2xl font-black text-slate-800 block">₦{(user?.credit_balance ?? 0) * 100}</span>
+                        <span className="text-2xl font-black text-slate-800 block">{user?.credit_balance ?? 0} Credits</span>
                         <div className="text-[10px] text-indigo-600 font-extrabold">
                             {user?.credit_balance ?? 0} Credits Available
                         </div>
@@ -173,13 +170,12 @@ export default function ClientDashboardPage() {
                 <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
                     <div className="space-y-2">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Verification</span>
-                        <span className={`text-xs font-black px-2 py-0.5 rounded uppercase block mt-1.5 w-fit ${
-                            onboarding?.onboarding_status === 'approved' 
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
-                            : onboarding?.onboarding_status === 'pending'
-                            ? 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
-                            : 'bg-slate-50 text-slate-600 border border-slate-200'
-                        }`}>
+                        <span className={`text-xs font-black px-2 py-0.5 rounded uppercase block mt-1.5 w-fit ${onboarding?.onboarding_status === 'approved'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
+                                : onboarding?.onboarding_status === 'pending'
+                                    ? 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
+                                    : 'bg-slate-50 text-slate-600 border border-slate-200'
+                            }`}>
                             {onboarding?.onboarding_status || 'not_started'}
                         </span>
                         <div className="text-[10px] text-slate-400 font-semibold">
@@ -236,11 +232,10 @@ export default function ClientDashboardPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-3.5">
-                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                                                    job.job_type === 'PERMANENT' 
-                                                    ? 'bg-purple-50 text-purple-700 border border-purple-150' 
-                                                    : 'bg-amber-50 text-amber-700 border border-amber-150'
-                                                }`}>
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${job.job_type === 'PERMANENT'
+                                                        ? 'bg-purple-50 text-purple-700 border border-purple-150'
+                                                        : 'bg-amber-50 text-amber-700 border border-amber-150'
+                                                    }`}>
                                                     {job.job_type}
                                                 </span>
                                             </td>
@@ -248,11 +243,10 @@ export default function ClientDashboardPage() {
                                                 {job.clinical_setting}
                                             </td>
                                             <td className="px-6 py-3.5 text-right">
-                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                                                    job.status === 'OPEN' 
-                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
-                                                    : 'bg-slate-50 text-slate-600 border border-slate-200'
-                                                }`}>
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${job.status === 'OPEN'
+                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
+                                                        : 'bg-slate-50 text-slate-600 border border-slate-200'
+                                                    }`}>
                                                     {job.status}
                                                 </span>
                                             </td>
@@ -307,13 +301,12 @@ export default function ClientDashboardPage() {
                                                 {new Date(app.created_at || '').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                             </td>
                                             <td className="px-6 py-3.5 text-right">
-                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                                                    app.application_status === 'ACCEPTED' 
-                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
-                                                    : app.application_status === 'DECLINED'
-                                                    ? 'bg-red-50 text-red-700 border border-red-150'
-                                                    : 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
-                                                }`}>
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${app.application_status === 'ACCEPTED'
+                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
+                                                        : app.application_status === 'DECLINED'
+                                                            ? 'bg-red-50 text-red-700 border border-red-150'
+                                                            : 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
+                                                    }`}>
                                                     {app.application_status}
                                                 </span>
                                             </td>

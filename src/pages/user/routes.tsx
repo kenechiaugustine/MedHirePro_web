@@ -8,6 +8,7 @@ import ProfessionalJobDetailsPage from "./jobs/details";
 import ProfessionalApplicationsPage from "./applications";
 import UserProfilePage from "./profile/page";
 import UserSettingsPage from "./settings/page";
+import UserReferralsPage from "./referrals/page";
 
 const userRoutes: RouteObject[] = [
     { path: USER_ROUTES.DASHBOARD, element: <UserDashboardPage /> },
@@ -18,6 +19,7 @@ const userRoutes: RouteObject[] = [
     { path: USER_ROUTES.APPLICATIONS, element: <ProfessionalApplicationsPage /> },
     { path: USER_ROUTES.PROFILE, element: <UserProfilePage /> },
     { path: USER_ROUTES.SETTINGS, element: <UserSettingsPage /> },
+    { path: USER_ROUTES.REFERRALS, element: <UserReferralsPage /> },
 ];
 
 export default userRoutes;

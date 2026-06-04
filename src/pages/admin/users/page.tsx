@@ -359,7 +359,7 @@ export default function AdminUserManagementPage() {
                                                         {user.credit_balance} Credits
                                                     </p>
                                                     <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
-                                                        Cap: {user.daily_credit_cap}/day
+                                                        Cap: {user.daily_credit_cap} daily cap
                                                     </p>
                                                 </div>
                                             </td>

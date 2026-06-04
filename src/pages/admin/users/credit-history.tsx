@@ -100,7 +100,7 @@ export default function AdminUserCreditHistoryPage() {
                     <div className="space-y-0.5">
                         <span className="text-[9px] font-black text-teal-400 tracking-wider uppercase block">Daily System Cap</span>
                         <span className="text-2xl font-black text-teal-700">
-                            {user.daily_credit_cap} <span className="text-xs font-bold text-slate-400">Claims / day</span>
+                            {user.daily_credit_cap} <span className="text-xs font-bold text-slate-400">daily cap</span>
                         </span>
                     </div>
                     <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">

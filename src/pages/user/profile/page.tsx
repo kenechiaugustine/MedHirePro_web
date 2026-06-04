@@ -3,10 +3,10 @@ import { useGetMeQuery, useUpdateProfileMutation } from '../../../redux/apis/use
 import { useUploadMediaMutation } from '../../../redux/apis/mediaApi';
 import { ClinicalSpecialty } from '../../../redux/apis/jobsApi/interface';
 import { Avatar } from '../../../components/app';
-import { 
-    FiShield, 
-    FiLoader, 
-    FiCamera, 
+import {
+    FiShield,
+    FiLoader,
+    FiCamera,
     FiInfo,
     FiUser,
     FiBriefcase,
@@ -103,7 +103,7 @@ export default function UserProfilePage() {
 
             {/* Main Content Layout */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
+
                 {/* Balance & Verification Column */}
                 <div className="md:col-span-1 space-y-6">
                     {/* Professional Wallet Card */}
@@ -120,7 +120,7 @@ export default function UserProfilePage() {
 
                         <div className="pt-2">
                             <span className="text-3xl font-black text-slate-800 block">
-                                ₦{(user?.credit_balance ?? 0) * 100}
+                                {user?.credit_balance ?? 0} Credits
                             </span>
                             <span className="text-xs text-blue-600 font-bold">
                                 {user?.credit_balance ?? 0} Credits Available
@@ -136,21 +136,20 @@ export default function UserProfilePage() {
                     <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 space-y-3">
                         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Verification Dossier</h4>
                         <div className="flex items-center gap-2">
-                            <span className={`w-2.5 h-2.5 rounded-full ${
-                                user?.onboarding_status === 'approved' 
-                                ? 'bg-emerald-500 animate-pulse' 
-                                : user?.onboarding_status === 'pending'
-                                ? 'bg-amber-500 animate-pulse'
-                                : 'bg-slate-400'
-                            }`} />
+                            <span className={`w-2.5 h-2.5 rounded-full ${user?.onboarding_status === 'approved'
+                                    ? 'bg-emerald-500 animate-pulse'
+                                    : user?.onboarding_status === 'pending'
+                                        ? 'bg-amber-500 animate-pulse'
+                                        : 'bg-slate-400'
+                                }`} />
                             <span className="text-xs font-extrabold text-slate-700 uppercase">
                                 {user?.onboarding_status || 'not_started'}
                             </span>
                         </div>
                         <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
-                            {user?.onboarding_status === 'approved' 
-                            ? 'Your credentials have been audited and verified. You have full access to locum matching.'
-                            : 'Onboarding certificates are in review. Premium features activate once verified.'}
+                            {user?.onboarding_status === 'approved'
+                                ? 'Your credentials have been audited and verified. You have full access to locum matching.'
+                                : 'Onboarding certificates are in review. Premium features activate once verified.'}
                         </p>
                     </div>
                 </div>
@@ -158,15 +157,15 @@ export default function UserProfilePage() {
                 {/* Form Inputs Column */}
                 <div className="md:col-span-2 bg-white border border-slate-150 rounded-2xl shadow-md overflow-hidden p-6 md:p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        
+
                         {/* Avatar Upload Container */}
                         <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-slate-100">
                             <div className="relative group">
-                                <Avatar 
-                                    name={user?.full_name || 'Professional'} 
-                                    avatarUrl={avatarUrl} 
-                                    size="lg" 
-                                    role="professional" 
+                                <Avatar
+                                    name={user?.full_name || 'Professional'}
+                                    avatarUrl={avatarUrl}
+                                    size="lg"
+                                    role="professional"
                                 />
                                 {isUploading && (
                                     <div className="absolute inset-0 bg-slate-900/60 rounded-full flex items-center justify-center text-white">
@@ -175,11 +174,11 @@ export default function UserProfilePage() {
                                 )}
                                 <label className="absolute right-0 bottom-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full cursor-pointer shadow-md transition-colors border border-white">
                                     <FiCamera className="w-3.5 h-3.5" />
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        onChange={handleFileChange} 
-                                        className="hidden" 
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
                                     />
                                 </label>
                             </div>
@@ -232,7 +231,7 @@ export default function UserProfilePage() {
                                     </select>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
                                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                                         </svg>
                                     </div>
                                 </div>

@@ -7,4 +7,5 @@ export const USER_ROUTES = {
     APPLICATIONS: '/user/applications',
     PROFILE: '/user/profile',
     SETTINGS: '/user/settings',
+    REFERRALS: '/user/referrals',
 };
