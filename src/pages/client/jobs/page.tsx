@@ -73,7 +73,7 @@ export default function ClientJobListingsPage() {
     });
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
     };
 
     return (

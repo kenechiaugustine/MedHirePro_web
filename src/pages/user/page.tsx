@@ -3,11 +3,11 @@ import { useGetOnboardingStatusQuery } from "../../redux/apis/onboardingApi";
 import { useGetMyApplicationsQuery } from "../../redux/apis/applicationsApi";
 import { useGetJobListingsQuery } from "../../redux/apis/jobsApi";
 import { Link } from "react-router-dom";
-import { 
-    FiAward, 
-    FiClock, 
-    FiCreditCard, 
-    FiGrid, 
+import {
+    FiAward,
+    FiClock,
+    FiCreditCard,
+    FiGrid,
     FiAlertCircle,
     FiBriefcase,
     FiFileText,
@@ -42,13 +42,13 @@ export default function UserDashboardPage() {
 
     // Filter recommended jobs matching the user's specialty
     const userSpecialty = user?.specialty;
-    const recommendedJobs = jobs 
+    const recommendedJobs = jobs
         ? jobs.filter(job => job.status === 'OPEN' && (!userSpecialty || job.clinical_specialty === userSpecialty)).slice(0, 4)
         : [];
-    
+
     // Fallback if no exact specialty matches
-    const displayJobs = recommendedJobs.length > 0 
-        ? recommendedJobs 
+    const displayJobs = recommendedJobs.length > 0
+        ? recommendedJobs
         : (jobs ? jobs.filter(job => job.status === 'OPEN').slice(0, 4) : []);
 
     const latestApplications = myApps ? [...myApps].slice(-4).reverse() : [];
@@ -57,57 +57,54 @@ export default function UserDashboardPage() {
         <div className="space-y-8 animate-fadeIn duration-300">
             {/* Onboarding Verification Action Banner */}
             {onboarding?.onboarding_status !== 'approved' && (
-                <div className={`p-6 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm ${
-                    onboarding?.onboarding_status === 'pending' 
-                    ? 'bg-blue-50 border-blue-200 text-blue-800' 
-                    : onboarding?.onboarding_status === 'rejected'
-                    ? 'bg-red-50 border-red-200 text-red-800'
-                    : 'bg-amber-50 border-amber-200 text-amber-800'
-                }`}>
+                <div className={`p-6 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm ${onboarding?.onboarding_status === 'pending'
+                        ? 'bg-blue-50 border-blue-200 text-blue-800'
+                        : onboarding?.onboarding_status === 'rejected'
+                            ? 'bg-red-50 border-red-200 text-red-800'
+                            : 'bg-amber-50 border-amber-200 text-amber-800'
+                    }`}>
                     <div className="flex gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${
-                            onboarding?.onboarding_status === 'pending' 
-                            ? 'bg-blue-100 text-blue-600' 
-                            : onboarding?.onboarding_status === 'rejected'
-                            ? 'bg-red-100 text-red-600'
-                            : 'bg-amber-100 text-amber-600'
-                        }`}>
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${onboarding?.onboarding_status === 'pending'
+                                ? 'bg-blue-100 text-blue-600'
+                                : onboarding?.onboarding_status === 'rejected'
+                                    ? 'bg-red-100 text-red-600'
+                                    : 'bg-amber-100 text-amber-600'
+                            }`}>
                             <FiAlertCircle />
                         </div>
                         <div className="space-y-1">
                             <h4 className="font-extrabold text-sm">
-                                {onboarding?.onboarding_status === 'pending' 
-                                    ? 'Professional Dossier Under Compliance Audit' 
+                                {onboarding?.onboarding_status === 'pending'
+                                    ? 'Professional Dossier Under Compliance Audit'
                                     : onboarding?.onboarding_status === 'rejected'
-                                    ? 'Onboarding Documents Audit Flagged'
-                                    : 'Complete Your Professional Dossier Verification'
+                                        ? 'Onboarding Documents Audit Flagged'
+                                        : 'Complete Your Professional Dossier Verification'
                                 }
                             </h4>
                             <p className="text-xs font-medium opacity-90 leading-relaxed max-w-xl">
-                                {onboarding?.onboarding_status === 'pending' 
-                                    ? 'We are currently auditing your clinical certificates. Verified profiles gain premium index matching and priority placements.' 
+                                {onboarding?.onboarding_status === 'pending'
+                                    ? 'We are currently auditing your clinical certificates. Verified profiles gain premium index matching and priority placements.'
                                     : onboarding?.onboarding_status === 'rejected'
-                                    ? `Audit Flagged: ${onboarding?.submission?.rejection_reason || 'Certificate mismatch'}. Please correct your documentation.`
-                                    : 'Your practitioner profile is currently unverified. Upload your clinical license and background check certificates to unlock job applications.'
+                                        ? `Audit Flagged: ${onboarding?.submission?.rejection_reason || 'Certificate mismatch'}. Please correct your documentation.`
+                                        : 'Your practitioner profile is currently unverified. Upload your clinical license and background check certificates to unlock job applications.'
                                 }
                             </p>
                         </div>
                     </div>
                     <Link
                         to="/user/onboarding"
-                        className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow transition-all hover:-translate-y-0.5 active:translate-y-0 text-center flex-shrink-0 ${
-                            onboarding?.onboarding_status === 'pending' 
-                            ? 'bg-blue-600 text-white shadow-blue-500/10 hover:bg-blue-700' 
-                            : onboarding?.onboarding_status === 'rejected'
-                            ? 'bg-red-600 text-white shadow-red-500/10 hover:bg-red-700'
-                            : 'bg-amber-600 text-white shadow-amber-500/10 hover:bg-amber-700'
-                        }`}
+                        className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow transition-all hover:-translate-y-0.5 active:translate-y-0 text-center flex-shrink-0 ${onboarding?.onboarding_status === 'pending'
+                                ? 'bg-blue-600 text-white shadow-blue-500/10 hover:bg-blue-700'
+                                : onboarding?.onboarding_status === 'rejected'
+                                    ? 'bg-red-600 text-white shadow-red-500/10 hover:bg-red-700'
+                                    : 'bg-amber-600 text-white shadow-amber-500/10 hover:bg-amber-700'
+                            }`}
                     >
-                        {onboarding?.onboarding_status === 'pending' 
-                            ? 'Track Progress' 
+                        {onboarding?.onboarding_status === 'pending'
+                            ? 'Track Progress'
                             : onboarding?.onboarding_status === 'rejected'
-                            ? 'Update Credentials'
-                            : 'Verify Profile'
+                                ? 'Update Credentials'
+                                : 'Verify Profile'
                         }
                     </Link>
                 </div>
@@ -138,7 +135,7 @@ export default function UserDashboardPage() {
                 <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
                     <div className="space-y-2">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Wallet Balance</span>
-                        <span className="text-2xl font-black text-slate-800 block">₦{(user?.credit_balance ?? 0) * 100}</span>
+                        <span className="text-2xl font-black text-slate-800 block">{user?.credit_balance ?? 0} Credits</span>
                         <div className="text-[10px] text-blue-600 font-extrabold">
                             {user?.credit_balance ?? 0} Credits Available
                         </div>
@@ -180,13 +177,12 @@ export default function UserDashboardPage() {
                 <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow flex items-start justify-between">
                     <div className="space-y-2">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Registry Profile</span>
-                        <span className={`text-xs font-black px-2 py-0.5 rounded uppercase block mt-1.5 w-fit ${
-                            onboarding?.onboarding_status === 'approved' 
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
-                            : onboarding?.onboarding_status === 'pending'
-                            ? 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
-                            : 'bg-slate-50 text-slate-600 border border-slate-200'
-                        }`}>
+                        <span className={`text-xs font-black px-2 py-0.5 rounded uppercase block mt-1.5 w-fit ${onboarding?.onboarding_status === 'approved'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
+                                : onboarding?.onboarding_status === 'pending'
+                                    ? 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
+                                    : 'bg-slate-50 text-slate-600 border border-slate-200'
+                            }`}>
                             {onboarding?.onboarding_status || 'not_started'}
                         </span>
                         <div className="text-[10px] text-slate-400 font-semibold">
@@ -201,7 +197,7 @@ export default function UserDashboardPage() {
 
             {/* Split data panels */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
+
                 {/* My Applications */}
                 <div className="bg-white border border-slate-150 rounded-2xl shadow-md overflow-hidden flex flex-col">
                     <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
@@ -246,13 +242,12 @@ export default function UserDashboardPage() {
                                                     {new Date(app.created_at || '').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                 </td>
                                                 <td className="px-6 py-3.5 text-right">
-                                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                                                        app.application_status === 'ACCEPTED' 
-                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-150' 
-                                                        : app.application_status === 'DECLINED'
-                                                        ? 'bg-red-50 text-red-700 border border-red-150'
-                                                        : 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
-                                                    }`}>
+                                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${app.application_status === 'ACCEPTED'
+                                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
+                                                            : app.application_status === 'DECLINED'
+                                                                ? 'bg-red-50 text-red-700 border border-red-150'
+                                                                : 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
+                                                        }`}>
                                                         {app.application_status}
                                                     </span>
                                                 </td>
@@ -283,9 +278,9 @@ export default function UserDashboardPage() {
                             </p>
                         ) : (
                             displayJobs.map((job) => (
-                                <Link 
+                                <Link
                                     to={`/user/jobs/view/${job._id}`}
-                                    key={job._id} 
+                                    key={job._id}
                                     className="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/20 transition-all group cursor-pointer"
                                 >
                                     <div className="overflow-hidden space-y-0.5">

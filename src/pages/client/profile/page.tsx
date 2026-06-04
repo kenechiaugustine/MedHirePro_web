@@ -115,7 +115,7 @@ export default function ClientProfilePage() {
 
                         <div className="pt-2">
                             <span className="text-3xl font-black text-slate-800 block">
-                                ₦{(user?.credit_balance ?? 0) * 100}
+                                {user?.credit_balance ?? 0} Credits
                             </span>
                             <span className="text-xs text-indigo-600 font-bold">
                                 {user?.credit_balance ?? 0} Credits Available

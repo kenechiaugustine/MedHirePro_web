@@ -4,16 +4,17 @@ import { useAppDispatch } from "../../redux/hooks";
 import { logout } from "../../redux/slices/authSlice";
 import { useGetMeQuery } from "../../redux/apis/userApi";
 import { Avatar } from "../../components/app";
-import { 
-    FiGrid, 
-    FiUser, 
-    FiUsers, 
-    FiSettings, 
-    FiLogOut, 
+import {
+    FiGrid,
+    FiUser,
+    FiUsers,
+    FiSettings,
+    FiLogOut,
     FiShield,
     FiMenu,
     FiX,
-    FiList
+    FiList,
+    FiGift
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -21,10 +22,10 @@ export default function ClientLayout() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     // Toggle state for mobile sidebar
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    
+
     // Fetch logged-in facility details
     const { data: user, isLoading } = useGetMeQuery();
 
@@ -39,6 +40,7 @@ export default function ClientLayout() {
         { name: "Verification", path: "/client/onboarding", icon: <FiShield className="text-lg" /> },
         { name: "Job Listings", path: "/client/jobs", icon: <FiList className="text-lg" /> },
         { name: "Manage Applicants", path: "/client/applicants", icon: <FiUsers className="text-lg" /> },
+        { name: "Referrals", path: "/client/referrals", icon: <FiGift className="text-lg" /> },
         { name: "Institute Profile", path: "/client/profile", icon: <FiUser className="text-lg" /> },
         { name: "Settings", path: "/client/settings", icon: <FiSettings className="text-lg" /> },
     ];
@@ -61,16 +63,15 @@ export default function ClientLayout() {
         <div className="flex h-screen bg-[#f8fafc] overflow-hidden font-sans">
             {/* Backdrop for Mobile Sidebar */}
             {isSidebarOpen && (
-                <div 
+                <div
                     className="fixed inset-0 z-30 bg-indigo-950/40 backdrop-blur-xs lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1e1b4b] text-white flex flex-col h-full border-r border-[#2e2a72]/40 transition-transform duration-300 transform lg:translate-x-0 lg:static lg:h-full lg:flex ${
-                isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            }`}>
+            <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1e1b4b] text-white flex flex-col h-full border-r border-[#2e2a72]/40 transition-transform duration-300 transform lg:translate-x-0 lg:static lg:h-full lg:flex ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+                }`}>
                 {/* Header/Logo */}
                 <div className="h-20 flex items-center justify-between px-6 border-b border-[#2e2a72]/65 flex-shrink-0">
                     <div className="flex items-center">
@@ -100,8 +101,8 @@ export default function ClientLayout() {
                                 to={link.path}
                                 onClick={() => setIsSidebarOpen(false)}
                                 className={`flex items-center gap-3.5 px-4 py-3 rounded-lg text-[14px] font-medium transition-all duration-200 group
-                                    ${isActive 
-                                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10" 
+                                    ${isActive
+                                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
                                         : "text-slate-400 hover:bg-[#2e2a72]/50 hover:text-slate-100"
                                     }
                                 `}
@@ -118,11 +119,11 @@ export default function ClientLayout() {
                 {/* Footer Section: Facility Profile Brief & Logout */}
                 <div className="p-4 border-t border-[#2e2a72]/65 bg-[#12102f] flex-shrink-0">
                     <div className="flex items-center gap-3 mb-4 px-2">
-                        <Avatar 
-                            name={user?.facility_name} 
-                            avatarUrl={user?.avatar_url} 
-                            size="sm" 
-                            role="institute" 
+                        <Avatar
+                            name={user?.facility_name}
+                            avatarUrl={user?.avatar_url}
+                            size="sm"
+                            role="institute"
                         />
                         <div className="overflow-hidden">
                             <p className="text-sm font-semibold text-slate-200 truncate">
@@ -167,15 +168,15 @@ export default function ClientLayout() {
                                 Balance
                             </span>
                             <span className="text-xs sm:text-sm font-extrabold text-indigo-600">
-                                ₦{(user?.credit_balance ?? 0) * 100}
+                                {user?.credit_balance ?? 0} Credits
                             </span>
                         </div>
                         <Link to="/client/profile" className="hover:opacity-85 transition-opacity">
-                            <Avatar 
-                                name={user?.facility_name} 
-                                avatarUrl={user?.avatar_url} 
-                                size="sm" 
-                                role="institute" 
+                            <Avatar
+                                name={user?.facility_name}
+                                avatarUrl={user?.avatar_url}
+                                size="sm"
+                                role="institute"
                             />
                         </Link>
                     </div>

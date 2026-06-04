@@ -379,7 +379,7 @@ export default function AdminJobsPage() {
 
                                             <td className="px-6 py-4.5 whitespace-nowrap">
                                                 <p className="font-extrabold text-slate-800">
-                                                    {job.currency_symbol || '₦'}{job.rate_amount_min.toLocaleString()} - {job.rate_amount_max.toLocaleString()}
+                                                    {job.currency_symbol || '$'}{job.rate_amount_min.toLocaleString()} - {job.rate_amount_max.toLocaleString()}
                                                 </p>
                                                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
                                                     Per {job.rate_type.toLowerCase()}
@@ -713,7 +713,7 @@ export default function AdminJobsPage() {
                                     <div>
                                         <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Compensation Rate</span>
                                         <p className="font-extrabold text-slate-850 pt-0.5">
-                                            {selectedJob.currency_symbol || '₦'}{selectedJob.rate_amount_min.toLocaleString()} - {selectedJob.rate_amount_max.toLocaleString()} per {selectedJob.rate_type.toLowerCase()}
+                                            {selectedJob.currency_symbol || '$'}{selectedJob.rate_amount_min.toLocaleString()} - {selectedJob.rate_amount_max.toLocaleString()} per {selectedJob.rate_type.toLowerCase()}
                                         </p>
                                     </div>
                                     <div>
