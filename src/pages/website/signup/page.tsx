@@ -26,7 +26,7 @@ const SignupPage = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <div className="min-h-screen flex flex-col bg-[#f8fafc] font-sans relative overflow-hidden">
+        <div className="min-h-screen flex flex-col bg-white sm:bg-[#f8fafc] font-sans relative overflow-hidden">
 
             {/* Decorative Background Blob (Bottom Right) */}
             <div className="absolute -bottom-[20%] -right-[10%] w-[800px] h-[800px] rounded-full bg-blue-100/40 blur-[120px] pointer-events-none"></div>

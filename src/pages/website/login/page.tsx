@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
-import { FcGoogle } from "react-icons/fc";
 import { HiOutlineBadgeCheck } from "react-icons/hi";
 import { EmailInput, PasswordInput } from "../../../components/app";
 import heroimage from "../../../assets/heroimage.png";
@@ -108,11 +107,11 @@ export default function LoginPage() {
                 </div>
 
                 {/* RIGHT SIDE */}
-                <div className="flex w-full lg:w-1/2 items-center justify-center px-6 py-8 bg-[#f8fafc] overflow-y-auto">
-                    <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-sm">
+                <div className="flex w-full lg:w-1/2 items-center justify-center p-0 sm:p-8 bg-white sm:bg-[#f8fafc] overflow-y-auto">
+                    <div className="w-full min-h-full sm:min-h-0 sm:max-w-md bg-white pt-16 pb-6 px-6 sm:p-8 rounded-none sm:rounded-xl shadow-none sm:shadow-sm flex flex-col justify-center relative">
 
                         {/* Back to site — top left */}
-                        <div className="mb-6">
+                        <div className="absolute top-6 left-6 sm:static sm:mb-6">
                             <Link
                                 to={WEBSITE_ROUTES.HOME}
                                 className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
@@ -142,19 +141,11 @@ export default function LoginPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                             />
 
-                            {/* PASSWORD with forgot link */}
+                            {/* PASSWORD */}
                             <div className="flex flex-col gap-1.5">
-                                <div className="flex justify-between items-center">
-                                    <label htmlFor="login-password" className="text-[12px] font-bold text-[#0a192f]">
-                                        PASSWORD
-                                    </label>
-                                    <Link
-                                        to={WEBSITE_ROUTES.LOGIN}
-                                        className="text-[11px] text-blue-600 hover:underline"
-                                    >
-                                        Forgot Password?
-                                    </Link>
-                                </div>
+                                <label htmlFor="login-password" className="text-[12px] font-bold text-[#0a192f]">
+                                    PASSWORD
+                                </label>
                                 <PasswordInput
                                     id="login-password"
                                     label=""
@@ -164,10 +155,18 @@ export default function LoginPage() {
                                 />
                             </div>
 
-                            {/* REMEMBER */}
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <input type="checkbox" id="remember-device" className="accent-blue-600" />
-                                <label htmlFor="remember-device">Remember this device</label>
+                            {/* REMEMBER & FORGOT PASSWORD */}
+                            <div className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2 text-gray-500">
+                                    <input type="checkbox" id="remember-device" className="accent-blue-600" />
+                                    <label htmlFor="remember-device">Remember this device</label>
+                                </div>
+                                <Link
+                                    to={WEBSITE_ROUTES.LOGIN}
+                                    className="text-sm text-blue-600 hover:underline font-medium"
+                                >
+                                    Forgot Password?
+                                </Link>
                             </div>
 
                             <button
@@ -188,20 +187,6 @@ export default function LoginPage() {
                                 )}
                             </button>
                         </form>
-
-                        {/* DIVIDER */}
-                        <div className="text-center text-[11px] text-gray-400 my-6">
-                            OR CONTINUE WITH
-                        </div>
-
-                        {/* SOCIAL — Google only */}
-                        <button
-                            type="button"
-                            className="w-full flex items-center justify-center gap-2 border border-gray-200 py-2.5 rounded-md text-sm hover:bg-gray-50 transition-colors"
-                        >
-                            <FcGoogle className="text-xl" />
-                            Continue with Google
-                        </button>
 
                         {/* SIGNUP */}
                         <p className="text-sm text-gray-500 text-center mt-6">

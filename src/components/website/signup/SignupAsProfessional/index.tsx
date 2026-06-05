@@ -71,7 +71,7 @@ const SignupAsProfessional = () => {
     };
 
     return (
-        <div className="flex-grow flex items-center justify-center px-4 sm:px-6 py-10 sm:py-16 relative z-10 w-full max-w-[1200px] mx-auto">
+        <div className="flex-grow flex items-center justify-center p-0 sm:px-6 sm:py-16 relative z-10 w-full max-w-[1200px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center w-full">
 
                 {/* Left Side */}
@@ -126,7 +126,7 @@ const SignupAsProfessional = () => {
                 </div>
 
                 {/* Right Side: Form */}
-                <div className="bg-white rounded-[2rem] p-6 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 w-full max-w-md mx-auto lg:mx-0">
+                <div className="bg-white rounded-none sm:rounded-[2rem] p-6 sm:p-8 lg:p-10 shadow-none sm:shadow-[0_8px_30px_rgb(0,0,0,0.08)] border-0 sm:border border-gray-100 w-full max-w-full sm:max-w-md mx-auto lg:mx-0">
 
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#e0f4f9] text-[#00838f] text-[10px] font-bold tracking-widest uppercase mb-6">
                         <MdWorkOutline className="w-3.5 h-3.5" /> Healthcare Professional
