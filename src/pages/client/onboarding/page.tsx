@@ -6,6 +6,7 @@ import {
 } from '../../../redux/apis/onboardingApi';
 import type { IInstituteOnboardingSubmit } from '../../../redux/apis/onboardingApi/interface';
 import { useUploadMediaMutation } from '../../../redux/apis/mediaApi';
+import { SearchableSelect } from '../../../components/app';
 import {
     FiShield,
     FiCheckCircle,
@@ -21,6 +22,17 @@ import {
     FiHome
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+
+const FACILITY_TYPE_OPTIONS = [
+    { label: 'Acute Care Hospital', value: 'Acute Care Hospital', group: 'Facility Type' },
+    { label: 'Outpatient Clinic', value: 'Outpatient Clinic', group: 'Facility Type' },
+    { label: 'Rehabilitation Facility', value: 'Rehabilitation Facility', group: 'Facility Type' },
+    { label: 'Long-Term Care Facility', value: 'Long-Term Care Facility', group: 'Facility Type' },
+    { label: 'Skilled Nursing Facility', value: 'Skilled Nursing Facility', group: 'Facility Type' },
+    { label: 'Urgent Care Center', value: 'Urgent Care Center', group: 'Facility Type' },
+    { label: 'Community Health Center', value: 'Community Health Center', group: 'Facility Type' },
+    { label: 'Telehealth Portal', value: 'Telehealth', group: 'Facility Type' },
+];
 
 export default function InstituteOnboardingPage() {
     const navigate = useNavigate();
@@ -548,23 +560,17 @@ export default function InstituteOnboardingPage() {
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-450 uppercase block">Healthcare Facility Type <span className="text-red-500">*</span></label>
-                                        <select
+                                        <SearchableSelect
+                                            label="Healthcare Facility Type"
+                                            placeholder="Search or select facility type..."
+                                            options={FACILITY_TYPE_OPTIONS}
                                             value={facilityType}
-                                            onChange={(e) => setFacilityType(e.target.value)}
-                                            className="w-full bg-slate-50/70 border border-slate-200 rounded-xl p-3 text-sm focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-800 outline-none cursor-pointer"
-                                            required
-                                        >
-                                            <option value="" disabled>Select facility type...</option>
-                                            <option value="Acute Care Hospital">Acute Care Hospital</option>
-                                            <option value="Outpatient Clinic">Outpatient Clinic</option>
-                                            <option value="Rehabilitation Facility">Rehabilitation Facility</option>
-                                            <option value="Long-Term Care Facility">Long-Term Care Facility</option>
-                                            <option value="Skilled Nursing Facility">Skilled Nursing Facility</option>
-                                            <option value="Urgent Care Center">Urgent Care Center</option>
-                                            <option value="Community Health Center">Community Health Center</option>
-                                            <option value="Telehealth">Telehealth Portal</option>
-                                        </select>
+                                            onChange={setFacilityType}
+                                            required={true}
+                                            focusColor="#4f46e5"
+                                            icon={<FiBriefcase className="text-lg text-slate-400" />}
+                                            id="facility-type-select"
+                                        />
                                     </div>
                                 </div>
                             </div>
