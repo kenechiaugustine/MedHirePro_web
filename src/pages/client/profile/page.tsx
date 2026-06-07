@@ -18,35 +18,46 @@ export default function ClientProfilePage() {
     // API queries & mutations
     const { data: user, isLoading: isUserLoading, refetch } = useGetMeQuery();
     const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
-    const [uploadMedia, { isLoading: isUploading }] = useUploadMediaMutation();
+    const [uploadMedia] = useUploadMediaMutation();
 
     // Local form states
     const [facilityName, setFacilityName] = useState('');
     const [fullName, setFullName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (user) {
             setFacilityName(user.facility_name || '');
             setFullName(user.full_name || '');
             setAvatarUrl(user.avatar_url || '');
+            setAvatarPreview(user.avatar_url || '');
         }
     }, [user]);
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        if (!avatarFile) return;
+        const objectUrl = URL.createObjectURL(avatarFile);
+        setAvatarPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [avatarFile]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const res = await uploadMedia(formData).unwrap();
-            setAvatarUrl(res.media.url);
-            toast.success("Facility logo uploaded successfully!");
-        } catch (err: any) {
-            toast.error(err?.data?.detail || "Logo upload failed.");
+        // Size check: limit to 5MB
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Logo size cannot exceed 5MB.");
+            return;
         }
+
+        setAvatarFile(file);
+        toast.success(`Selected facility logo: ${file.name}`);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -57,16 +68,31 @@ export default function ClientProfilePage() {
         }
 
         try {
+            let finalAvatarUrl = avatarUrl;
+            if (avatarFile) {
+                setIsUploading(true);
+                toast.loading('Uploading facility logo...', { id: 'profile-upload' });
+                const formData = new FormData();
+                formData.append('file', avatarFile);
+                const res = await uploadMedia(formData).unwrap();
+                finalAvatarUrl = res.media.url;
+                setAvatarUrl(finalAvatarUrl);
+                setAvatarFile(null); // Clear selected file after successful upload
+            }
+
+            toast.loading('Saving profile changes...', { id: 'profile-upload' });
             await updateProfile({
                 facility_name: facilityName.trim(),
                 full_name: fullName.trim() || null,
-                avatar_url: avatarUrl || null
+                avatar_url: finalAvatarUrl || null
             }).unwrap();
 
-            toast.success("Institute profile updated successfully!");
+            toast.success("Institute profile updated successfully!", { id: 'profile-upload' });
             refetch();
         } catch (err: any) {
-            toast.error(err?.data?.detail || "Failed to update profile settings.");
+            toast.error(err?.data?.detail || "Failed to update profile settings.", { id: 'profile-upload' });
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -159,7 +185,7 @@ export default function ClientProfilePage() {
                             <div className="relative group">
                                 <Avatar 
                                     name={user?.facility_name || user?.full_name || 'Institute'} 
-                                    avatarUrl={avatarUrl} 
+                                    avatarUrl={avatarPreview} 
                                     size="lg" 
                                     role="institute" 
                                 />

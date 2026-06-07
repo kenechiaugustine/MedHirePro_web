@@ -50,10 +50,55 @@ export default function InstituteOnboardingPage() {
     const [proofAddressUrl, setProofAddressUrl] = useState('');
     const [repIdUrl, setRepIdUrl] = useState('');
 
-    // Uploading states per file type
-    const [uploadingLicense, setUploadingLicense] = useState(false);
-    const [uploadingProofAddress, setUploadingProofAddress] = useState(false);
-    const [uploadingRepId, setUploadingRepId] = useState(false);
+    // Selected local files
+    const [licenseFile, setLicenseFile] = useState<File | null>(null);
+    const [proofAddressFile, setProofAddressFile] = useState<File | null>(null);
+    const [repIdFile, setRepIdFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+
+    // Local previews
+    const [licensePreview, setLicensePreview] = useState('');
+    const [proofAddressPreview, setProofAddressPreview] = useState('');
+    const [repIdPreview, setRepIdPreview] = useState('');
+
+    useEffect(() => {
+        setLicensePreview(licenseUrl);
+    }, [licenseUrl]);
+
+    useEffect(() => {
+        setProofAddressPreview(proofAddressUrl);
+    }, [proofAddressUrl]);
+
+    useEffect(() => {
+        setRepIdPreview(repIdUrl);
+    }, [repIdUrl]);
+
+    useEffect(() => {
+        if (!licenseFile) return;
+        const objectUrl = URL.createObjectURL(licenseFile);
+        setLicensePreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [licenseFile]);
+
+    useEffect(() => {
+        if (!proofAddressFile) return;
+        const objectUrl = URL.createObjectURL(proofAddressFile);
+        setProofAddressPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [proofAddressFile]);
+
+    useEffect(() => {
+        if (!repIdFile) return;
+        const objectUrl = URL.createObjectURL(repIdFile);
+        setRepIdPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [repIdFile]);
 
     // Sync form values on rejected state for corrections
     useEffect(() => {
@@ -76,10 +121,9 @@ export default function InstituteOnboardingPage() {
         }
     }, [statusData, submissionDetails]);
 
-    const handleFileUpload = async (
+    const handleFileSelect = (
         e: React.ChangeEvent<HTMLInputElement>,
-        setURL: (url: string) => void,
-        setLoading: (loading: boolean) => void
+        setFile: (file: File | null) => void
     ) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -90,20 +134,15 @@ export default function InstituteOnboardingPage() {
             return;
         }
 
-        setLoading(true);
+        setFile(file);
+        toast.success(`Selected file: ${file.name}`);
+    };
+
+    const uploadSingleFile = async (file: File): Promise<string> => {
         const formData = new FormData();
         formData.append('file', file);
-
-        try {
-            const res = await uploadMedia(formData).unwrap();
-            setURL(res.media.url);
-            toast.success(`${file.name} uploaded successfully!`);
-        } catch (err: any) {
-            console.error(err);
-            toast.error(err?.data?.detail || 'Failed to upload document.');
-        } finally {
-            setLoading(false);
-        }
+        const res = await uploadMedia(formData).unwrap();
+        return res.media.url;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -121,26 +160,50 @@ export default function InstituteOnboardingPage() {
             toast.error('Please complete your facility address details.');
             return;
         }
-        if (!licenseUrl) {
+
+        const currentLicense = licenseFile || licenseUrl;
+        if (!currentLicense) {
             toast.error('Business License document is required.');
             return;
         }
-        if (!proofAddressUrl) {
+        const currentProofAddress = proofAddressFile || proofAddressUrl;
+        if (!currentProofAddress) {
             toast.error('Proof of Address document is required.');
             return;
         }
-        if (!repIdUrl) {
+        const currentRepId = repIdFile || repIdUrl;
+        if (!currentRepId) {
             toast.error('Representative Identity Document is required.');
             return;
         }
 
+        let finalLicenseUrl = licenseUrl;
+        let finalProofAddressUrl = proofAddressUrl;
+        let finalRepIdUrl = repIdUrl;
+
         try {
+            setIsUploading(true);
+            if (licenseFile) {
+                toast.loading('Uploading License document...', { id: 'onboarding-upload' });
+                finalLicenseUrl = await uploadSingleFile(licenseFile);
+            }
+            if (proofAddressFile) {
+                toast.loading('Uploading Address Proof document...', { id: 'onboarding-upload' });
+                finalProofAddressUrl = await uploadSingleFile(proofAddressFile);
+            }
+            if (repIdFile) {
+                toast.loading('Uploading Representative ID...', { id: 'onboarding-upload' });
+                finalRepIdUrl = await uploadSingleFile(repIdFile);
+            }
+
+            toast.loading('Submitting verification credentials...', { id: 'onboarding-upload' });
+
             const payload = {
                 business_registration_number: businessRegistrationNumber,
                 facility_type: facilityType,
-                business_license_url: licenseUrl,
-                proof_of_address_url: proofAddressUrl,
-                representative_id_url: repIdUrl,
+                business_license_url: finalLicenseUrl,
+                proof_of_address_url: finalProofAddressUrl,
+                representative_id_url: finalRepIdUrl,
                 facility_address: {
                     street,
                     city,
@@ -151,13 +214,23 @@ export default function InstituteOnboardingPage() {
             };
 
             await submitOnboarding(payload).unwrap();
-            toast.success('Corporate verification successfully uploaded for review!');
+
+            // Clear selected local files
+            setLicenseFile(null);
+            setProofAddressFile(null);
+            setRepIdFile(null);
+
+            toast.success('Corporate verification successfully uploaded for review!', { id: 'onboarding-upload' });
             refetchStatus();
         } catch (err: any) {
             console.error(err);
-            toast.error(err?.data?.detail || 'Failed to submit corporate credentials.');
+            toast.error(err?.data?.detail || 'Failed to submit corporate credentials.', { id: 'onboarding-upload' });
+        } finally {
+            setIsUploading(false);
         }
     };
+
+    // (Local previews are managed via useEffect state hooks)
 
     // Calculate completion metrics
     const getCompletionPercentage = () => {
@@ -571,19 +644,19 @@ export default function InstituteOnboardingPage() {
                                         <label className="text-xs font-bold text-slate-455 block">Business Licensure or Medical Practice Permit Document <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${licenseUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                <FiUploadCloud className={`w-8 h-8 ${licenseFile || licenseUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                 <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {uploadingLicense ? 'Uploading permit...' : licenseUrl ? 'License document loaded!' : 'Select Corporate License'}
+                                                    {licenseFile ? `Selected: ${licenseFile.name}` : licenseUrl ? 'License document loaded!' : 'Select Corporate License'}
                                                 </span>
                                                 <input
                                                     type="file"
                                                     accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileUpload(e, setLicenseUrl, setUploadingLicense)}
+                                                    onChange={(e) => handleFileSelect(e, setLicenseFile)}
                                                     className="hidden"
                                                 />
                                             </label>
-                                            {licenseUrl && (
-                                                <a href={licenseUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                            {licensePreview && (
+                                                <a href={licensePreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                     <FiExternalLink className="w-5 h-5 text-indigo-600" />
                                                 </a>
                                             )}
@@ -595,19 +668,19 @@ export default function InstituteOnboardingPage() {
                                         <label className="text-xs font-bold text-slate-455 block">Official Proof of Corporate Address (Utility Bill, Tenancy Agreement) <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${proofAddressUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                <FiUploadCloud className={`w-8 h-8 ${proofAddressFile || proofAddressUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                 <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {uploadingProofAddress ? 'Uploading address proof...' : proofAddressUrl ? 'Address proof loaded!' : 'Select Proof of Address'}
+                                                    {proofAddressFile ? `Selected: ${proofAddressFile.name}` : proofAddressUrl ? 'Address proof loaded!' : 'Select Proof of Address'}
                                                 </span>
                                                 <input
                                                     type="file"
                                                     accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileUpload(e, setProofAddressUrl, setUploadingProofAddress)}
+                                                    onChange={(e) => handleFileSelect(e, setProofAddressFile)}
                                                     className="hidden"
                                                 />
                                             </label>
-                                            {proofAddressUrl && (
-                                                <a href={proofAddressUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                            {proofAddressPreview && (
+                                                <a href={proofAddressPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                     <FiExternalLink className="w-5 h-5 text-indigo-600" />
                                                 </a>
                                             )}
@@ -619,19 +692,19 @@ export default function InstituteOnboardingPage() {
                                         <label className="text-xs font-bold text-slate-455 block">Representative Legal ID (Passport, National ID or Recruiter License Card) <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${repIdUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                <FiUploadCloud className={`w-8 h-8 ${repIdFile || repIdUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                 <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {uploadingRepId ? 'Uploading ID...' : repIdUrl ? 'ID document loaded!' : 'Select Representative ID'}
+                                                    {repIdFile ? `Selected: ${repIdFile.name}` : repIdUrl ? 'ID document loaded!' : 'Select Representative ID'}
                                                 </span>
                                                 <input
                                                     type="file"
                                                     accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileUpload(e, setRepIdUrl, setUploadingRepId)}
+                                                    onChange={(e) => handleFileSelect(e, setRepIdFile)}
                                                     className="hidden"
                                                 />
                                             </label>
-                                            {repIdUrl && (
-                                                <a href={repIdUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                            {repIdPreview && (
+                                                <a href={repIdPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                     <FiExternalLink className="w-5 h-5 text-indigo-600" />
                                                 </a>
                                             )}
@@ -651,10 +724,10 @@ export default function InstituteOnboardingPage() {
 
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting || uploadingLicense || uploadingProofAddress || uploadingRepId}
+                                    disabled={isSubmitting || isUploading}
                                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-indigo-700 to-indigo-600 hover:from-indigo-800 hover:to-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:pointer-events-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
                                 >
-                                    {isSubmitting ? (
+                                    {isSubmitting || isUploading ? (
                                         <>
                                             <FiLoader className="animate-spin w-4 h-4" /> Submitting Dossier...
                                         </>

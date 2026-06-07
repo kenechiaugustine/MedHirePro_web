@@ -19,35 +19,46 @@ export default function UserProfilePage() {
     // API queries & mutations
     const { data: user, isLoading: isUserLoading, refetch } = useGetMeQuery();
     const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
-    const [uploadMedia, { isLoading: isUploading }] = useUploadMediaMutation();
+    const [uploadMedia] = useUploadMediaMutation();
 
     // Local form states
     const [fullName, setFullName] = useState('');
     const [specialty, setSpecialty] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (user) {
             setFullName(user.full_name || '');
             setSpecialty(user.specialty || '');
             setAvatarUrl(user.avatar_url || '');
+            setAvatarPreview(user.avatar_url || '');
         }
     }, [user]);
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        if (!avatarFile) return;
+        const objectUrl = URL.createObjectURL(avatarFile);
+        setAvatarPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [avatarFile]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const res = await uploadMedia(formData).unwrap();
-            setAvatarUrl(res.media.url);
-            toast.success("Profile picture uploaded successfully!");
-        } catch (err: any) {
-            toast.error(err?.data?.detail || "Image upload failed.");
+        // Size check: limit to 5MB
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image size cannot exceed 5MB.");
+            return;
         }
+
+        setAvatarFile(file);
+        toast.success(`Selected profile image: ${file.name}`);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -62,16 +73,31 @@ export default function UserProfilePage() {
         }
 
         try {
+            let finalAvatarUrl = avatarUrl;
+            if (avatarFile) {
+                setIsUploading(true);
+                toast.loading('Uploading profile picture...', { id: 'profile-upload' });
+                const formData = new FormData();
+                formData.append('file', avatarFile);
+                const res = await uploadMedia(formData).unwrap();
+                finalAvatarUrl = res.media.url;
+                setAvatarUrl(finalAvatarUrl);
+                setAvatarFile(null); // Clear selected file after successful upload
+            }
+
+            toast.loading('Saving profile changes...', { id: 'profile-upload' });
             await updateProfile({
                 full_name: fullName.trim(),
                 specialty: specialty,
-                avatar_url: avatarUrl || null
+                avatar_url: finalAvatarUrl || null
             }).unwrap();
 
-            toast.success("Professional profile updated successfully!");
+            toast.success("Professional profile updated successfully!", { id: 'profile-upload' });
             refetch();
         } catch (err: any) {
-            toast.error(err?.data?.detail || "Failed to update profile settings.");
+            toast.error(err?.data?.detail || "Failed to update profile settings.", { id: 'profile-upload' });
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -163,7 +189,7 @@ export default function UserProfilePage() {
                             <div className="relative group">
                                 <Avatar
                                     name={user?.full_name || 'Professional'}
-                                    avatarUrl={avatarUrl}
+                                    avatarUrl={avatarPreview}
                                     size="lg"
                                     role="professional"
                                 />

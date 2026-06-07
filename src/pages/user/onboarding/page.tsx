@@ -53,11 +53,70 @@ export default function ProfessionalOnboardingPage() {
     const [licenceUrl, setLicenceUrl] = useState('');
     const [schoolLetterUrl, setSchoolLetterUrl] = useState('');
 
-    // Uploading states per file type
-    const [uploadingDegree, setUploadingDegree] = useState(false);
-    const [uploadingId, setUploadingId] = useState(false);
-    const [uploadingLicence, setUploadingLicence] = useState(false);
-    const [uploadingSchoolLetter, setUploadingSchoolLetter] = useState(false);
+    // Selected local files
+    const [degreeFile, setDegreeFile] = useState<File | null>(null);
+    const [idFile, setIdFile] = useState<File | null>(null);
+    const [licenceFile, setLicenceFile] = useState<File | null>(null);
+    const [schoolLetterFile, setSchoolLetterFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+
+    // Local previews
+    const [degreePreview, setDegreePreview] = useState('');
+    const [idPreview, setIdPreview] = useState('');
+    const [licencePreview, setLicencePreview] = useState('');
+    const [schoolLetterPreview, setSchoolLetterPreview] = useState('');
+
+    useEffect(() => {
+        setDegreePreview(degreeUrl);
+    }, [degreeUrl]);
+
+    useEffect(() => {
+        setIdPreview(idUrl);
+    }, [idUrl]);
+
+    useEffect(() => {
+        setLicencePreview(licenceUrl);
+    }, [licenceUrl]);
+
+    useEffect(() => {
+        setSchoolLetterPreview(schoolLetterUrl);
+    }, [schoolLetterUrl]);
+
+    useEffect(() => {
+        if (!degreeFile) return;
+        const objectUrl = URL.createObjectURL(degreeFile);
+        setDegreePreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [degreeFile]);
+
+    useEffect(() => {
+        if (!idFile) return;
+        const objectUrl = URL.createObjectURL(idFile);
+        setIdPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [idFile]);
+
+    useEffect(() => {
+        if (!licenceFile) return;
+        const objectUrl = URL.createObjectURL(licenceFile);
+        setLicencePreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [licenceFile]);
+
+    useEffect(() => {
+        if (!schoolLetterFile) return;
+        const objectUrl = URL.createObjectURL(schoolLetterFile);
+        setSchoolLetterPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [schoolLetterFile]);
 
     // Get clinical specialty options from medicalData
     const specialtyOptions = useMemo(() => {
@@ -106,10 +165,9 @@ export default function ProfessionalOnboardingPage() {
         }
     }, [statusData, submissionDetails, userData]);
 
-    const handleFileUpload = async (
+    const handleFileSelect = (
         e: React.ChangeEvent<HTMLInputElement>,
-        setURL: (url: string) => void,
-        setLoading: (loading: boolean) => void
+        setFile: (file: File | null) => void
     ) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -120,20 +178,15 @@ export default function ProfessionalOnboardingPage() {
             return;
         }
 
-        setLoading(true);
+        setFile(file);
+        toast.success(`Selected file: ${file.name}`);
+    };
+
+    const uploadSingleFile = async (file: File): Promise<string> => {
         const formData = new FormData();
         formData.append('file', file);
-
-        try {
-            const res = await uploadMedia(formData).unwrap();
-            setURL(res.media.url);
-            toast.success(`${file.name} uploaded successfully!`);
-        } catch (err: any) {
-            console.error(err);
-            toast.error(err?.data?.detail || 'Failed to upload document.');
-        } finally {
-            setLoading(false);
-        }
+        const res = await uploadMedia(formData).unwrap();
+        return res.media.url;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -143,22 +196,27 @@ export default function ProfessionalOnboardingPage() {
             toast.error('Please select your specialty.');
             return;
         }
-        if (!degreeUrl) {
+
+        const currentDegree = degreeFile || degreeUrl;
+        if (!currentDegree) {
             toast.error('Degree Certificate is required.');
             return;
         }
-        if (!idUrl) {
+
+        const currentId = idFile || idUrl;
+        if (!currentId) {
             toast.error('Identity Document is required.');
             return;
         }
 
         if (isIntern) {
-            if (!schoolLetterUrl) {
+            const currentSchoolLetter = schoolLetterFile || schoolLetterUrl;
+            if (!currentSchoolLetter) {
                 toast.error('Internship/School Placement letter is required.');
                 return;
             }
         } else {
-            if (!licenceNumber) {
+            if (!licenceNumber.trim()) {
                 toast.error('Professional Licence Number is required.');
                 return;
             }
@@ -166,34 +224,75 @@ export default function ProfessionalOnboardingPage() {
                 toast.error('Licence Expiry date is required.');
                 return;
             }
-            if (!licenceUrl) {
+            const currentLicence = licenceFile || licenceUrl;
+            if (!currentLicence) {
                 toast.error('Licence Document is required.');
                 return;
             }
         }
 
+        let finalDegreeUrl = degreeUrl;
+        let finalIdUrl = idUrl;
+        let finalSchoolLetterUrl = schoolLetterUrl;
+        let finalLicenceUrl = licenceUrl;
+
         try {
+            setIsUploading(true);
+
+            if (degreeFile) {
+                toast.loading('Uploading Degree Certificate...', { id: 'onboarding-upload' });
+                finalDegreeUrl = await uploadSingleFile(degreeFile);
+            }
+            if (idFile) {
+                toast.loading('Uploading Identity Document...', { id: 'onboarding-upload' });
+                finalIdUrl = await uploadSingleFile(idFile);
+            }
+            if (isIntern) {
+                if (schoolLetterFile) {
+                    toast.loading('Uploading Internship Letter...', { id: 'onboarding-upload' });
+                    finalSchoolLetterUrl = await uploadSingleFile(schoolLetterFile);
+                }
+            } else {
+                if (licenceFile) {
+                    toast.loading('Uploading Licence Certificate...', { id: 'onboarding-upload' });
+                    finalLicenceUrl = await uploadSingleFile(licenceFile);
+                }
+            }
+
+            toast.loading('Submitting verification credentials...', { id: 'onboarding-upload' });
+
             const payload = {
                 is_intern: isIntern,
                 specialty,
                 employment_status: employmentStatus,
                 current_workplace: currentWorkplace || null,
-                degree_document_url: degreeUrl,
-                id_document_url: idUrl,
+                degree_document_url: finalDegreeUrl,
+                id_document_url: finalIdUrl,
                 ...(isIntern 
-                    ? { school_or_placement_letter_url: schoolLetterUrl }
-                    : { licence_number: licenceNumber, licence_expiry: licenceExpiry, licence_document_url: licenceUrl }
+                    ? { school_or_placement_letter_url: finalSchoolLetterUrl }
+                    : { licence_number: licenceNumber, licence_expiry: licenceExpiry, licence_document_url: finalLicenceUrl }
                 )
             };
 
             await submitOnboarding(payload).unwrap();
-            toast.success('Onboarding submission successfully uploaded for review!');
+
+            // Clear selected local files
+            setDegreeFile(null);
+            setIdFile(null);
+            setSchoolLetterFile(null);
+            setLicenceFile(null);
+
+            toast.success('Onboarding submission successfully uploaded for review!', { id: 'onboarding-upload' });
             refetchStatus();
         } catch (err: any) {
             console.error(err);
-            toast.error(err?.data?.detail || 'Failed to submit onboarding details.');
+            toast.error(err?.data?.detail || 'Failed to submit onboarding details.', { id: 'onboarding-upload' });
+        } finally {
+            setIsUploading(false);
         }
     };
+
+    // (Local previews are managed via useEffect state hooks)
 
     // Calculate completion metrics
     const getCompletionPercentage = () => {
@@ -594,19 +693,19 @@ export default function ProfessionalOnboardingPage() {
                                             <label className="text-xs font-bold text-slate-450 uppercase block">School Placement / Intern Letter Document <span className="text-red-500">*</span></label>
                                             <div className="flex items-center gap-4">
                                                 <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                    <FiUploadCloud className={`w-8 h-8 ${schoolLetterUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                    <FiUploadCloud className={`w-8 h-8 ${schoolLetterFile || schoolLetterUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                     <span className="text-xs font-bold text-slate-700 text-center">
-                                                        {uploadingSchoolLetter ? 'Uploading attestation...' : schoolLetterUrl ? 'Attestation loaded!' : 'Select Placement Letter'}
+                                                        {schoolLetterFile ? `Selected: ${schoolLetterFile.name}` : schoolLetterUrl ? 'Attestation loaded!' : 'Select Placement Letter'}
                                                     </span>
                                                     <input
                                                         type="file"
                                                         accept="image/*,.pdf"
-                                                        onChange={(e) => handleFileUpload(e, setSchoolLetterUrl, setUploadingSchoolLetter)}
+                                                        onChange={(e) => handleFileSelect(e, setSchoolLetterFile)}
                                                         className="hidden"
                                                     />
                                                 </label>
-                                                {schoolLetterUrl && (
-                                                    <a href={schoolLetterUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                                {schoolLetterPreview && (
+                                                    <a href={schoolLetterPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                         <FiExternalLink className="w-5 h-5 text-blue-600" />
                                                     </a>
                                                 )}
@@ -643,19 +742,19 @@ export default function ProfessionalOnboardingPage() {
                                             <label className="text-xs font-bold text-slate-450 uppercase block">Active Licence Certificate Document <span className="text-red-500">*</span></label>
                                             <div className="flex items-center gap-4">
                                                 <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                    <FiUploadCloud className={`w-8 h-8 ${licenceUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                    <FiUploadCloud className={`w-8 h-8 ${licenceFile || licenceUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                     <span className="text-xs font-bold text-slate-700 text-center">
-                                                        {uploadingLicence ? 'Uploading licence...' : licenceUrl ? 'Licence document loaded!' : 'Select Licence Certificate'}
+                                                        {licenceFile ? `Selected: ${licenceFile.name}` : licenceUrl ? 'Licence document loaded!' : 'Select Licence Certificate'}
                                                     </span>
                                                     <input
                                                         type="file"
                                                         accept="image/*,.pdf"
-                                                        onChange={(e) => handleFileUpload(e, setLicenceUrl, setUploadingLicence)}
+                                                        onChange={(e) => handleFileSelect(e, setLicenceFile)}
                                                         className="hidden"
                                                     />
                                                 </label>
-                                                {licenceUrl && (
-                                                    <a href={licenceUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                                {licencePreview && (
+                                                    <a href={licencePreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                         <FiExternalLink className="w-5 h-5 text-blue-600" />
                                                     </a>
                                                 )}
@@ -680,19 +779,19 @@ export default function ProfessionalOnboardingPage() {
                                         <label className="text-xs font-bold text-slate-455 block">Degree / Transcripts Certificate <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${degreeUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                <FiUploadCloud className={`w-8 h-8 ${degreeFile || degreeUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                 <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {uploadingDegree ? 'Uploading certificate...' : degreeUrl ? 'Degree uploaded!' : 'Select Degree Certificate'}
+                                                    {degreeFile ? `Selected: ${degreeFile.name}` : degreeUrl ? 'Degree uploaded!' : 'Select Degree Certificate'}
                                                 </span>
                                                 <input
                                                     type="file"
                                                     accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileUpload(e, setDegreeUrl, setUploadingDegree)}
+                                                    onChange={(e) => handleFileSelect(e, setDegreeFile)}
                                                     className="hidden"
                                                 />
                                             </label>
-                                            {degreeUrl && (
-                                                <a href={degreeUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                            {degreePreview && (
+                                                <a href={degreePreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                     <FiExternalLink className="w-5 h-5 text-blue-600" />
                                                 </a>
                                             )}
@@ -704,19 +803,19 @@ export default function ProfessionalOnboardingPage() {
                                         <label className="text-xs font-bold text-slate-455 block">Government Issued Identification Document <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${idUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                <FiUploadCloud className={`w-8 h-8 ${idFile || idUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                 <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {uploadingId ? 'Uploading ID...' : idUrl ? 'ID card loaded!' : 'Select ID Card'}
+                                                    {idFile ? `Selected: ${idFile.name}` : idUrl ? 'ID card loaded!' : 'Select ID Card'}
                                                 </span>
                                                 <input
                                                     type="file"
                                                     accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileUpload(e, setIdUrl, setUploadingId)}
+                                                    onChange={(e) => handleFileSelect(e, setIdFile)}
                                                     className="hidden"
                                                 />
                                             </label>
-                                            {idUrl && (
-                                                <a href={idUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                            {idPreview && (
+                                                <a href={idPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                     <FiExternalLink className="w-5 h-5 text-blue-600" />
                                                 </a>
                                             )}
@@ -736,10 +835,10 @@ export default function ProfessionalOnboardingPage() {
 
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting || uploadingDegree || uploadingId || uploadingLicence || uploadingSchoolLetter}
+                                    disabled={isSubmitting || isUploading}
                                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
                                 >
-                                    {isSubmitting ? (
+                                    {isSubmitting || isUploading ? (
                                         <>
                                             <FiLoader className="animate-spin w-4 h-4" /> Registering Dossier...
                                         </>
