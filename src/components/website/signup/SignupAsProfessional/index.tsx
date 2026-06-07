@@ -173,6 +173,7 @@ const SignupAsProfessional = () => {
                             value={specialty}
                             onChange={setSpecialty}
                             focusColor="#0b5cd5"
+                            required={true}
                         />
 
                         <EmailInput

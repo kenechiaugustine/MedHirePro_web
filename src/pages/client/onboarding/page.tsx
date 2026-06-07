@@ -463,7 +463,7 @@ export default function InstituteOnboardingPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-450 uppercase block">Corporate Registration No. (EIN/CAC)</label>
+                                        <label className="text-xs font-bold text-slate-450 uppercase block">Corporate Registration No. (EIN/CAC) <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             value={businessRegistrationNumber}
@@ -475,7 +475,7 @@ export default function InstituteOnboardingPage() {
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-450 uppercase block">Healthcare Facility Type</label>
+                                        <label className="text-xs font-bold text-slate-450 uppercase block">Healthcare Facility Type <span className="text-red-500">*</span></label>
                                         <select
                                             value={facilityType}
                                             onChange={(e) => setFacilityType(e.target.value)}
@@ -507,7 +507,7 @@ export default function InstituteOnboardingPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="space-y-1.5 md:col-span-3">
-                                        <label className="text-xs font-bold text-slate-455 block">Street Address</label>
+                                        <label className="text-xs font-bold text-slate-455 block">Street Address <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             value={street}
@@ -519,7 +519,7 @@ export default function InstituteOnboardingPage() {
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-455 block">City</label>
+                                        <label className="text-xs font-bold text-slate-455 block">City <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             value={city}
@@ -531,7 +531,7 @@ export default function InstituteOnboardingPage() {
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-455 block">State / Province</label>
+                                        <label className="text-xs font-bold text-slate-455 block">State / Province <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             value={state}
@@ -543,7 +543,7 @@ export default function InstituteOnboardingPage() {
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-455 block">Zip / Postal Code</label>
+                                        <label className="text-xs font-bold text-slate-455 block">Zip / Postal Code <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             value={zip}
@@ -568,7 +568,7 @@ export default function InstituteOnboardingPage() {
                                 <div className="grid grid-cols-1 gap-6">
                                     {/* Business License */}
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-455 block">Business Licensure or Medical Practice Permit Document</label>
+                                        <label className="text-xs font-bold text-slate-455 block">Business Licensure or Medical Practice Permit Document <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
                                                 <FiUploadCloud className={`w-8 h-8 ${licenseUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
@@ -592,7 +592,7 @@ export default function InstituteOnboardingPage() {
 
                                     {/* Proof of Corporate Address */}
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-455 block">Official Proof of Corporate Address (Utility Bill, Tenancy Agreement)</label>
+                                        <label className="text-xs font-bold text-slate-455 block">Official Proof of Corporate Address (Utility Bill, Tenancy Agreement) <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
                                                 <FiUploadCloud className={`w-8 h-8 ${proofAddressUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
@@ -616,7 +616,7 @@ export default function InstituteOnboardingPage() {
 
                                     {/* Representative ID */}
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-455 block">Representative Legal ID (Passport, National ID or Recruiter License Card)</label>
+                                        <label className="text-xs font-bold text-slate-455 block">Representative Legal ID (Passport, National ID or Recruiter License Card) <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
                                                 <FiUploadCloud className={`w-8 h-8 ${repIdUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
