@@ -11,6 +11,7 @@ import { setCredentials } from "../../../redux/slices/authSlice";
 import { getRoleDashboard } from "../../../components/guards/ProtectedRoute";
 import type { UserRole } from "../../../redux/apis/userApi/interface";
 import toast from "react-hot-toast";
+import { getErrorMessage } from "../../../lib/utils";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -40,9 +41,7 @@ export default function LoginPage() {
             toast.success("Logged in successfully!");
             navigate(getRoleDashboard(result.user_role as UserRole), { replace: true });
         } catch (err: unknown) {
-            const error = err as { data?: { detail?: string }; status?: number };
-            const message = error?.data?.detail || "Login failed. Please check your credentials.";
-            toast.error(message);
+            toast.error(getErrorMessage(err, "Login failed. Please check your credentials."));
         }
     };
 
