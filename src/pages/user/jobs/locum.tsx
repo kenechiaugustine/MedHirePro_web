@@ -44,7 +44,7 @@ export default function ProfessionalLocumSearchPage() {
     const [originFilter, setOriginFilter] = useState<'ALL' | 'POSTED_BY_ME' | 'AVAILABLE'>('ALL');
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
     };
 
     // Merge listings and append ownership boolean flag

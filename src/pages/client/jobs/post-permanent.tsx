@@ -242,7 +242,7 @@ export default function PostPermanentJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Minimum Amount ($) <span className="text-red-500">*</span></label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Minimum Amount (₦) <span className="text-red-500">*</span></label>
                             <input
                                 type="number"
                                 required
@@ -254,7 +254,7 @@ export default function PostPermanentJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Maximum Amount ($) <span className="text-red-500">*</span></label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Maximum Amount (₦) <span className="text-red-500">*</span></label>
                             <input
                                 type="number"
                                 required
