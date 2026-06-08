@@ -18,6 +18,7 @@ import {
     ClinicalSetting, 
     RateType 
 } from '../../../redux/apis/jobsApi/interface';
+import { SearchableSelect } from '../../../components/app';
 
 export default function PostLocumJobPage() {
     const navigate = useNavigate();
@@ -43,6 +44,18 @@ export default function PostLocumJobPage() {
     const [malpracticeInsuranceProvided, setMalpracticeInsuranceProvided] = useState(false);
     const [travelHousingReimbursement, setTravelHousingReimbursement] = useState(false);
     const [onCallRequirements, setOnCallRequirements] = useState('');
+
+    const specialtyOptions = Object.values(ClinicalSpecialty).map(spec => ({
+        label: spec,
+        value: spec,
+        group: 'Clinical Specialties'
+    }));
+
+    const settingOptions = Object.values(ClinicalSetting).map(set => ({
+        label: set,
+        value: set,
+        group: 'Clinical Settings'
+    }));
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -136,7 +149,7 @@ export default function PostLocumJobPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1.5 md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Position Title</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Position Title <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 required
@@ -148,49 +161,33 @@ export default function PostLocumJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Clinical Specialty</label>
-                            <select
+                            <SearchableSelect
+                                label="Clinical Specialty"
+                                placeholder="Select clinical specialty..."
+                                options={specialtyOptions}
                                 value={clinicalSpecialty}
-                                onChange={(e) => setClinicalSpecialty(e.target.value as ClinicalSpecialty)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 font-semibold text-slate-700 cursor-pointer"
-                            >
-                                <option value={ClinicalSpecialty.GENERAL_PRACTICE}>General Practice</option>
-                                <option value={ClinicalSpecialty.INTERNAL_MEDICINE}>Internal Medicine</option>
-                                <option value={ClinicalSpecialty.PEDIATRICS}>Pediatrics</option>
-                                <option value={ClinicalSpecialty.OBSTETRICS_GYNECOLOGY}>Obstetrics & Gynecology</option>
-                                <option value={ClinicalSpecialty.SURGERY}>Surgery</option>
-                                <option value={ClinicalSpecialty.ANESTHESIOLOGY}>Anesthesiology</option>
-                                <option value={ClinicalSpecialty.CARDIOLOGY}>Cardiology</option>
-                                <option value={ClinicalSpecialty.EMERGENCY_MEDICINE}>Emergency Medicine</option>
-                                <option value={ClinicalSpecialty.FAMILY_PRACTICE}>Family Practice</option>
-                                <option value={ClinicalSpecialty.PSYCHIATRY}>Psychiatry</option>
-                                <option value={ClinicalSpecialty.PULMONOLOGY}>Pulmonology</option>
-                                <option value={ClinicalSpecialty.CRITICAL_CARE}>Critical Care</option>
-                                <option value={ClinicalSpecialty.NURSING}>Nursing</option>
-                                <option value={ClinicalSpecialty.PHARMACY}>Pharmacy</option>
-                            </select>
+                                onChange={(val) => setClinicalSpecialty(val as ClinicalSpecialty)}
+                                required={true}
+                                focusColor="#4f46e5"
+                                id="clinical-specialty"
+                            />
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Clinical Setting</label>
-                            <select
+                            <SearchableSelect
+                                label="Clinical Setting"
+                                placeholder="Select clinical setting..."
+                                options={settingOptions}
                                 value={clinicalSetting}
-                                onChange={(e) => setClinicalSetting(e.target.value as ClinicalSetting)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 font-semibold text-slate-700 cursor-pointer"
-                            >
-                                <option value={ClinicalSetting.ACUTE_CARE_HOSPITAL}>Acute Care Hospital</option>
-                                <option value={ClinicalSetting.OUTPATIENT_CLINIC}>Outpatient Clinic</option>
-                                <option value={ClinicalSetting.REHABILITATION_FACILITY}>Rehabilitation Facility</option>
-                                <option value={ClinicalSetting.LONG_TERM_CARE}>Long-Term Care Facility</option>
-                                <option value={ClinicalSetting.SKILLED_NURSING_FACILITY}>Skilled Nursing Facility</option>
-                                <option value={ClinicalSetting.URGENT_CARE_CENTER}>Urgent Care Center</option>
-                                <option value={ClinicalSetting.COMMUNITY_HEALTH_CENTER}>Community Health Center</option>
-                                <option value={ClinicalSetting.TELEHEALTH}>Telehealth</option>
-                            </select>
+                                onChange={(val) => setClinicalSetting(val as ClinicalSetting)}
+                                required={true}
+                                focusColor="#4f46e5"
+                                id="clinical-setting"
+                            />
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Department Unit</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Department Unit <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 required
@@ -202,7 +199,7 @@ export default function PostLocumJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Minimum Experience (Years)</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Minimum Experience (Years) <span className="text-red-500">*</span></label>
                             <input
                                 type="number"
                                 min={0}
@@ -223,7 +220,7 @@ export default function PostLocumJobPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Coverage Start Date</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Coverage Start Date <span className="text-red-500">*</span></label>
                             <input
                                 type="date"
                                 required
@@ -234,7 +231,7 @@ export default function PostLocumJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Coverage End Date</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Coverage End Date <span className="text-red-500">*</span></label>
                             <input
                                 type="date"
                                 required
@@ -245,7 +242,7 @@ export default function PostLocumJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Shift Hours Details</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Shift Hours Details <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 required
@@ -312,7 +309,7 @@ export default function PostLocumJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide font-extrabold text-slate-700">Minimum Rate ($)</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide font-extrabold text-slate-700">Minimum Rate ($) <span className="text-red-500">*</span></label>
                             <input
                                 type="number"
                                 required
@@ -324,7 +321,7 @@ export default function PostLocumJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide font-extrabold text-slate-700">Maximum Rate ($)</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide font-extrabold text-slate-700">Maximum Rate ($) <span className="text-red-500">*</span></label>
                             <input
                                 type="number"
                                 required
@@ -336,7 +333,7 @@ export default function PostLocumJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide"><FiMapPin className="inline mr-0.5" /> City</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide"><FiMapPin className="inline mr-0.5" /> City <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 required
@@ -348,7 +345,7 @@ export default function PostLocumJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">State</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">State <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 required
@@ -360,7 +357,7 @@ export default function PostLocumJobPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Country</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Country <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 required
@@ -380,7 +377,7 @@ export default function PostLocumJobPage() {
 
                     <div className="space-y-5">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Role Description</label>
+                            <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Role Description <span className="text-red-500">*</span></label>
                             <textarea
                                 required
                                 rows={5}
@@ -393,7 +390,7 @@ export default function PostLocumJobPage() {
 
                         <div className="space-y-1.5">
                             <div className="flex justify-between items-center">
-                                <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Required Credentials</label>
+                                <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Required Credentials <span className="text-red-500">*</span></label>
                                 <span className="text-[9px] text-slate-400 font-semibold italic">Separate with commas</span>
                             </div>
                             <input
