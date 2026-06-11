@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetJobListingsQuery } from '../../../redux/apis/jobsApi';
+import { 
+    useGetJobListingsQuery, 
+    useGetMyJobListingsQuery
+} from '../../../redux/apis/jobsApi';
 import { USER_ROUTES } from '../routes.enum';
 import { 
     FiSearch, 
@@ -10,35 +13,76 @@ import {
     FiLoader, 
     FiFileText, 
     FiCalendar, 
-    FiShield
+    FiShield,
+    FiPlus
 } from 'react-icons/fi';
 import { 
     ClinicalSpecialty, 
-    ClinicalSetting 
+    ClinicalSetting
 } from '../../../redux/apis/jobsApi/interface';
 
 export default function ProfessionalLocumSearchPage() {
     const navigate = useNavigate();
-    
+
     // Fetch only open locum shifts
-    const { data: jobs, isLoading, error } = useGetJobListingsQuery({
+    const { data: jobs, isLoading: isJobsLoading, error: jobsError } = useGetJobListingsQuery({
         job_type: 'LOCUM',
         status: 'OPEN'
     });
 
+    // Fetch current user's posted locum shifts
+    const { data: myJobs, isLoading: isMyJobsLoading } = useGetMyJobListingsQuery({
+        job_type: 'LOCUM'
+    });
+
+    const isLoading = isJobsLoading || isMyJobsLoading;
+    const error = jobsError;
+
     const [searchTerm, setSearchTerm] = useState('');
     const [specialtyFilter, setSpecialtyFilter] = useState<string>('ALL');
     const [settingFilter, setSettingFilter] = useState<string>('ALL');
+    const [originFilter, setOriginFilter] = useState<'ALL' | 'POSTED_BY_ME' | 'AVAILABLE'>('ALL');
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
     };
+
+    // Merge listings and append ownership boolean flag
+    const mergedJobs = useMemo(() => {
+        const map = new Map<string, any>();
+        
+        (jobs || []).forEach(job => {
+            map.set(job._id, { ...job, isOwner: false });
+        });
+        
+        (myJobs || []).forEach(job => {
+            map.set(job._id, { ...job, isOwner: true });
+        });
+        
+        return Array.from(map.values());
+    }, [jobs, myJobs]);
+
+    // Filter job results
+    const filteredJobs = (mergedJobs || []).filter(job => {
+        const matchesSearch = (job.position_title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (job.department_unit || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (job.city || '').toLowerCase().includes(searchTerm.toLowerCase());
+        
+        const matchesSpecialty = specialtyFilter === 'ALL' || job.clinical_specialty === specialtyFilter;
+        const matchesSetting = settingFilter === 'ALL' || job.clinical_setting === settingFilter;
+
+        const matchesOrigin = originFilter === 'ALL' || 
+            (originFilter === 'POSTED_BY_ME' && job.isOwner) ||
+            (originFilter === 'AVAILABLE' && !job.isOwner);
+
+        return matchesSearch && matchesSpecialty && matchesSetting && matchesOrigin;
+    });
 
     if (isLoading) {
         return (
             <div className="flex h-96 items-center justify-center">
                 <div className="flex flex-col items-center gap-2">
-                    <FiLoader className="animate-spin h-8 w-8 text-teal-600" />
+                    <FiLoader className="animate-spin h-8 w-8 text-teal-650" />
                     <p className="text-slate-500 font-medium text-xs">Scanning active shift rosters...</p>
                 </div>
             </div>
@@ -57,32 +101,60 @@ export default function ProfessionalLocumSearchPage() {
         );
     }
 
-    // Filter job results
-    const filteredJobs = (jobs || []).filter(job => {
-        const matchesSearch = (job.position_title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (job.department_unit || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (job.city || '').toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesSpecialty = specialtyFilter === 'ALL' || job.clinical_specialty === specialtyFilter;
-        const matchesSetting = settingFilter === 'ALL' || job.clinical_setting === settingFilter;
-
-        return matchesSearch && matchesSpecialty && matchesSetting;
-    });
-
     return (
         <div className="space-y-6 animate-fadeIn duration-200">
             
             {/* Header section with rich gradient */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-teal-900 via-slate-900 to-indigo-950 rounded-2xl p-6 md:p-8 text-white shadow-lg border border-teal-500/10">
+            <div className="relative overflow-hidden bg-gradient-to-r from-teal-900 via-slate-900 to-indigo-950 rounded-2xl p-6 md:p-8 text-white shadow-lg border border-teal-500/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="space-y-2 max-w-2xl">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-200 text-xs font-semibold backdrop-blur-md border border-teal-500/20">
                         <FiClock className="w-3.5 h-3.5" /> Locum Shifts
                     </div>
                     <h1 className="text-2xl md:text-3xl font-black tracking-tight">Locum Registry & Placements</h1>
                     <p className="text-teal-200 text-xs md:text-sm font-medium opacity-90 leading-relaxed">
-                        Fill immediate shifts, temporary clinical gaps, or explore short-term healthcare postings with high daily/hourly rates.
+                        Fill immediate shifts, temporary clinical gaps, or explore short-term postings with high daily/hourly rates.
                     </p>
                 </div>
+                <button
+                    onClick={() => navigate(USER_ROUTES.POST_LOCUM)}
+                    className="flex-shrink-0 px-5 py-3 bg-gradient-to-r from-teal-400 to-emerald-500 hover:from-teal-500 hover:to-emerald-600 text-slate-900 font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-teal-400/10 hover:shadow-teal-400/20 transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 self-start sm:self-center"
+                >
+                    <FiPlus className="w-4 h-4 font-black" /> Post Locum Shift
+                </button>
+            </div>
+
+            {/* Shift Origin Filter Tabs */}
+            <div className="flex border-b border-slate-100 gap-6 pt-2">
+                <button
+                    onClick={() => setOriginFilter('ALL')}
+                    className={`pb-3 text-xs font-bold transition-all border-b-2 cursor-pointer ${
+                        originFilter === 'ALL'
+                            ? 'border-teal-600 text-teal-650 font-black'
+                            : 'border-transparent text-slate-400 hover:text-slate-600'
+                    }`}
+                >
+                    All Shifts ({mergedJobs.length})
+                </button>
+                <button
+                    onClick={() => setOriginFilter('AVAILABLE')}
+                    className={`pb-3 text-xs font-bold transition-all border-b-2 cursor-pointer ${
+                        originFilter === 'AVAILABLE'
+                            ? 'border-teal-600 text-teal-650 font-black'
+                            : 'border-transparent text-slate-400 hover:text-slate-600'
+                    }`}
+                >
+                    Available Placements ({mergedJobs.filter(j => !j.isOwner).length})
+                </button>
+                <button
+                    onClick={() => setOriginFilter('POSTED_BY_ME')}
+                    className={`pb-3 text-xs font-bold transition-all border-b-2 cursor-pointer ${
+                        originFilter === 'POSTED_BY_ME'
+                            ? 'border-teal-600 text-teal-650 font-black'
+                            : 'border-transparent text-slate-400 hover:text-slate-600'
+                    }`}
+                >
+                    Posted by Me ({mergedJobs.filter(j => j.isOwner).length})
+                </button>
             </div>
 
             {/* Advanced search and filter controls */}
@@ -104,47 +176,31 @@ export default function ProfessionalLocumSearchPage() {
 
                     {/* Specialty Filter */}
                     <div className="relative flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-shrink-0"><FiFilter className="inline mr-1" />Specialty</span>
+                        <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider flex-shrink-0"><FiFilter className="inline mr-1" />Specialty</span>
                         <select
                             value={specialtyFilter}
                             onChange={(e) => setSpecialtyFilter(e.target.value)}
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-400 font-semibold text-slate-600 cursor-pointer"
                         >
                             <option value="ALL">All Specialties</option>
-                            <option value={ClinicalSpecialty.GENERAL_PRACTICE}>General Practice</option>
-                            <option value={ClinicalSpecialty.INTERNAL_MEDICINE}>Internal Medicine</option>
-                            <option value={ClinicalSpecialty.PEDIATRICS}>Pediatrics</option>
-                            <option value={ClinicalSpecialty.OBSTETRICS_GYNECOLOGY}>Obstetrics & Gynecology</option>
-                            <option value={ClinicalSpecialty.SURGERY}>Surgery</option>
-                            <option value={ClinicalSpecialty.ANESTHESIOLOGY}>Anesthesiology</option>
-                            <option value={ClinicalSpecialty.CARDIOLOGY}>Cardiology</option>
-                            <option value={ClinicalSpecialty.EMERGENCY_MEDICINE}>Emergency Medicine</option>
-                            <option value={ClinicalSpecialty.FAMILY_PRACTICE}>Family Practice</option>
-                            <option value={ClinicalSpecialty.PSYCHIATRY}>Psychiatry</option>
-                            <option value={ClinicalSpecialty.PULMONOLOGY}>Pulmonology</option>
-                            <option value={ClinicalSpecialty.CRITICAL_CARE}>Critical Care</option>
-                            <option value={ClinicalSpecialty.NURSING}>Nursing</option>
-                            <option value={ClinicalSpecialty.PHARMACY}>Pharmacy</option>
+                            {Object.values(ClinicalSpecialty).map(spec => (
+                                <option key={spec} value={spec}>{spec.replace(/_/g, ' ')}</option>
+                            ))}
                         </select>
                     </div>
 
                     {/* Setting Filter */}
                     <div className="relative flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-shrink-0">Setting</span>
+                        <span className="text-[10px] font-bold text-slate-455 uppercase tracking-wider flex-shrink-0">Setting</span>
                         <select
                             value={settingFilter}
                             onChange={(e) => setSettingFilter(e.target.value)}
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-400 font-semibold text-slate-600 cursor-pointer"
                         >
                             <option value="ALL">All Settings</option>
-                            <option value={ClinicalSetting.ACUTE_CARE_HOSPITAL}>Acute Care Hospital</option>
-                            <option value={ClinicalSetting.OUTPATIENT_CLINIC}>Outpatient Clinic</option>
-                            <option value={ClinicalSetting.REHABILITATION_FACILITY}>Rehabilitation Facility</option>
-                            <option value={ClinicalSetting.LONG_TERM_CARE}>Long-Term Care</option>
-                            <option value={ClinicalSetting.SKILLED_NURSING_FACILITY}>Skilled Nursing</option>
-                            <option value={ClinicalSetting.URGENT_CARE_CENTER}>Urgent Care</option>
-                            <option value={ClinicalSetting.COMMUNITY_HEALTH_CENTER}>Community Health</option>
-                            <option value={ClinicalSetting.TELEHEALTH}>Telehealth</option>
+                            {Object.values(ClinicalSetting).map(set => (
+                                <option key={set} value={set}>{set.replace(/_/g, ' ')}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -176,9 +232,16 @@ export default function ProfessionalLocumSearchPage() {
                                 <div className="space-y-3.5">
                                     {/* Specialty and Type Tag Header */}
                                     <div className="flex justify-between items-center flex-wrap gap-2">
-                                        <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-50 border border-teal-100 text-teal-700">
-                                            {(job.clinical_specialty || '').replace(/_/g, ' ')}
-                                        </span>
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                            <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-50 border border-teal-100 text-teal-700">
+                                                {(job.clinical_specialty || '').replace(/_/g, ' ')}
+                                            </span>
+                                            {job.isOwner && (
+                                                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700">
+                                                    Posted by you
+                                                </span>
+                                            )}
+                                        </div>
                                         <span className="text-[9px] font-bold text-slate-450 uppercase tracking-wide">
                                             Locum Shift
                                         </span>
@@ -195,7 +258,7 @@ export default function ProfessionalLocumSearchPage() {
                                     </div>
 
                                     {/* Timeframe Card */}
-                                    <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl space-y-1.5 text-[11px] font-semibold text-slate-600">
+                                    <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl space-y-1.5 text-[11px] font-semibold text-slate-655">
                                         <div className="flex justify-between items-center">
                                             <span className="text-slate-400 flex items-center gap-0.5"><FiCalendar /> Coverage:</span>
                                             <span className="font-extrabold text-slate-750">
@@ -234,12 +297,29 @@ export default function ProfessionalLocumSearchPage() {
                                         <FiMapPin className="text-[11px] text-slate-400" /> {job.city}, {job.state}
                                     </span>
 
-                                    <button
-                                        onClick={() => navigate(USER_ROUTES.JOB_DETAILS.replace(':id', job._id))}
-                                        className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-[10px] font-black cursor-pointer shadow-sm hover:shadow-md transition-all duration-150"
-                                    >
-                                        Apply for Shift
-                                    </button>
+                                    {job.isOwner ? (
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => navigate(USER_ROUTES.EDIT_LOCUM.replace(':jobId', job._id))}
+                                                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[10px] font-black cursor-pointer shadow-sm transition-all duration-150"
+                                            >
+                                                Edit Shift
+                                            </button>
+                                            <button
+                                                onClick={() => navigate(USER_ROUTES.JOB_APPLICANTS.replace(':jobId', job._id))}
+                                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black cursor-pointer shadow-sm hover:shadow-md transition-all duration-150 flex items-center gap-1"
+                                            >
+                                                Manage ({job.total_applicants || 0})
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => navigate(USER_ROUTES.JOB_DETAILS.replace(':id', job._id))}
+                                            className="px-4 py-2 bg-teal-655 bg-teal-700 text-white rounded-xl text-[10px] font-black cursor-pointer shadow-sm hover:shadow-md transition-all duration-150"
+                                        >
+                                            Apply for Shift
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
     useGetOnboardingStatusQuery, 
@@ -6,6 +6,9 @@ import {
 } from '../../../redux/apis/onboardingApi';
 import type { IProfessionalOnboardingSubmit } from '../../../redux/apis/onboardingApi/interface';
 import { useUploadMediaMutation } from '../../../redux/apis/mediaApi';
+import { useGetMeQuery } from '../../../redux/apis/userApi';
+import { medicalData } from '../../../data/medicalData';
+import { SearchableSelect } from '../../../components/app';
 import { 
     FiShield, 
     FiCheckCircle, 
@@ -26,8 +29,9 @@ import toast from 'react-hot-toast';
 export default function ProfessionalOnboardingPage() {
     const navigate = useNavigate();
     
-    // Fetch onboarding status
+    // Fetch onboarding status and user info
     const { data: statusData, isLoading: isStatusLoading, refetch: refetchStatus } = useGetOnboardingStatusQuery();
+    const { data: userData } = useGetMeQuery();
     const [submitOnboarding, { isLoading: isSubmitting }] = useSubmitOnboardingMutation();
     const [uploadMedia] = useUploadMediaMutation();
 
@@ -49,13 +53,100 @@ export default function ProfessionalOnboardingPage() {
     const [licenceUrl, setLicenceUrl] = useState('');
     const [schoolLetterUrl, setSchoolLetterUrl] = useState('');
 
-    // Uploading states per file type
-    const [uploadingDegree, setUploadingDegree] = useState(false);
-    const [uploadingId, setUploadingId] = useState(false);
-    const [uploadingLicence, setUploadingLicence] = useState(false);
-    const [uploadingSchoolLetter, setUploadingSchoolLetter] = useState(false);
+    // Selected local files
+    const [degreeFile, setDegreeFile] = useState<File | null>(null);
+    const [idFile, setIdFile] = useState<File | null>(null);
+    const [licenceFile, setLicenceFile] = useState<File | null>(null);
+    const [schoolLetterFile, setSchoolLetterFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
-    // Sync form values on rejected state for corrections
+    // Local previews
+    const [degreePreview, setDegreePreview] = useState('');
+    const [idPreview, setIdPreview] = useState('');
+    const [licencePreview, setLicencePreview] = useState('');
+    const [schoolLetterPreview, setSchoolLetterPreview] = useState('');
+
+    useEffect(() => {
+        setDegreePreview(degreeUrl);
+    }, [degreeUrl]);
+
+    useEffect(() => {
+        setIdPreview(idUrl);
+    }, [idUrl]);
+
+    useEffect(() => {
+        setLicencePreview(licenceUrl);
+    }, [licenceUrl]);
+
+    useEffect(() => {
+        setSchoolLetterPreview(schoolLetterUrl);
+    }, [schoolLetterUrl]);
+
+    useEffect(() => {
+        if (!degreeFile) return;
+        const objectUrl = URL.createObjectURL(degreeFile);
+        setDegreePreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [degreeFile]);
+
+    useEffect(() => {
+        if (!idFile) return;
+        const objectUrl = URL.createObjectURL(idFile);
+        setIdPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [idFile]);
+
+    useEffect(() => {
+        if (!licenceFile) return;
+        const objectUrl = URL.createObjectURL(licenceFile);
+        setLicencePreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [licenceFile]);
+
+    useEffect(() => {
+        if (!schoolLetterFile) return;
+        const objectUrl = URL.createObjectURL(schoolLetterFile);
+        setSchoolLetterPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [schoolLetterFile]);
+
+    // Get clinical specialty options from medicalData
+    const specialtyOptions = useMemo(() => {
+        const options = medicalData.departments.flatMap(dept => {
+            if (dept.specialties.length === 0) {
+                return [{
+                    label: dept.name,
+                    value: dept.name,
+                    group: 'General Services'
+                }];
+            }
+            return dept.specialties.map(spec => ({
+                label: spec,
+                value: spec,
+                group: dept.name
+            }));
+        });
+
+        // Ensure currently selected specialty is in options
+        if (specialty && !options.some(opt => opt.value === specialty)) {
+            options.push({
+                label: specialty,
+                value: specialty,
+                group: 'Registered Specialty'
+            });
+        }
+        return options;
+    }, [specialty]);
+
+    // Sync form values on loaded user profile / onboarding details
     useEffect(() => {
         if (submissionDetails) {
             const details = submissionDetails;
@@ -69,13 +160,14 @@ export default function ProfessionalOnboardingPage() {
             setIdUrl(details.id_document_url || '');
             setLicenceUrl(details.licence_document_url || '');
             setSchoolLetterUrl(details.school_or_placement_letter_url || '');
+        } else if (userData) {
+            setSpecialty(userData.specialty || '');
         }
-    }, [statusData, submissionDetails]);
+    }, [statusData, submissionDetails, userData]);
 
-    const handleFileUpload = async (
+    const handleFileSelect = (
         e: React.ChangeEvent<HTMLInputElement>,
-        setURL: (url: string) => void,
-        setLoading: (loading: boolean) => void
+        setFile: (file: File | null) => void
     ) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -86,20 +178,15 @@ export default function ProfessionalOnboardingPage() {
             return;
         }
 
-        setLoading(true);
+        setFile(file);
+        toast.success(`Selected file: ${file.name}`);
+    };
+
+    const uploadSingleFile = async (file: File): Promise<string> => {
         const formData = new FormData();
         formData.append('file', file);
-
-        try {
-            const res = await uploadMedia(formData).unwrap();
-            setURL(res.media.url);
-            toast.success(`${file.name} uploaded successfully!`);
-        } catch (err: any) {
-            console.error(err);
-            toast.error(err?.data?.detail || 'Failed to upload document.');
-        } finally {
-            setLoading(false);
-        }
+        const res = await uploadMedia(formData).unwrap();
+        return res.media.url;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -109,22 +196,27 @@ export default function ProfessionalOnboardingPage() {
             toast.error('Please select your specialty.');
             return;
         }
-        if (!degreeUrl) {
+
+        const currentDegree = degreeFile || degreeUrl;
+        if (!currentDegree) {
             toast.error('Degree Certificate is required.');
             return;
         }
-        if (!idUrl) {
+
+        const currentId = idFile || idUrl;
+        if (!currentId) {
             toast.error('Identity Document is required.');
             return;
         }
 
         if (isIntern) {
-            if (!schoolLetterUrl) {
+            const currentSchoolLetter = schoolLetterFile || schoolLetterUrl;
+            if (!currentSchoolLetter) {
                 toast.error('Internship/School Placement letter is required.');
                 return;
             }
         } else {
-            if (!licenceNumber) {
+            if (!licenceNumber.trim()) {
                 toast.error('Professional Licence Number is required.');
                 return;
             }
@@ -132,34 +224,75 @@ export default function ProfessionalOnboardingPage() {
                 toast.error('Licence Expiry date is required.');
                 return;
             }
-            if (!licenceUrl) {
+            const currentLicence = licenceFile || licenceUrl;
+            if (!currentLicence) {
                 toast.error('Licence Document is required.');
                 return;
             }
         }
 
+        let finalDegreeUrl = degreeUrl;
+        let finalIdUrl = idUrl;
+        let finalSchoolLetterUrl = schoolLetterUrl;
+        let finalLicenceUrl = licenceUrl;
+
         try {
+            setIsUploading(true);
+
+            if (degreeFile) {
+                toast.loading('Uploading Degree Certificate...', { id: 'onboarding-upload' });
+                finalDegreeUrl = await uploadSingleFile(degreeFile);
+            }
+            if (idFile) {
+                toast.loading('Uploading Identity Document...', { id: 'onboarding-upload' });
+                finalIdUrl = await uploadSingleFile(idFile);
+            }
+            if (isIntern) {
+                if (schoolLetterFile) {
+                    toast.loading('Uploading Internship Letter...', { id: 'onboarding-upload' });
+                    finalSchoolLetterUrl = await uploadSingleFile(schoolLetterFile);
+                }
+            } else {
+                if (licenceFile) {
+                    toast.loading('Uploading Licence Certificate...', { id: 'onboarding-upload' });
+                    finalLicenceUrl = await uploadSingleFile(licenceFile);
+                }
+            }
+
+            toast.loading('Submitting verification credentials...', { id: 'onboarding-upload' });
+
             const payload = {
                 is_intern: isIntern,
                 specialty,
                 employment_status: employmentStatus,
                 current_workplace: currentWorkplace || null,
-                degree_document_url: degreeUrl,
-                id_document_url: idUrl,
+                degree_document_url: finalDegreeUrl,
+                id_document_url: finalIdUrl,
                 ...(isIntern 
-                    ? { school_or_placement_letter_url: schoolLetterUrl }
-                    : { licence_number: licenceNumber, licence_expiry: licenceExpiry, licence_document_url: licenceUrl }
+                    ? { school_or_placement_letter_url: finalSchoolLetterUrl }
+                    : { licence_number: licenceNumber, licence_expiry: licenceExpiry, licence_document_url: finalLicenceUrl }
                 )
             };
 
             await submitOnboarding(payload).unwrap();
-            toast.success('Onboarding submission successfully uploaded for review!');
+
+            // Clear selected local files
+            setDegreeFile(null);
+            setIdFile(null);
+            setSchoolLetterFile(null);
+            setLicenceFile(null);
+
+            toast.success('Onboarding submission successfully uploaded for review!', { id: 'onboarding-upload' });
             refetchStatus();
         } catch (err: any) {
             console.error(err);
-            toast.error(err?.data?.detail || 'Failed to submit onboarding details.');
+            toast.error(err?.data?.detail || 'Failed to submit onboarding details.', { id: 'onboarding-upload' });
+        } finally {
+            setIsUploading(false);
         }
     };
+
+    // (Local previews are managed via useEffect state hooks)
 
     // Calculate completion metrics
     const getCompletionPercentage = () => {
@@ -480,31 +613,19 @@ export default function ProfessionalOnboardingPage() {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-450 uppercase block">Clinical Specialty</label>
-                                        <select
-                                            value={specialty}
-                                            onChange={(e) => setSpecialty(e.target.value)}
-                                            className="w-full bg-slate-50/70 border border-slate-200 rounded-xl p-3 text-sm focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-slate-800 outline-none cursor-pointer"
-                                            required
-                                        >
-                                            <option value="" disabled>Select clinical specialty...</option>
-                                            <option value="General Practice">General Practice</option>
-                                            <option value="Cardiology">Cardiology</option>
-                                            <option value="Emergency Medicine">Emergency Medicine</option>
-                                            <option value="Pediatrics">Pediatrics</option>
-                                            <option value="Internal Medicine">Internal Medicine</option>
-                                            <option value="Anesthesiology">Anesthesiology</option>
-                                            <option value="Obstetrics & Gynecology">Obstetrics & Gynecology</option>
-                                            <option value="Psychiatry">Psychiatry</option>
-                                            <option value="Surgery">Surgery</option>
-                                            <option value="Nursing">Nursing</option>
-                                            <option value="Pharmacy">Pharmacy</option>
-                                        </select>
-                                    </div>
+                                    <SearchableSelect
+                                        id="prof-specialty"
+                                        label="Clinical Specialty"
+                                        placeholder="Select clinical specialty..."
+                                        options={specialtyOptions}
+                                        value={specialty}
+                                        onChange={(val) => setSpecialty(val)}
+                                        focusColor="#0b5cd5"
+                                        required={true}
+                                    />
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-slate-450 uppercase block">Employment Category</label>
+                                        <label className="text-xs font-bold text-slate-450 uppercase block">Employment Category <span className="text-red-500">*</span></label>
                                         <select
                                             value={employmentStatus}
                                             onChange={(e) => setEmploymentStatus(e.target.value)}
@@ -533,7 +654,7 @@ export default function ProfessionalOnboardingPage() {
 
                             {/* SECTION 2: Licensure details */}
                             <div className="space-y-5">
-                                <div className="flex justify-between items-center border-b border-slate-50 pb-2">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-slate-50 pb-2">
                                     <div className="flex items-center gap-2">
                                         <FiBriefcase className="text-blue-600 text-lg" />
                                         <h4 className="font-extrabold text-slate-800 text-sm uppercase tracking-wide">
@@ -542,7 +663,7 @@ export default function ProfessionalOnboardingPage() {
                                     </div>
 
                                     {/* Intern Switcher Toggle */}
-                                    <label className="inline-flex items-center gap-2.5 cursor-pointer">
+                                    <label className="inline-flex items-center justify-between sm:justify-start gap-2.5 cursor-pointer w-full sm:w-auto bg-slate-50 sm:bg-transparent p-2 sm:p-0 rounded-lg border border-slate-100 sm:border-0">
                                         <input 
                                             type="checkbox"
                                             checked={isIntern}
@@ -553,8 +674,8 @@ export default function ProfessionalOnboardingPage() {
                                             }}
                                             className="sr-only peer"
                                         />
-                                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Clinical Intern</span>
-                                        <div className="relative w-8 h-4.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Are you an intern?</span>
+                                        <div className="relative w-8 h-4.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-blue-600 flex-shrink-0"></div>
                                     </label>
                                 </div>
 
@@ -569,22 +690,22 @@ export default function ProfessionalOnboardingPage() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-450 uppercase block">School Placement / Intern Letter Document</label>
+                                            <label className="text-xs font-bold text-slate-450 uppercase block">School Placement / Intern Letter Document <span className="text-red-500">*</span></label>
                                             <div className="flex items-center gap-4">
                                                 <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                    <FiUploadCloud className={`w-8 h-8 ${schoolLetterUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                    <FiUploadCloud className={`w-8 h-8 ${schoolLetterFile || schoolLetterUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                     <span className="text-xs font-bold text-slate-700 text-center">
-                                                        {uploadingSchoolLetter ? 'Uploading attestation...' : schoolLetterUrl ? 'Attestation loaded!' : 'Select Placement Letter'}
+                                                        {schoolLetterFile ? `Selected: ${schoolLetterFile.name}` : schoolLetterUrl ? 'Attestation loaded!' : 'Select Placement Letter'}
                                                     </span>
                                                     <input
                                                         type="file"
                                                         accept="image/*,.pdf"
-                                                        onChange={(e) => handleFileUpload(e, setSchoolLetterUrl, setUploadingSchoolLetter)}
+                                                        onChange={(e) => handleFileSelect(e, setSchoolLetterFile)}
                                                         className="hidden"
                                                     />
                                                 </label>
-                                                {schoolLetterUrl && (
-                                                    <a href={schoolLetterUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                                {schoolLetterPreview && (
+                                                    <a href={schoolLetterPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                         <FiExternalLink className="w-5 h-5 text-blue-600" />
                                                     </a>
                                                 )}
@@ -595,7 +716,7 @@ export default function ProfessionalOnboardingPage() {
                                     /* STANDARD LICENCE DETAILS */
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-slate-450 uppercase block">Licence Number</label>
+                                            <label className="text-xs font-bold text-slate-450 uppercase block">Licence Number <span className="text-red-500">*</span></label>
                                             <input
                                                 type="text"
                                                 value={licenceNumber}
@@ -607,7 +728,7 @@ export default function ProfessionalOnboardingPage() {
                                         </div>
 
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-slate-450 uppercase block">Licence Expiry Date</label>
+                                            <label className="text-xs font-bold text-slate-450 uppercase block">Licence Expiry Date <span className="text-red-500">*</span></label>
                                             <input
                                                 type="date"
                                                 value={licenceExpiry}
@@ -618,22 +739,22 @@ export default function ProfessionalOnboardingPage() {
                                         </div>
 
                                         <div className="space-y-2 md:col-span-2">
-                                            <label className="text-xs font-bold text-slate-450 uppercase block">Active Licence Certificate Document</label>
+                                            <label className="text-xs font-bold text-slate-450 uppercase block">Active Licence Certificate Document <span className="text-red-500">*</span></label>
                                             <div className="flex items-center gap-4">
                                                 <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                    <FiUploadCloud className={`w-8 h-8 ${licenceUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                    <FiUploadCloud className={`w-8 h-8 ${licenceFile || licenceUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                     <span className="text-xs font-bold text-slate-700 text-center">
-                                                        {uploadingLicence ? 'Uploading licence...' : licenceUrl ? 'Licence document loaded!' : 'Select Licence Certificate'}
+                                                        {licenceFile ? `Selected: ${licenceFile.name}` : licenceUrl ? 'Licence document loaded!' : 'Select Licence Certificate'}
                                                     </span>
                                                     <input
                                                         type="file"
                                                         accept="image/*,.pdf"
-                                                        onChange={(e) => handleFileUpload(e, setLicenceUrl, setUploadingLicence)}
+                                                        onChange={(e) => handleFileSelect(e, setLicenceFile)}
                                                         className="hidden"
                                                     />
                                                 </label>
-                                                {licenceUrl && (
-                                                    <a href={licenceUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                                {licencePreview && (
+                                                    <a href={licencePreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                         <FiExternalLink className="w-5 h-5 text-blue-600" />
                                                     </a>
                                                 )}
@@ -655,22 +776,22 @@ export default function ProfessionalOnboardingPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* Degree Certificate */}
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-455 block">Degree / Transcripts Certificate</label>
+                                        <label className="text-xs font-bold text-slate-455 block">Degree / Transcripts Certificate <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${degreeUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                <FiUploadCloud className={`w-8 h-8 ${degreeFile || degreeUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                 <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {uploadingDegree ? 'Uploading certificate...' : degreeUrl ? 'Degree uploaded!' : 'Select Degree Certificate'}
+                                                    {degreeFile ? `Selected: ${degreeFile.name}` : degreeUrl ? 'Degree uploaded!' : 'Select Degree Certificate'}
                                                 </span>
                                                 <input
                                                     type="file"
                                                     accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileUpload(e, setDegreeUrl, setUploadingDegree)}
+                                                    onChange={(e) => handleFileSelect(e, setDegreeFile)}
                                                     className="hidden"
                                                 />
                                             </label>
-                                            {degreeUrl && (
-                                                <a href={degreeUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                            {degreePreview && (
+                                                <a href={degreePreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                     <FiExternalLink className="w-5 h-5 text-blue-600" />
                                                 </a>
                                             )}
@@ -679,22 +800,22 @@ export default function ProfessionalOnboardingPage() {
 
                                     {/* Government ID Document */}
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-455 block">Government Issued Identification Document</label>
+                                        <label className="text-xs font-bold text-slate-455 block">Government Issued Identification Document <span className="text-red-500">*</span></label>
                                         <div className="flex items-center gap-4">
                                             <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${idUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
+                                                <FiUploadCloud className={`w-8 h-8 ${idFile || idUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
                                                 <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {uploadingId ? 'Uploading ID...' : idUrl ? 'ID card loaded!' : 'Select ID Card'}
+                                                    {idFile ? `Selected: ${idFile.name}` : idUrl ? 'ID card loaded!' : 'Select ID Card'}
                                                 </span>
                                                 <input
                                                     type="file"
                                                     accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileUpload(e, setIdUrl, setUploadingId)}
+                                                    onChange={(e) => handleFileSelect(e, setIdFile)}
                                                     className="hidden"
                                                 />
                                             </label>
-                                            {idUrl && (
-                                                <a href={idUrl} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
+                                            {idPreview && (
+                                                <a href={idPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
                                                     <FiExternalLink className="w-5 h-5 text-blue-600" />
                                                 </a>
                                             )}
@@ -714,10 +835,10 @@ export default function ProfessionalOnboardingPage() {
 
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting || uploadingDegree || uploadingId || uploadingLicence || uploadingSchoolLetter}
+                                    disabled={isSubmitting || isUploading}
                                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:pointer-events-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
                                 >
-                                    {isSubmitting ? (
+                                    {isSubmitting || isUploading ? (
                                         <>
                                             <FiLoader className="animate-spin w-4 h-4" /> Registering Dossier...
                                         </>

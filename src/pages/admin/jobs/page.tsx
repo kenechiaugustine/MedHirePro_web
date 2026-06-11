@@ -379,7 +379,7 @@ export default function AdminJobsPage() {
 
                                             <td className="px-6 py-4.5 whitespace-nowrap">
                                                 <p className="font-extrabold text-slate-800">
-                                                    {job.currency_symbol || '$'}{job.rate_amount_min.toLocaleString()} - {job.rate_amount_max.toLocaleString()}
+                                                    {job.currency_symbol || '₦'}{job.rate_amount_min.toLocaleString()} - {job.rate_amount_max.toLocaleString()}
                                                 </p>
                                                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
                                                     Per {job.rate_type.toLowerCase()}
@@ -388,10 +388,10 @@ export default function AdminJobsPage() {
 
                                             <td className="px-6 py-4.5 whitespace-nowrap">
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${job.status === 'OPEN'
-                                                        ? 'bg-emerald-50 border-emerald-250 text-emerald-700'
-                                                        : job.status === 'FILLED'
-                                                            ? 'bg-blue-50 border-blue-200 text-blue-700'
-                                                            : 'bg-slate-100 border-slate-200 text-slate-400'
+                                                    ? 'bg-emerald-50 border-emerald-250 text-emerald-700'
+                                                    : job.status === 'FILLED'
+                                                        ? 'bg-blue-50 border-blue-200 text-blue-700'
+                                                        : 'bg-slate-100 border-slate-200 text-slate-400'
                                                     }`}>
                                                     <span className={`h-1.5 w-1.5 rounded-full inline-block ${job.status === 'OPEN' ? 'bg-emerald-500' : job.status === 'FILLED' ? 'bg-blue-500' : 'bg-slate-350'}`} />
                                                     {job.status}
@@ -713,7 +713,7 @@ export default function AdminJobsPage() {
                                     <div>
                                         <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Compensation Rate</span>
                                         <p className="font-extrabold text-slate-850 pt-0.5">
-                                            {selectedJob.currency_symbol || '$'}{selectedJob.rate_amount_min.toLocaleString()} - {selectedJob.rate_amount_max.toLocaleString()} per {selectedJob.rate_type.toLowerCase()}
+                                            {selectedJob.currency_symbol || '₦'}{selectedJob.rate_amount_min.toLocaleString()} - {selectedJob.rate_amount_max.toLocaleString()} per {selectedJob.rate_type.toLowerCase()}
                                         </p>
                                     </div>
                                     <div>

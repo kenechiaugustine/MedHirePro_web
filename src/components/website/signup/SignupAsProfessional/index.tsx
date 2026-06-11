@@ -11,6 +11,8 @@ import { useAppDispatch } from '../../../../redux/hooks';
 import { setCredentials } from '../../../../redux/slices/authSlice';
 import toast from 'react-hot-toast';
 
+import { getErrorMessage } from '../../../../lib/utils';
+
 const SignupAsProfessional = () => {
     const [fullName, setFullName] = useState('');
     const [specialty, setSpecialty] = useState('');
@@ -47,6 +49,11 @@ const SignupAsProfessional = () => {
             return;
         }
 
+        if (password.length < 8) {
+            toast.error('Password must be at least 8 characters long.');
+            return;
+        }
+
         try {
             const result = await registerProfessional({
                 full_name: fullName,
@@ -64,9 +71,7 @@ const SignupAsProfessional = () => {
             toast.success('Account created successfully!');
             navigate('/user/dashboard', { replace: true });
         } catch (err: unknown) {
-            const error = err as { data?: { detail?: string }; status?: number };
-            const message = error?.data?.detail || 'Registration failed. Please try again.';
-            toast.error(message);
+            toast.error(getErrorMessage(err, 'Registration failed. Please try again.'));
         }
     };
 
@@ -168,6 +173,7 @@ const SignupAsProfessional = () => {
                             value={specialty}
                             onChange={setSpecialty}
                             focusColor="#0b5cd5"
+                            required={true}
                         />
 
                         <EmailInput

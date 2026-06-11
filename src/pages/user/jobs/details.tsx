@@ -36,18 +36,28 @@ export default function ProfessionalJobDetailsPage() {
 
     // Mutations
     const [submitApplication, { isLoading: isSubmitting }] = useSubmitApplicationMutation();
-    const [uploadMedia, { isLoading: isUploadingMedia }] = useUploadMediaMutation();
+    const [uploadMedia] = useUploadMediaMutation();
 
     // Application Form States
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
     const [clinicalSummary, setClinicalSummary] = useState('');
-    const [cvUrl, setCvUrl] = useState('');
-    const [credentialsList, setCredentialsList] = useState<string[]>([]);
+    
+    // Selected files holding states
+    const [cvFile, setCvFile] = useState<File | null>(null);
+    const [credentialsFiles, setCredentialsFiles] = useState<File[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
 
     const hasApplied = checkAppliedData?.applied || false;
     const activeApplication = checkAppliedData?.application || null;
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'cv' | 'credential') => {
+    const resetForm = () => {
+        setClinicalSummary('');
+        setCvFile(null);
+        setCredentialsFiles([]);
+        setIsUploading(false);
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'cv' | 'credential') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -57,34 +67,25 @@ export default function ProfessionalJobDetailsPage() {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const res = await uploadMedia(formData).unwrap();
-            if (type === 'cv') {
-                setCvUrl(res.media.url);
-                toast.success("CV successfully uploaded to credentials vault!");
-            } else {
-                setCredentialsList(prev => [...prev, res.media.url]);
-                toast.success("Supporting credential document uploaded!");
-            }
-        } catch (err: any) {
-            console.error(err);
-            toast.error(err?.data?.detail || "Failed to upload document to secure storage.");
+        if (type === 'cv') {
+            setCvFile(file);
+            toast.success(`Selected CV: ${file.name}`);
+        } else {
+            setCredentialsFiles(prev => [...prev, file]);
+            toast.success(`Selected supporting document: ${file.name}`);
         }
     };
 
     const handleRemoveCredential = (indexToRemove: number) => {
-        setCredentialsList(prev => prev.filter((_, idx) => idx !== indexToRemove));
+        setCredentialsFiles(prev => prev.filter((_, idx) => idx !== indexToRemove));
     };
 
     const handleApplySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!id || !job) return;
 
-        if (!cvUrl) {
-            toast.error("Please upload your Curriculum Vitae (CV) to proceed.");
+        if (!cvFile) {
+            toast.error("Please select your Curriculum Vitae (CV) to proceed.");
             return;
         }
 
@@ -94,27 +95,48 @@ export default function ProfessionalJobDetailsPage() {
         }
 
         try {
+            setIsUploading(true);
+            toast.loading("Uploading CV...", { id: 'job-apply-upload' });
+
+            // Upload CV
+            const cvFormData = new FormData();
+            cvFormData.append('file', cvFile);
+            const cvRes = await uploadMedia(cvFormData).unwrap();
+            const finalCvUrl = cvRes.media.url;
+
+            // Upload all credentials
+            const finalCredentialUrls: string[] = [];
+            for (let i = 0; i < credentialsFiles.length; i++) {
+                toast.loading(`Uploading supporting document ${i + 1}/${credentialsFiles.length}...`, { id: 'job-apply-upload' });
+                const credFormData = new FormData();
+                credFormData.append('file', credentialsFiles[i]);
+                const credRes = await uploadMedia(credFormData).unwrap();
+                finalCredentialUrls.push(credRes.media.url);
+            }
+
+            toast.loading("Submitting your clinical application...", { id: 'job-apply-upload' });
+
             await submitApplication({
                 vacancy_id: id,
-                curriculum_vitae_url: cvUrl,
+                curriculum_vitae_url: finalCvUrl,
                 clinical_summary: clinicalSummary,
-                credentialing_packet_urls: credentialsList
+                credentialing_packet_urls: finalCredentialUrls
             }).unwrap();
 
-            toast.success("Clinical placement application successfully submitted!");
+            toast.success("Clinical placement application successfully submitted!", { id: 'job-apply-upload' });
             setIsApplyModalOpen(false);
-            setClinicalSummary('');
-            setCvUrl('');
-            setCredentialsList([]);
+            resetForm();
             navigate(USER_ROUTES.APPLICATIONS);
         } catch (err: any) {
             console.error(err);
-            toast.error(err?.data?.detail || "Failed to submit clinical placement request.");
+            toast.error(err?.data?.detail || "Failed to submit clinical placement request.", { id: 'job-apply-upload' });
+        } finally {
+            setIsUploading(false);
         }
     };
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
     };
 
     if (isJobLoading || isCheckAppliedLoading) {
@@ -446,13 +468,13 @@ export default function ProfessionalJobDetailsPage() {
                                 </div>
                                 <button 
                                     type="button" 
-                                    onClick={() => setIsApplyModalOpen(false)}
+                                    onClick={() => { setIsApplyModalOpen(false); resetForm(); }}
                                     className="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg cursor-pointer"
-                                >
+                                  >
                                     <FiX />
                                 </button>
                             </div>
-
+ 
                             {/* Alert/Guidelines */}
                             <div className="p-3 rounded-xl border bg-indigo-50/50 border-indigo-100 text-indigo-850 text-[10px] font-semibold leading-relaxed flex gap-2">
                                 <FiInfo className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
@@ -460,7 +482,7 @@ export default function ProfessionalJobDetailsPage() {
                                     <strong>Credentials Vault:</strong> All documents are uploaded securely and processed via Cloudinary encryption. Verify the license requirements match your profile.
                                 </p>
                             </div>
-
+ 
                             <div className="space-y-4 text-xs font-semibold text-slate-700">
                                 {/* CV / Resume Upload */}
                                 <div className="space-y-2">
@@ -468,47 +490,47 @@ export default function ProfessionalJobDetailsPage() {
                                     
                                     <div className="flex items-center gap-3">
                                         <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-55 hover:bg-indigo-100 border border-indigo-150 hover:border-indigo-200 text-indigo-600 rounded-xl text-xs font-black cursor-pointer transition-colors">
-                                            {isUploadingMedia ? <FiLoader className="animate-spin text-sm" /> : <FiUploadCloud className="text-sm" />}
-                                            {cvUrl ? 'CV Uploaded!' : 'Select PDF/Doc File'}
+                                            {isUploading ? <FiLoader className="animate-spin text-sm" /> : <FiUploadCloud className="text-sm" />}
+                                            {cvFile ? 'CV Selected' : 'Select PDF/Doc File'}
                                             <input 
                                                 type="file"
                                                 accept=".pdf,.doc,.docx"
                                                 onChange={(e) => handleFileChange(e, 'cv')}
                                                 className="hidden"
-                                                disabled={isUploadingMedia}
+                                                disabled={isUploading}
                                             />
                                         </label>
-                                        {cvUrl && (
+                                        {cvFile && (
                                             <span className="text-[10px] text-emerald-600 bg-emerald-50 px-2.5 py-1.5 rounded-xl border border-emerald-100 truncate max-w-[240px]">
-                                                Secure Link Synced
+                                                {cvFile.name}
                                             </span>
                                         )}
                                     </div>
                                 </div>
-
+ 
                                 {/* Supporting Documents */}
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">2. Supporting Board Licences / Degree pack (Optional)</label>
                                     
                                     <div className="flex items-center gap-3">
                                         <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold cursor-pointer transition-colors">
-                                            {isUploadingMedia ? <FiLoader className="animate-spin text-sm" /> : <FiUploadCloud className="text-sm" />}
+                                            {isUploading ? <FiLoader className="animate-spin text-sm" /> : <FiUploadCloud className="text-sm" />}
                                             Add Supporting Doc
                                             <input 
                                                 type="file"
                                                 onChange={(e) => handleFileChange(e, 'credential')}
                                                 className="hidden"
-                                                disabled={isUploadingMedia}
+                                                disabled={isUploading}
                                             />
                                         </label>
                                     </div>
-
-                                    {/* Uploaded pack list */}
-                                    {credentialsList.length > 0 && (
+ 
+                                    {/* selected pack list */}
+                                    {credentialsFiles.length > 0 && (
                                         <div className="grid grid-cols-1 gap-2 pt-1.5">
-                                            {credentialsList.map((_, index) => (
+                                            {credentialsFiles.map((file, index) => (
                                                 <div key={index} className="flex justify-between items-center bg-slate-50 border border-slate-150 p-2.5 rounded-xl text-[10px]">
-                                                    <span className="truncate max-w-[300px] text-slate-500 font-bold">CredentialDoc_{index + 1}.pdf</span>
+                                                    <span className="truncate max-w-[300px] text-slate-500 font-bold">{file.name}</span>
                                                     <button
                                                         type="button"
                                                         onClick={() => handleRemoveCredential(index)}
@@ -522,7 +544,7 @@ export default function ProfessionalJobDetailsPage() {
                                         </div>
                                     )}
                                 </div>
-
+ 
                                 {/* Summary */}
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">3. Clinical Work Capabilities Summary</label>
@@ -536,22 +558,22 @@ export default function ProfessionalJobDetailsPage() {
                                     />
                                 </div>
                             </div>
-
+ 
                             {/* Submit Buttons */}
                             <div className="flex justify-end items-center gap-3 border-t border-slate-100 pt-4">
                                 <button
                                     type="button"
-                                    onClick={() => setIsApplyModalOpen(false)}
+                                    onClick={() => { setIsApplyModalOpen(false); resetForm(); }}
                                     className="px-4 py-2.5 text-xs text-slate-500 hover:text-slate-800 font-bold bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting || isUploadingMedia || !cvUrl}
+                                    disabled={isSubmitting || isUploading || !cvFile}
                                     className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-lg shadow-indigo-600/15 transition-all cursor-pointer"
                                 >
-                                    {isSubmitting ? (
+                                    {isSubmitting || isUploading ? (
                                         <FiLoader className="animate-spin text-sm" />
                                     ) : (
                                         <FiCheckCircle className="text-sm" />
