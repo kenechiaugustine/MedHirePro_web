@@ -155,6 +155,11 @@ export default function ProfessionalLocumApplicantsPage() {
                                         <div>
                                             <h4 className="font-extrabold text-slate-850 text-sm flex items-center gap-1.5">
                                                 {name}
+                                                {candidate?.is_verified && (
+                                                    <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-[8px] font-black text-emerald-700 uppercase tracking-wide">
+                                                        ✓ Verified
+                                                    </span>
+                                                )}
                                             </h4>
                                             <p className="text-[10px] text-slate-400 font-bold">
                                                 {specialty} • {email}
@@ -182,10 +187,87 @@ export default function ProfessionalLocumApplicantsPage() {
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-xs font-semibold text-slate-650 leading-relaxed">
+                                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-xs font-semibold text-slate-655 leading-relaxed">
                                     <span className="font-black text-slate-750 block text-[9px] uppercase tracking-wider mb-1">Clinical Work Summary</span>
                                     {app.clinical_summary}
                                 </div>
+
+                                {candidate?.is_verified && (
+                                    <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4 text-xs font-semibold text-slate-655 space-y-3">
+                                        <span className="font-black text-slate-750 block text-[9px] uppercase tracking-wider">
+                                            Verified Clinical Credentials Dossier
+                                        </span>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <span className="text-[9px] font-bold text-slate-400 block uppercase">Registration Type</span>
+                                                <span className="font-extrabold text-slate-750">
+                                                    {candidate.is_intern ? 'Clinical Intern / Student' : 'Fully Licensed Practitioner'}
+                                                </span>
+                                            </div>
+
+                                            {!candidate.is_intern ? (
+                                                <>
+                                                    <div className="space-y-1">
+                                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">License Number</span>
+                                                        <span className="font-mono font-bold text-slate-700">{candidate.licence_number || 'N/A'}</span>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">License Expiration</span>
+                                                        <span className="font-bold text-slate-700">{candidate.licence_expiry || 'N/A'}</span>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Placement / Dean Letter</span>
+                                                    {candidate.school_or_placement_letter_url ? (
+                                                        <a href={candidate.school_or_placement_letter_url} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-bold inline-flex items-center gap-1">
+                                                            View Dean/Placement Letter <FiExternalLink className="text-[10px]" />
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-slate-400">Not provided</span>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {!candidate.is_intern && candidate.licence_document_url && (
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Medical License</span>
+                                                    <a href={candidate.licence_document_url} target="_blank" rel="noreferrer" className="text-indigo-650 hover:underline font-bold inline-flex items-center gap-1">
+                                                        View License Document <FiExternalLink className="text-[10px]" />
+                                                    </a>
+                                                </div>
+                                            )}
+
+                                            {candidate.degree_document_url && (
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Degree / Diploma</span>
+                                                    <a href={candidate.degree_document_url} target="_blank" rel="noreferrer" className="text-indigo-650 hover:underline font-bold inline-flex items-center gap-1">
+                                                        View Degree Certificate <FiExternalLink className="text-[10px]" />
+                                                    </a>
+                                                </div>
+                                            )}
+
+                                            {candidate.id_document_url && (
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Government ID</span>
+                                                    <a href={candidate.id_document_url} target="_blank" rel="noreferrer" className="text-indigo-650 hover:underline font-bold inline-flex items-center gap-1">
+                                                        View ID Document <FiExternalLink className="text-[10px]" />
+                                                    </a>
+                                                </div>
+                                            )}
+
+                                            {(candidate.employment_status || candidate.current_workplace) && (
+                                                <div className="space-y-1 col-span-1 md:col-span-2 border-t border-slate-100 pt-2">
+                                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Current Employment</span>
+                                                    <span className="font-bold text-slate-705 capitalize">
+                                                        {candidate.employment_status?.replace(/_/g, ' ') || 'Unspecified'}
+                                                        {candidate.current_workplace && ` at ${candidate.current_workplace}`}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-slate-50 text-[11px]">
                                     <div className="flex flex-wrap gap-3">

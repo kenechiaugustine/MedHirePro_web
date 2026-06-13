@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    useGetOnboardingStatusQuery, 
-    useSubmitOnboardingMutation 
+import {
+    useGetOnboardingStatusQuery,
+    useSubmitOnboardingMutation
 } from '../../../redux/apis/onboardingApi';
 import type { IProfessionalOnboardingSubmit } from '../../../redux/apis/onboardingApi/interface';
 import { useUploadMediaMutation } from '../../../redux/apis/mediaApi';
 import { useGetMeQuery } from '../../../redux/apis/userApi';
 import { medicalData } from '../../../data/medicalData';
 import { SearchableSelect } from '../../../components/app';
-import { 
-    FiShield, 
-    FiCheckCircle, 
-    FiClock, 
-    FiAlertTriangle, 
-    FiUploadCloud, 
+import {
+    FiShield,
+    FiCheckCircle,
+    FiClock,
+    FiAlertTriangle,
+    FiUploadCloud,
     FiArrowLeft,
     FiLoader,
     FiUserCheck,
@@ -22,21 +22,53 @@ import {
     FiBriefcase,
     FiBookOpen,
     FiCheck,
-    FiExternalLink
+    FiEye,
+    FiEdit2,
+    FiTrash2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
+const getTrimmedFileName = (file: File | null, url: string, maxLength = 22) => {
+    let name = '';
+    if (file) {
+        name = file.name;
+    } else if (url) {
+        try {
+            const decoded = decodeURIComponent(url);
+            name = decoded.substring(decoded.lastIndexOf('/') + 1);
+            if (name.includes('?')) {
+                name = name.split('?')[0];
+            }
+        } catch (e) {
+            name = 'document.pdf';
+        }
+    }
+    if (!name) return 'document';
+    if (name.length <= maxLength) return name;
+    
+    const dotIdx = name.lastIndexOf('.');
+    if (dotIdx !== -1 && name.length - dotIdx <= 8) {
+        const ext = name.substring(dotIdx);
+        const nameWithoutExt = name.substring(0, dotIdx);
+        const keepLen = maxLength - ext.length - 3;
+        if (keepLen > 0) {
+            return nameWithoutExt.substring(0, keepLen) + '...' + ext;
+        }
+    }
+    return name.substring(0, maxLength - 3) + '...';
+};
+
 export default function ProfessionalOnboardingPage() {
     const navigate = useNavigate();
-    
+
     // Fetch onboarding status and user info
     const { data: statusData, isLoading: isStatusLoading, refetch: refetchStatus } = useGetOnboardingStatusQuery();
     const { data: userData } = useGetMeQuery();
     const [submitOnboarding, { isLoading: isSubmitting }] = useSubmitOnboardingMutation();
     const [uploadMedia] = useUploadMediaMutation();
 
-    const submissionDetails = statusData?.submission?.details 
-        ? (statusData.submission.details as IProfessionalOnboardingSubmit) 
+    const submissionDetails = statusData?.submission?.details
+        ? (statusData.submission.details as IProfessionalOnboardingSubmit)
         : null;
 
     // Form fields state
@@ -268,7 +300,7 @@ export default function ProfessionalOnboardingPage() {
                 current_workplace: currentWorkplace || null,
                 degree_document_url: finalDegreeUrl,
                 id_document_url: finalIdUrl,
-                ...(isIntern 
+                ...(isIntern
                     ? { school_or_placement_letter_url: finalSchoolLetterUrl }
                     : { licence_number: licenceNumber, licence_expiry: licenceExpiry, licence_document_url: finalLicenceUrl }
                 )
@@ -298,20 +330,20 @@ export default function ProfessionalOnboardingPage() {
     const getCompletionPercentage = () => {
         let total = 4; // Specialty, Employment, Degree, ID
         let completed = 0;
-        
+
         if (specialty) completed++;
         if (employmentStatus) completed++;
-        if (degreeUrl) completed++;
-        if (idUrl) completed++;
+        if (degreeUrl || degreeFile) completed++;
+        if (idUrl || idFile) completed++;
 
         if (isIntern) {
             total += 1; // School placement letter
-            if (schoolLetterUrl) completed++;
+            if (schoolLetterUrl || schoolLetterFile) completed++;
         } else {
             total += 3; // Licence number, expiry, licence certificate
             if (licenceNumber) completed++;
             if (licenceExpiry) completed++;
-            if (licenceUrl) completed++;
+            if (licenceUrl || licenceFile) completed++;
         }
 
         return Math.round((completed / total) * 100);
@@ -334,7 +366,7 @@ export default function ProfessionalOnboardingPage() {
     if (currentStatus === 'approved') {
         return (
             <div className="max-w-2xl mx-auto space-y-6 py-8 animate-fadeIn duration-500">
-                <button 
+                <button
                     onClick={() => navigate('/user/dashboard')}
                     className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 text-sm font-bold transition-colors mb-2 cursor-pointer"
                 >
@@ -345,7 +377,7 @@ export default function ProfessionalOnboardingPage() {
                     <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-600 border-4 border-emerald-100 animate-bounce">
                         <FiCheckCircle className="w-10 h-10" />
                     </div>
-                    
+
                     <div className="space-y-2">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
                             <FiShield className="w-3.5 h-3.5" /> VERIFIED PRACTITIONER
@@ -392,7 +424,7 @@ export default function ProfessionalOnboardingPage() {
     if (currentStatus === 'pending') {
         return (
             <div className="max-w-2xl mx-auto space-y-6 py-8 animate-fadeIn">
-                <button 
+                <button
                     onClick={() => navigate('/user/dashboard')}
                     className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 text-sm font-bold transition-colors mb-2 cursor-pointer"
                 >
@@ -463,7 +495,7 @@ export default function ProfessionalOnboardingPage() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 py-6 animate-fadeIn text-slate-750">
-            <button 
+            <button
                 onClick={() => navigate('/user/dashboard')}
                 className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 text-sm font-bold transition-colors mb-2 cursor-pointer"
             >
@@ -501,7 +533,7 @@ export default function ProfessionalOnboardingPage() {
 
             {/* Redesigned Dual Panel Workspace */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
+
                 {/* LEFT COLUMN: COMPLIANCE CHECKLIST PANEL */}
                 <div className="space-y-6">
                     <div className="bg-white rounded-2xl border border-slate-100 shadow-lg p-6 space-y-6">
@@ -516,8 +548,8 @@ export default function ProfessionalOnboardingPage() {
                                 <span className="text-lg font-black text-blue-600">{completion}%</span>
                             </div>
                             <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                                <div 
-                                    className="bg-gradient-to-r from-blue-500 to-sky-500 h-full rounded-full transition-all duration-500 ease-out" 
+                                <div
+                                    className="bg-gradient-to-r from-blue-500 to-sky-500 h-full rounded-full transition-all duration-500 ease-out"
                                     style={{ width: `${completion}%` }}
                                 ></div>
                             </div>
@@ -526,9 +558,8 @@ export default function ProfessionalOnboardingPage() {
                         {/* Document Checklist Items */}
                         <div className="space-y-4 pt-2">
                             <div className="flex items-center gap-3">
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
-                                    specialty ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
-                                }`}>
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${specialty ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
+                                    }`}>
                                     {specialty ? <FiCheck className="w-3.5 h-3.5" /> : '1'}
                                 </span>
                                 <span className={`text-xs font-semibold ${specialty ? 'text-slate-700' : 'text-slate-400'}`}>
@@ -537,44 +568,40 @@ export default function ProfessionalOnboardingPage() {
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
-                                    degreeUrl ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
-                                }`}>
-                                    {degreeUrl ? <FiCheck className="w-3.5 h-3.5" /> : '2'}
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${(degreeFile || degreeUrl) ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
+                                    }`}>
+                                    {(degreeFile || degreeUrl) ? <FiCheck className="w-3.5 h-3.5" /> : '2'}
                                 </span>
-                                <span className={`text-xs font-semibold ${degreeUrl ? 'text-slate-700' : 'text-slate-400'}`}>
+                                <span className={`text-xs font-semibold ${(degreeFile || degreeUrl) ? 'text-slate-700' : 'text-slate-400'}`}>
                                     Degree Certificate Upload
                                 </span>
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
-                                    idUrl ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
-                                }`}>
-                                    {idUrl ? <FiCheck className="w-3.5 h-3.5" /> : '3'}
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${(idFile || idUrl) ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
+                                    }`}>
+                                    {(idFile || idUrl) ? <FiCheck className="w-3.5 h-3.5" /> : '3'}
                                 </span>
-                                <span className={`text-xs font-semibold ${idUrl ? 'text-slate-700' : 'text-slate-400'}`}>
+                                <span className={`text-xs font-semibold ${(idFile || idUrl) ? 'text-slate-700' : 'text-slate-400'}`}>
                                     Government ID Upload
                                 </span>
                             </div>
 
                             {isIntern ? (
                                 <div className="flex items-center gap-3">
-                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
-                                        schoolLetterUrl ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
-                                    }`}>
-                                        {schoolLetterUrl ? <FiCheck className="w-3.5 h-3.5" /> : '4'}
+                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${(schoolLetterFile || schoolLetterUrl) ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
+                                        }`}>
+                                        {(schoolLetterFile || schoolLetterUrl) ? <FiCheck className="w-3.5 h-3.5" /> : '4'}
                                     </span>
-                                    <span className={`text-xs font-semibold ${schoolLetterUrl ? 'text-slate-700' : 'text-slate-400'}`}>
+                                    <span className={`text-xs font-semibold ${(schoolLetterFile || schoolLetterUrl) ? 'text-slate-700' : 'text-slate-400'}`}>
                                         Internship Placement Letter
                                     </span>
                                 </div>
                             ) : (
                                 <>
                                     <div className="flex items-center gap-3">
-                                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
-                                            licenceNumber && licenceExpiry ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
-                                        }`}>
+                                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${licenceNumber && licenceExpiry ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
+                                            }`}>
                                             {licenceNumber && licenceExpiry ? <FiCheck className="w-3.5 h-3.5" /> : '4'}
                                         </span>
                                         <span className={`text-xs font-semibold ${licenceNumber && licenceExpiry ? 'text-slate-700' : 'text-slate-400'}`}>
@@ -583,12 +610,11 @@ export default function ProfessionalOnboardingPage() {
                                     </div>
 
                                     <div className="flex items-center gap-3">
-                                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
-                                            licenceUrl ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
-                                        }`}>
-                                            {licenceUrl ? <FiCheck className="w-3.5 h-3.5" /> : '5'}
+                                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${(licenceFile || licenceUrl) ? 'bg-blue-50 text-blue-600 font-black' : 'bg-slate-50 text-slate-300'
+                                            }`}>
+                                            {(licenceFile || licenceUrl) ? <FiCheck className="w-3.5 h-3.5" /> : '5'}
                                         </span>
-                                        <span className={`text-xs font-semibold ${licenceUrl ? 'text-slate-700' : 'text-slate-400'}`}>
+                                        <span className={`text-xs font-semibold ${(licenceFile || licenceUrl) ? 'text-slate-700' : 'text-slate-400'}`}>
                                             Licence Certificate Document
                                         </span>
                                     </div>
@@ -602,7 +628,7 @@ export default function ProfessionalOnboardingPage() {
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-white rounded-2xl border border-slate-100 shadow-lg p-6 md:p-8">
                         <form onSubmit={handleSubmit} className="space-y-8">
-                            
+
                             {/* SECTION 1: Practice Categories */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 border-b border-slate-50 pb-2">
@@ -664,7 +690,7 @@ export default function ProfessionalOnboardingPage() {
 
                                     {/* Intern Switcher Toggle */}
                                     <label className="inline-flex items-center justify-between sm:justify-start gap-2.5 cursor-pointer w-full sm:w-auto bg-slate-50 sm:bg-transparent p-2 sm:p-0 rounded-lg border border-slate-100 sm:border-0">
-                                        <input 
+                                        <input
                                             type="checkbox"
                                             checked={isIntern}
                                             onChange={(e) => {
@@ -690,24 +716,65 @@ export default function ProfessionalOnboardingPage() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-450 uppercase block">School Placement / Intern Letter Document <span className="text-red-500">*</span></label>
-                                            <div className="flex items-center gap-4">
-                                                <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                    <FiUploadCloud className={`w-8 h-8 ${schoolLetterFile || schoolLetterUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
-                                                    <span className="text-xs font-bold text-slate-700 text-center">
-                                                        {schoolLetterFile ? `Selected: ${schoolLetterFile.name}` : schoolLetterUrl ? 'Attestation loaded!' : 'Select Placement Letter'}
-                                                    </span>
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*,.pdf"
-                                                        onChange={(e) => handleFileSelect(e, setSchoolLetterFile)}
-                                                        className="hidden"
-                                                    />
-                                                </label>
-                                                {schoolLetterPreview && (
-                                                    <a href={schoolLetterPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
-                                                        <FiExternalLink className="w-5 h-5 text-blue-600" />
-                                                    </a>
+                                            <label className="text-xs font-bold text-slate-455 uppercase block">School Placement / Intern Letter Document <span className="text-red-500">*</span></label>
+                                            <div className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                                <input
+                                                    id="school-letter-upload"
+                                                    type="file"
+                                                    accept="image/*,.pdf"
+                                                    onChange={(e) => handleFileSelect(e, setSchoolLetterFile)}
+                                                    className="hidden"
+                                                />
+                                                {schoolLetterFile || schoolLetterUrl ? (
+                                                    <div className="flex flex-col items-center text-center space-y-2 w-full animate-fadeIn">
+                                                        <FiCheckCircle className="w-8 h-8 text-emerald-500" />
+                                                        <span className="text-[10px] text-slate-500 font-bold bg-slate-100/70 px-2.5 py-0.5 rounded-lg max-w-[200px] truncate" title={schoolLetterFile?.name || schoolLetterUrl}>
+                                                            {getTrimmedFileName(schoolLetterFile, schoolLetterUrl)}
+                                                        </span>
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <a
+                                                                href={schoolLetterPreview}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                title="View Document"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                <FiEye className="w-3.5 h-3.5 text-blue-600" /> View
+                                                            </a>
+                                                            <label
+                                                                htmlFor="school-letter-upload"
+                                                                title="Change Document"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                                            >
+                                                                <FiEdit2 className="w-3.5 h-3.5 text-amber-600" /> Change
+                                                            </label>
+                                                            <button
+                                                                type="button"
+                                                                title="Remove Document"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    e.preventDefault();
+                                                                    setSchoolLetterFile(null);
+                                                                    setSchoolLetterUrl('');
+                                                                    setSchoolLetterPreview('');
+                                                                }}
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-100 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                            >
+                                                                <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <label
+                                                        htmlFor="school-letter-upload"
+                                                        className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-4"
+                                                    >
+                                                        <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                                        <span className="text-xs font-bold text-slate-700 text-center">
+                                                            Select Placement Letter
+                                                        </span>
+                                                    </label>
                                                 )}
                                             </div>
                                         </div>
@@ -739,24 +806,65 @@ export default function ProfessionalOnboardingPage() {
                                         </div>
 
                                         <div className="space-y-2 md:col-span-2">
-                                            <label className="text-xs font-bold text-slate-450 uppercase block">Active Licence Certificate Document <span className="text-red-500">*</span></label>
-                                            <div className="flex items-center gap-4">
-                                                <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                    <FiUploadCloud className={`w-8 h-8 ${licenceFile || licenceUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
-                                                    <span className="text-xs font-bold text-slate-700 text-center">
-                                                        {licenceFile ? `Selected: ${licenceFile.name}` : licenceUrl ? 'Licence document loaded!' : 'Select Licence Certificate'}
-                                                    </span>
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*,.pdf"
-                                                        onChange={(e) => handleFileSelect(e, setLicenceFile)}
-                                                        className="hidden"
-                                                    />
-                                                </label>
-                                                {licencePreview && (
-                                                    <a href={licencePreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
-                                                        <FiExternalLink className="w-5 h-5 text-blue-600" />
-                                                    </a>
+                                            <label className="text-xs font-bold text-slate-455 uppercase block">Active Licence Certificate Document <span className="text-red-500">*</span></label>
+                                            <div className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                                <input
+                                                    id="licence-upload"
+                                                    type="file"
+                                                    accept="image/*,.pdf"
+                                                    onChange={(e) => handleFileSelect(e, setLicenceFile)}
+                                                    className="hidden"
+                                                />
+                                                {licenceFile || licenceUrl ? (
+                                                    <div className="flex flex-col items-center text-center space-y-2 w-full animate-fadeIn">
+                                                        <FiCheckCircle className="w-8 h-8 text-emerald-500" />
+                                                        <span className="text-[10px] text-slate-500 font-bold bg-slate-100/70 px-2.5 py-0.5 rounded-lg max-w-[200px] truncate" title={licenceFile?.name || licenceUrl}>
+                                                            {getTrimmedFileName(licenceFile, licenceUrl)}
+                                                        </span>
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <a
+                                                                href={licencePreview}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                title="View Document"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                <FiEye className="w-3.5 h-3.5 text-blue-600" /> View
+                                                            </a>
+                                                            <label
+                                                                htmlFor="licence-upload"
+                                                                title="Change Document"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                                            >
+                                                                <FiEdit2 className="w-3.5 h-3.5 text-amber-600" /> Change
+                                                            </label>
+                                                            <button
+                                                                type="button"
+                                                                title="Remove Document"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    e.preventDefault();
+                                                                    setLicenceFile(null);
+                                                                    setLicenceUrl('');
+                                                                    setLicencePreview('');
+                                                                }}
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-100 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                            >
+                                                                <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <label
+                                                        htmlFor="licence-upload"
+                                                        className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-4"
+                                                    >
+                                                        <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                                        <span className="text-xs font-bold text-slate-700 text-center">
+                                                            Select Licence Certificate
+                                                        </span>
+                                                    </label>
                                                 )}
                                             </div>
                                         </div>
@@ -773,27 +881,68 @@ export default function ProfessionalOnboardingPage() {
                                     </h4>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 gap-6">
                                     {/* Degree Certificate */}
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-slate-455 block">Degree / Transcripts Certificate <span className="text-red-500">*</span></label>
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${degreeFile || degreeUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
-                                                <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {degreeFile ? `Selected: ${degreeFile.name}` : degreeUrl ? 'Degree uploaded!' : 'Select Degree Certificate'}
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileSelect(e, setDegreeFile)}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                            {degreePreview && (
-                                                <a href={degreePreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
-                                                    <FiExternalLink className="w-5 h-5 text-blue-600" />
-                                                </a>
+                                        <div className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                            <input
+                                                id="degree-upload"
+                                                type="file"
+                                                accept="image/*,.pdf"
+                                                onChange={(e) => handleFileSelect(e, setDegreeFile)}
+                                                className="hidden"
+                                            />
+                                            {degreeFile || degreeUrl ? (
+                                                <div className="flex flex-col items-center text-center space-y-2 w-full animate-fadeIn">
+                                                    <FiCheckCircle className="w-8 h-8 text-emerald-500" />
+                                                    <span className="text-[10px] text-slate-500 font-bold bg-slate-100/70 px-2.5 py-0.5 rounded-lg max-w-[200px] truncate" title={degreeFile?.name || degreeUrl}>
+                                                        {getTrimmedFileName(degreeFile, degreeUrl)}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <a
+                                                            href={degreePreview}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            title="View Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <FiEye className="w-3.5 h-3.5 text-blue-600" /> View
+                                                        </a>
+                                                        <label
+                                                            htmlFor="degree-upload"
+                                                            title="Change Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiEdit2 className="w-3.5 h-3.5 text-amber-600" /> Change
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            title="Remove Document"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                setDegreeFile(null);
+                                                                setDegreeUrl('');
+                                                                setDegreePreview('');
+                                                            }}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-100 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <label
+                                                    htmlFor="degree-upload"
+                                                    className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-4"
+                                                >
+                                                    <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                                    <span className="text-xs font-bold text-slate-700 text-center">
+                                                        Select Degree Certificate
+                                                    </span>
+                                                </label>
                                             )}
                                         </div>
                                     </div>
@@ -801,23 +950,64 @@ export default function ProfessionalOnboardingPage() {
                                     {/* Government ID Document */}
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-slate-455 block">Government Issued Identification Document <span className="text-red-500">*</span></label>
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${idFile || idUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
-                                                <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {idFile ? `Selected: ${idFile.name}` : idUrl ? 'ID card loaded!' : 'Select ID Card'}
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileSelect(e, setIdFile)}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                            {idPreview && (
-                                                <a href={idPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
-                                                    <FiExternalLink className="w-5 h-5 text-blue-600" />
-                                                </a>
+                                        <div className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                            <input
+                                                id="id-upload"
+                                                type="file"
+                                                accept="image/*,.pdf"
+                                                onChange={(e) => handleFileSelect(e, setIdFile)}
+                                                className="hidden"
+                                            />
+                                            {idFile || idUrl ? (
+                                                <div className="flex flex-col items-center text-center space-y-2 w-full animate-fadeIn">
+                                                    <FiCheckCircle className="w-8 h-8 text-emerald-500" />
+                                                    <span className="text-[10px] text-slate-500 font-bold bg-slate-100/70 px-2.5 py-0.5 rounded-lg max-w-[200px] truncate" title={idFile?.name || idUrl}>
+                                                        {getTrimmedFileName(idFile, idUrl)}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <a
+                                                            href={idPreview}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            title="View Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <FiEye className="w-3.5 h-3.5 text-blue-600" /> View
+                                                        </a>
+                                                        <label
+                                                            htmlFor="id-upload"
+                                                            title="Change Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiEdit2 className="w-3.5 h-3.5 text-amber-600" /> Change
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            title="Remove Document"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                setIdFile(null);
+                                                                setIdUrl('');
+                                                                setIdPreview('');
+                                                            }}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-100 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <label
+                                                    htmlFor="id-upload"
+                                                    className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-4"
+                                                >
+                                                    <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                                    <span className="text-xs font-bold text-slate-700 text-center">
+                                                        Select ID Card
+                                                    </span>
+                                                </label>
                                             )}
                                         </div>
                                     </div>

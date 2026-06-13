@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { 
@@ -21,9 +21,42 @@ import {
     FiUploadCloud,
     FiX,
     FiAlertCircle,
-    FiInfo
+    FiInfo,
+    FiEye,
+    FiEdit2,
+    FiTrash2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+
+const getTrimmedFileName = (file: File | null, url: string, maxLength = 22) => {
+    let name = '';
+    if (file) {
+        name = file.name;
+    } else if (url) {
+        try {
+            const decoded = decodeURIComponent(url);
+            name = decoded.substring(decoded.lastIndexOf('/') + 1);
+            if (name.includes('?')) {
+                name = name.split('?')[0];
+            }
+        } catch (e) {
+            name = 'document.pdf';
+        }
+    }
+    if (!name) return 'document';
+    if (name.length <= maxLength) return name;
+    
+    const dotIdx = name.lastIndexOf('.');
+    if (dotIdx !== -1 && name.length - dotIdx <= 8) {
+        const ext = name.substring(dotIdx);
+        const nameWithoutExt = name.substring(0, dotIdx);
+        const keepLen = maxLength - ext.length - 3;
+        if (keepLen > 0) {
+            return nameWithoutExt.substring(0, keepLen) + '...' + ext;
+        }
+    }
+    return name.substring(0, maxLength - 3) + '...';
+};
 
 export default function ProfessionalJobDetailsPage() {
     const { id } = useParams<{ id: string }>();
@@ -46,6 +79,20 @@ export default function ProfessionalJobDetailsPage() {
     const [cvFile, setCvFile] = useState<File | null>(null);
     const [credentialsFiles, setCredentialsFiles] = useState<File[]>([]);
     const [isUploading, setIsUploading] = useState(false);
+    const [cvPreview, setCvPreview] = useState('');
+    const [credentialsPreviews, setCredentialsPreviews] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (!cvFile) {
+            setCvPreview('');
+            return;
+        }
+        const objectUrl = URL.createObjectURL(cvFile);
+        setCvPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [cvFile]);
 
     const hasApplied = checkAppliedData?.applied || false;
     const activeApplication = checkAppliedData?.application || null;
@@ -53,7 +100,14 @@ export default function ProfessionalJobDetailsPage() {
     const resetForm = () => {
         setClinicalSummary('');
         setCvFile(null);
+        setCvPreview('');
+        credentialsPreviews.forEach(url => {
+            try {
+                URL.revokeObjectURL(url);
+            } catch (err) {}
+        });
         setCredentialsFiles([]);
+        setCredentialsPreviews([]);
         setIsUploading(false);
     };
 
@@ -72,12 +126,21 @@ export default function ProfessionalJobDetailsPage() {
             toast.success(`Selected CV: ${file.name}`);
         } else {
             setCredentialsFiles(prev => [...prev, file]);
+            const objectUrl = URL.createObjectURL(file);
+            setCredentialsPreviews(prev => [...prev, objectUrl]);
             toast.success(`Selected supporting document: ${file.name}`);
         }
     };
 
     const handleRemoveCredential = (indexToRemove: number) => {
+        const urlToRemove = credentialsPreviews[indexToRemove];
+        if (urlToRemove) {
+            try {
+                URL.revokeObjectURL(urlToRemove);
+            } catch (err) {}
+        }
         setCredentialsFiles(prev => prev.filter((_, idx) => idx !== indexToRemove));
+        setCredentialsPreviews(prev => prev.filter((_, idx) => idx !== indexToRemove));
     };
 
     const handleApplySubmit = async (e: React.FormEvent) => {
@@ -486,59 +549,129 @@ export default function ProfessionalJobDetailsPage() {
                             <div className="space-y-4 text-xs font-semibold text-slate-700">
                                 {/* CV / Resume Upload */}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">1. Upload Curriculum Vitae (CV)</label>
-                                    
-                                    <div className="flex items-center gap-3">
-                                        <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-55 hover:bg-indigo-100 border border-indigo-150 hover:border-indigo-200 text-indigo-600 rounded-xl text-xs font-black cursor-pointer transition-colors">
-                                            {isUploading ? <FiLoader className="animate-spin text-sm" /> : <FiUploadCloud className="text-sm" />}
-                                            {cvFile ? 'CV Selected' : 'Select PDF/Doc File'}
-                                            <input 
-                                                type="file"
-                                                accept=".pdf,.doc,.docx"
-                                                onChange={(e) => handleFileChange(e, 'cv')}
-                                                className="hidden"
-                                                disabled={isUploading}
-                                            />
-                                        </label>
-                                        {cvFile && (
-                                            <span className="text-[10px] text-emerald-600 bg-emerald-50 px-2.5 py-1.5 rounded-xl border border-emerald-100 truncate max-w-[240px]">
-                                                {cvFile.name}
-                                            </span>
+                                    <label className="text-[10px] font-bold text-slate-455 uppercase block">1. Upload Curriculum Vitae (CV) <span className="text-red-500">*</span></label>
+                                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                        <input 
+                                            id="cv-upload-input"
+                                            type="file"
+                                            accept=".pdf,.doc,.docx"
+                                            onChange={(e) => handleFileChange(e, 'cv')}
+                                            className="hidden"
+                                            disabled={isUploading}
+                                        />
+                                        {cvFile ? (
+                                            <div className="flex flex-col items-center text-center space-y-2 w-full animate-fadeIn">
+                                                <FiCheckCircle className="w-8 h-8 text-emerald-500" />
+                                                <span className="text-[10px] text-slate-500 font-bold bg-slate-100/70 px-2.5 py-0.5 rounded-lg max-w-[200px] truncate" title={cvFile.name}>
+                                                    {getTrimmedFileName(cvFile, '')}
+                                                </span>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <a 
+                                                        href={cvPreview} 
+                                                        target="_blank" 
+                                                        rel="noreferrer" 
+                                                        title="View File"
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <FiEye className="w-3.5 h-3.5 text-indigo-650" /> View
+                                                    </a>
+                                                    <label 
+                                                        htmlFor="cv-upload-input"
+                                                        title="Change Document"
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                                    >
+                                                        <FiEdit2 className="w-3.5 h-3.5 text-amber-600" /> Change
+                                                    </label>
+                                                    <button
+                                                        type="button"
+                                                        title="Remove Document"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            e.preventDefault();
+                                                            setCvFile(null);
+                                                            setCvPreview('');
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-100 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                    >
+                                                        <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <label 
+                                                htmlFor="cv-upload-input"
+                                                className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-4"
+                                            >
+                                                <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                                <span className="text-xs font-bold text-slate-700 text-center">
+                                                    Select CV/Resume (PDF/Doc)
+                                                </span>
+                                            </label>
                                         )}
                                     </div>
                                 </div>
  
                                 {/* Supporting Documents */}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">2. Supporting Board Licences / Degree pack (Optional)</label>
+                                    <label className="text-[10px] font-bold text-slate-455 uppercase block">2. Supporting Board Licences / Degree pack (Optional)</label>
                                     
-                                    <div className="flex items-center gap-3">
-                                        <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold cursor-pointer transition-colors">
-                                            {isUploading ? <FiLoader className="animate-spin text-sm" /> : <FiUploadCloud className="text-sm" />}
-                                            Add Supporting Doc
-                                            <input 
-                                                type="file"
-                                                onChange={(e) => handleFileChange(e, 'credential')}
-                                                className="hidden"
-                                                disabled={isUploading}
-                                            />
+                                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                        <input 
+                                            id="supporting-doc-input"
+                                            type="file"
+                                            onChange={(e) => handleFileChange(e, 'credential')}
+                                            className="hidden"
+                                            disabled={isUploading}
+                                        />
+                                        <label 
+                                            htmlFor="supporting-doc-input"
+                                            className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-2"
+                                        >
+                                            <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                            <span className="text-xs font-bold text-slate-700 text-center">
+                                                Add Supporting Document
+                                            </span>
                                         </label>
                                     </div>
  
                                     {/* selected pack list */}
                                     {credentialsFiles.length > 0 && (
-                                        <div className="grid grid-cols-1 gap-2 pt-1.5">
+                                        <div className="grid grid-cols-1 gap-3 pt-2">
                                             {credentialsFiles.map((file, index) => (
-                                                <div key={index} className="flex justify-between items-center bg-slate-50 border border-slate-150 p-2.5 rounded-xl text-[10px]">
-                                                    <span className="truncate max-w-[300px] text-slate-500 font-bold">{file.name}</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveCredential(index)}
-                                                        className="p-1 text-red-500 hover:text-red-700 bg-white border border-slate-150 rounded-lg cursor-pointer"
-                                                        title="Remove document"
-                                                    >
-                                                        <FiX />
-                                                    </button>
+                                                <div key={index} className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-2xl">
+                                                    <div className="flex items-center gap-2">
+                                                        <FiCheckCircle className="text-emerald-505 w-4 h-4" />
+                                                        <span className="text-xs text-slate-550 font-bold bg-slate-100/70 px-2 py-0.5 rounded-lg max-w-[180px] truncate" title={file.name}>
+                                                            {getTrimmedFileName(file, '')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <a 
+                                                            href={credentialsPreviews[index]} 
+                                                            target="_blank" 
+                                                            rel="noreferrer" 
+                                                            title="View File"
+                                                            className="flex items-center gap-0 sm:gap-1.5 p-1.5 sm:px-3 sm:py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <FiEye className="w-3.5 h-3.5 text-indigo-650" />
+                                                            <span className="hidden sm:inline">View</span>
+                                                        </a>
+                                                        <button
+                                                            type="button"
+                                                            title="Remove File"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                handleRemoveCredential(index);
+                                                            }}
+                                                            className="flex items-center gap-0 sm:gap-1.5 p-1.5 sm:px-3 sm:py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-150 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiTrash2 className="w-3.5 h-3.5 text-red-500" />
+                                                            <span className="hidden sm:inline">Remove</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>

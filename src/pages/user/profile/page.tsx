@@ -11,7 +11,8 @@ import {
     FiUser,
     FiBriefcase,
     FiCreditCard,
-    FiMail
+    FiMail,
+    FiExternalLink
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -178,6 +179,72 @@ export default function UserProfilePage() {
                                 : 'Onboarding certificates are in review. Premium features activate once verified.'}
                         </p>
                     </div>
+
+                    {user?.onboarding_status === 'approved' && (
+                        <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 space-y-3">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Verified Credentials</h4>
+                            
+                            <div className="space-y-2.5 text-xs text-slate-600">
+                                <div className="border-b border-slate-50 pb-2">
+                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Registration Type</span>
+                                    <span className="font-extrabold text-slate-700">
+                                        {user.is_intern ? 'Clinical Intern / Student' : 'Fully Licensed Practitioner'}
+                                    </span>
+                                </div>
+
+                                {!user.is_intern ? (
+                                    <>
+                                        <div className="border-b border-slate-50 pb-2">
+                                            <span className="text-[9px] font-bold text-slate-400 block uppercase">License Number</span>
+                                            <span className="font-mono font-bold text-slate-700">{user.licence_number || 'N/A'}</span>
+                                        </div>
+                                        <div className="border-b border-slate-50 pb-2">
+                                            <span className="text-[9px] font-bold text-slate-400 block uppercase">License Expiration</span>
+                                            <span className="font-bold text-slate-700">{user.licence_expiry || 'N/A'}</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Placement / Dean Letter</span>
+                                        {user.school_or_placement_letter_url ? (
+                                            <a href={user.school_or_placement_letter_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                                View Placement Letter <FiExternalLink className="text-[10px]" />
+                                            </a>
+                                        ) : (
+                                            <span className="text-slate-400">Not provided</span>
+                                        )}
+                                    </div>
+                                )}
+
+                                {!user.is_intern && user.licence_document_url && (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Medical License Doc</span>
+                                        <a href={user.licence_document_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View License Certificate <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+
+                                {user.degree_document_url && (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Degree/Diploma</span>
+                                        <a href={user.degree_document_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Degree/Diploma <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+
+                                {user.id_document_url && (
+                                    <div>
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Government Photo ID</span>
+                                        <a href={user.id_document_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Photo ID Document <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Form Inputs Column */}

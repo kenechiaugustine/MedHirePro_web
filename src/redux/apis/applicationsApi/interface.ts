@@ -21,6 +21,16 @@ export interface ICandidateDetails {
     email?: string;
     specialty?: string;
     avatar_url?: string;
+    is_verified?: boolean;
+    employment_status?: string | null;
+    current_workplace?: string | null;
+    is_intern?: boolean;
+    licence_number?: string | null;
+    licence_expiry?: string | null;
+    licence_document_url?: string | null;
+    degree_document_url?: string | null;
+    id_document_url?: string | null;
+    school_or_placement_letter_url?: string | null;
 }
 
 export interface IApplicationResponse {

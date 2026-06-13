@@ -18,10 +18,42 @@ import {
     FiBriefcase,
     FiMapPin,
     FiCheck,
-    FiExternalLink,
-    FiHome
+    FiHome,
+    FiEye,
+    FiEdit2,
+    FiTrash2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+
+const getTrimmedFileName = (file: File | null, url: string, maxLength = 22) => {
+    let name = '';
+    if (file) {
+        name = file.name;
+    } else if (url) {
+        try {
+            const decoded = decodeURIComponent(url);
+            name = decoded.substring(decoded.lastIndexOf('/') + 1);
+            if (name.includes('?')) {
+                name = name.split('?')[0];
+            }
+        } catch (e) {
+            name = 'document.pdf';
+        }
+    }
+    if (!name) return 'document';
+    if (name.length <= maxLength) return name;
+    
+    const dotIdx = name.lastIndexOf('.');
+    if (dotIdx !== -1 && name.length - dotIdx <= 8) {
+        const ext = name.substring(dotIdx);
+        const nameWithoutExt = name.substring(0, dotIdx);
+        const keepLen = maxLength - ext.length - 3;
+        if (keepLen > 0) {
+            return nameWithoutExt.substring(0, keepLen) + '...' + ext;
+        }
+    }
+    return name.substring(0, maxLength - 3) + '...';
+};
 
 const FACILITY_TYPE_OPTIONS = [
     { label: 'Acute Care Hospital', value: 'Acute Care Hospital', group: 'Facility Type' },
@@ -253,9 +285,9 @@ export default function InstituteOnboardingPage() {
         if (facilityType) completed++;
         if (street) completed++;
         if (city && state && zip) completed++;
-        if (licenseUrl) completed++;
-        if (proofAddressUrl) completed++;
-        if (repIdUrl) completed++;
+        if (licenseUrl || licenseFile) completed++;
+        if (proofAddressUrl || proofAddressFile) completed++;
+        if (repIdUrl || repIdFile) completed++;
         if (street && city) completed++; // Sub Address complete
 
         return Math.min(100, Math.round((completed / total) * 100));
@@ -500,31 +532,31 @@ export default function InstituteOnboardingPage() {
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${licenseUrl ? 'bg-indigo-50 text-indigo-600 font-black' : 'bg-slate-50 text-slate-300'
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${(licenseFile || licenseUrl) ? 'bg-indigo-50 text-indigo-600 font-black' : 'bg-slate-50 text-slate-300'
                                     }`}>
-                                    {licenseUrl ? <FiCheck className="w-3.5 h-3.5" /> : '4'}
+                                    {(licenseFile || licenseUrl) ? <FiCheck className="w-3.5 h-3.5" /> : '4'}
                                 </span>
-                                <span className={`text-xs font-semibold ${licenseUrl ? 'text-slate-700' : 'text-slate-400'}`}>
+                                <span className={`text-xs font-semibold ${(licenseFile || licenseUrl) ? 'text-slate-700' : 'text-slate-400'}`}>
                                     Corporate Practice Permit
                                 </span>
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${proofAddressUrl ? 'bg-indigo-50 text-indigo-600 font-black' : 'bg-slate-50 text-slate-300'
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${(proofAddressFile || proofAddressUrl) ? 'bg-indigo-50 text-indigo-600 font-black' : 'bg-slate-50 text-slate-300'
                                     }`}>
-                                    {proofAddressUrl ? <FiCheck className="w-3.5 h-3.5" /> : '5'}
+                                    {(proofAddressFile || proofAddressUrl) ? <FiCheck className="w-3.5 h-3.5" /> : '5'}
                                 </span>
-                                <span className={`text-xs font-semibold ${proofAddressUrl ? 'text-slate-700' : 'text-slate-400'}`}>
+                                <span className={`text-xs font-semibold ${(proofAddressFile || proofAddressUrl) ? 'text-slate-700' : 'text-slate-400'}`}>
                                     Corporate Proof of Address
                                 </span>
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${repIdUrl ? 'bg-indigo-50 text-indigo-600 font-black' : 'bg-slate-50 text-slate-300'
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${(repIdFile || repIdUrl) ? 'bg-indigo-50 text-indigo-600 font-black' : 'bg-slate-50 text-slate-300'
                                     }`}>
-                                    {repIdUrl ? <FiCheck className="w-3.5 h-3.5" /> : '6'}
+                                    {(repIdFile || repIdUrl) ? <FiCheck className="w-3.5 h-3.5" /> : '6'}
                                 </span>
-                                <span className={`text-xs font-semibold ${repIdUrl ? 'text-slate-700' : 'text-slate-400'}`}>
+                                <span className={`text-xs font-semibold ${(repIdFile || repIdUrl) ? 'text-slate-700' : 'text-slate-400'}`}>
                                     Representative Legal ID
                                 </span>
                             </div>
@@ -648,23 +680,64 @@ export default function InstituteOnboardingPage() {
                                     {/* Business License */}
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-slate-455 block">Business Licensure or Medical Practice Permit Document <span className="text-red-500">*</span></label>
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${licenseFile || licenseUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
-                                                <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {licenseFile ? `Selected: ${licenseFile.name}` : licenseUrl ? 'License document loaded!' : 'Select Corporate License'}
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileSelect(e, setLicenseFile)}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                            {licensePreview && (
-                                                <a href={licensePreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
-                                                    <FiExternalLink className="w-5 h-5 text-indigo-600" />
-                                                </a>
+                                        <div className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                            <input
+                                                id="license-upload"
+                                                type="file"
+                                                accept="image/*,.pdf"
+                                                onChange={(e) => handleFileSelect(e, setLicenseFile)}
+                                                className="hidden"
+                                            />
+                                            {licenseFile || licenseUrl ? (
+                                                <div className="flex flex-col items-center text-center space-y-2 w-full animate-fadeIn">
+                                                    <FiCheckCircle className="w-8 h-8 text-emerald-500" />
+                                                    <span className="text-[10px] text-slate-500 font-bold bg-slate-100/70 px-2.5 py-0.5 rounded-lg max-w-[200px] truncate" title={licenseFile?.name || licenseUrl}>
+                                                        {getTrimmedFileName(licenseFile, licenseUrl)}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <a 
+                                                            href={licensePreview} 
+                                                            target="_blank" 
+                                                            rel="noreferrer" 
+                                                            title="View Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <FiEye className="w-3.5 h-3.5 text-indigo-600" /> View
+                                                        </a>
+                                                        <label 
+                                                            htmlFor="license-upload"
+                                                            title="Change Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiEdit2 className="w-3.5 h-3.5 text-amber-600" /> Change
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            title="Remove Document"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                setLicenseFile(null);
+                                                                setLicenseUrl('');
+                                                                setLicensePreview('');
+                                                            }}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-100 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <label 
+                                                    htmlFor="license-upload"
+                                                    className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-4"
+                                                >
+                                                    <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                                    <span className="text-xs font-bold text-slate-700 text-center">
+                                                        Select Corporate License
+                                                    </span>
+                                                </label>
                                             )}
                                         </div>
                                     </div>
@@ -672,23 +745,64 @@ export default function InstituteOnboardingPage() {
                                     {/* Proof of Corporate Address */}
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-slate-455 block">Official Proof of Corporate Address (Utility Bill, Tenancy Agreement) <span className="text-red-500">*</span></label>
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${proofAddressFile || proofAddressUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
-                                                <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {proofAddressFile ? `Selected: ${proofAddressFile.name}` : proofAddressUrl ? 'Address proof loaded!' : 'Select Proof of Address'}
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileSelect(e, setProofAddressFile)}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                            {proofAddressPreview && (
-                                                <a href={proofAddressPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
-                                                    <FiExternalLink className="w-5 h-5 text-indigo-600" />
-                                                </a>
+                                        <div className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                            <input
+                                                id="proof-address-upload"
+                                                type="file"
+                                                accept="image/*,.pdf"
+                                                onChange={(e) => handleFileSelect(e, setProofAddressFile)}
+                                                className="hidden"
+                                            />
+                                            {proofAddressFile || proofAddressUrl ? (
+                                                <div className="flex flex-col items-center text-center space-y-2 w-full animate-fadeIn">
+                                                    <FiCheckCircle className="w-8 h-8 text-emerald-500" />
+                                                    <span className="text-[10px] text-slate-500 font-bold bg-slate-100/70 px-2.5 py-0.5 rounded-lg max-w-[200px] truncate" title={proofAddressFile?.name || proofAddressUrl}>
+                                                        {getTrimmedFileName(proofAddressFile, proofAddressUrl)}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <a 
+                                                            href={proofAddressPreview} 
+                                                            target="_blank" 
+                                                            rel="noreferrer" 
+                                                            title="View Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <FiEye className="w-3.5 h-3.5 text-indigo-600" /> View
+                                                        </a>
+                                                        <label 
+                                                            htmlFor="proof-address-upload"
+                                                            title="Change Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiEdit2 className="w-3.5 h-3.5 text-amber-600" /> Change
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            title="Remove Document"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                setProofAddressFile(null);
+                                                                setProofAddressUrl('');
+                                                                setProofAddressPreview('');
+                                                            }}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-100 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <label 
+                                                    htmlFor="proof-address-upload"
+                                                    className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-4"
+                                                >
+                                                    <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                                    <span className="text-xs font-bold text-slate-700 text-center">
+                                                        Select Proof of Address
+                                                    </span>
+                                                </label>
                                             )}
                                         </div>
                                     </div>
@@ -696,23 +810,64 @@ export default function InstituteOnboardingPage() {
                                     {/* Representative ID */}
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-slate-455 block">Representative Legal ID (Passport, National ID or Recruiter License Card) <span className="text-red-500">*</span></label>
-                                        <div className="flex items-center gap-4">
-                                            <label className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl cursor-pointer transition-all">
-                                                <FiUploadCloud className={`w-8 h-8 ${repIdFile || repIdUrl ? 'text-emerald-500' : 'text-slate-400'} mb-2`} />
-                                                <span className="text-xs font-bold text-slate-700 text-center">
-                                                    {repIdFile ? `Selected: ${repIdFile.name}` : repIdUrl ? 'ID document loaded!' : 'Select Representative ID'}
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*,.pdf"
-                                                    onChange={(e) => handleFileSelect(e, setRepIdFile)}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                            {repIdPreview && (
-                                                <a href={repIdPreview} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0">
-                                                    <FiExternalLink className="w-5 h-5 text-indigo-600" />
-                                                </a>
+                                        <div className="flex flex-col items-center justify-center flex-grow p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                            <input
+                                                id="rep-id-upload"
+                                                type="file"
+                                                accept="image/*,.pdf"
+                                                onChange={(e) => handleFileSelect(e, setRepIdFile)}
+                                                className="hidden"
+                                            />
+                                            {repIdFile || repIdUrl ? (
+                                                <div className="flex flex-col items-center text-center space-y-2 w-full animate-fadeIn">
+                                                    <FiCheckCircle className="w-8 h-8 text-emerald-500" />
+                                                    <span className="text-[10px] text-slate-500 font-bold bg-slate-100/70 px-2.5 py-0.5 rounded-lg max-w-[200px] truncate" title={repIdFile?.name || repIdUrl}>
+                                                        {getTrimmedFileName(repIdFile, repIdUrl)}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <a 
+                                                            href={repIdPreview} 
+                                                            target="_blank" 
+                                                            rel="noreferrer" 
+                                                            title="View Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <FiEye className="w-3.5 h-3.5 text-indigo-600" /> View
+                                                        </a>
+                                                        <label 
+                                                            htmlFor="rep-id-upload"
+                                                            title="Change Document"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiEdit2 className="w-3.5 h-3.5 text-amber-600" /> Change
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            title="Remove Document"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                setRepIdFile(null);
+                                                                setRepIdUrl('');
+                                                                setRepIdPreview('');
+                                                            }}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-100 rounded-xl text-[11px] font-bold text-red-655 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <label 
+                                                    htmlFor="rep-id-upload"
+                                                    className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-4"
+                                                >
+                                                    <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                                    <span className="text-xs font-bold text-slate-700 text-center">
+                                                        Select Representative ID
+                                                    </span>
+                                                </label>
                                             )}
                                         </div>
                                     </div>

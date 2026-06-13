@@ -151,9 +151,11 @@ export default function AdminProfilePage() {
                                 Upload a clinical passport photo or logo. Supports JPG, PNG formats up to 5MB.
                             </p>
                             {avatarUrl && (
-                                <p className="text-[10px] text-teal-600 font-bold bg-teal-50 px-2 py-0.5 rounded border border-teal-150 w-fit mx-auto sm:mx-0">
-                                    Image URL Synced
-                                </p>
+                                <div className="pt-1">
+                                    <span className="text-[10px] text-teal-600 font-bold bg-teal-50 px-2 py-0.5 rounded border border-teal-150 w-fit inline-block">
+                                        Image URL Synced
+                                    </span>
+                                </div>
                             )}
                         </div>
                     </div>

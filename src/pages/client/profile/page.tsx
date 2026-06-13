@@ -10,7 +10,8 @@ import {
     FiUser,
     FiHome,
     FiCreditCard,
-    FiMail
+    FiMail,
+    FiExternalLink
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -174,6 +175,63 @@ export default function ClientProfilePage() {
                             : 'Your institute verification is pending credential audit checks. Features may be restricted.'}
                         </p>
                     </div>
+
+                    {user?.onboarding_status === 'approved' && (
+                        <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 space-y-3">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Verified Corporate Credentials</h4>
+                            
+                            <div className="space-y-2.5 text-xs text-slate-600">
+                                <div className="border-b border-slate-50 pb-2">
+                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Business Reg. Number</span>
+                                    <span className="font-mono font-bold text-slate-700">{user.business_registration_number || 'N/A'}</span>
+                                </div>
+
+                                <div className="border-b border-slate-50 pb-2">
+                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Facility Type</span>
+                                    <span className="font-extrabold text-slate-700 uppercase">{user.facility_type || 'N/A'}</span>
+                                </div>
+
+                                {user.facility_address && (
+                                    <div className="border-b border-slate-50 pb-2 font-medium text-slate-700">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Registered Address</span>
+                                        <div className="font-semibold">
+                                            {user.facility_address.street}, {user.facility_address.city}, {user.facility_address.state}
+                                        </div>
+                                        <div className="font-semibold text-slate-500">
+                                            {user.facility_address.zip}, {user.facility_address.country}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {user.business_license_url && (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Operating Permit / License</span>
+                                        <a href={user.business_license_url} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Operating License <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+
+                                {user.proof_of_address_url && (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Proof of Corporate Address</span>
+                                        <a href={user.proof_of_address_url} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Address Proof <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+
+                                {user.representative_id_url && (
+                                    <div>
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Authorized Rep Photo ID</span>
+                                        <a href={user.representative_id_url} target="_blank" rel="noreferrer" className="text-indigo-650 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Representative ID <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Profile Edit Form Column */}
