@@ -127,10 +127,20 @@ export interface IJobListingUpdate {
     on_call_requirements?: string | null;
 }
 
+export interface IPostedByResponse {
+    _id: string;
+    id: string;
+    full_name?: string;
+    facility_name?: string;
+    avatar_url?: string;
+    role: string;
+    is_verified: boolean;
+}
+
 export interface IJobListingResponse {
     _id: string;
     id: string;
-    posted_by: string;
+    posted_by: string | IPostedByResponse;
     poster_type: string;
     job_type: JobType;
     status: JobStatus;

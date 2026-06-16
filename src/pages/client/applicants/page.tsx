@@ -264,13 +264,36 @@ export default function ClientApplicantsPage() {
                                     
                                     return (
                                         <tr key={app._id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-5 max-w-xs space-y-1">
-                                                <p className="font-extrabold text-slate-800">
-                                                    Practitioner Ref: #{app._id.slice(-6).toUpperCase()}
-                                                </p>
-                                                <p className="text-[10px] text-slate-400 font-bold truncate">
-                                                    ID: {app.candidate_id}
-                                                </p>
+                                            <td className="px-6 py-5 max-w-xs">
+                                                <div className="flex items-center gap-3">
+                                                    {app.candidate_details?.avatar_url ? (
+                                                        <img 
+                                                            src={app.candidate_details.avatar_url} 
+                                                            alt={app.candidate_details.full_name || 'Practitioner'} 
+                                                            className="w-10 h-10 rounded-full object-cover border border-slate-100 shadow-sm flex-shrink-0"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-650 font-black text-xs flex-shrink-0">
+                                                            {app.candidate_details?.full_name 
+                                                                ? app.candidate_details.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                                                                : 'CD'
+                                                            }
+                                                        </div>
+                                                    )}
+                                                    <div className="space-y-0.5 truncate">
+                                                        <p className="font-extrabold text-slate-805 truncate" title={app.candidate_details?.full_name || 'Practitioner'}>
+                                                            {app.candidate_details?.full_name || 'Practitioner'}
+                                                        </p>
+                                                        <p className="text-[10px] text-slate-400 font-bold truncate">
+                                                            {app.candidate_details?.email || `ID: ${app.candidate_id}`}
+                                                        </p>
+                                                        {app.candidate_details?.specialty && (
+                                                            <span className="inline-block text-[9px] font-bold text-indigo-650 bg-indigo-50/50 px-1.5 py-0.5 rounded border border-indigo-100/30">
+                                                                {app.candidate_details.specialty.replace(/_/g, ' ')}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </td>
 
                                             <td className="px-6 py-5 max-w-xs space-y-1">
@@ -420,7 +443,7 @@ export default function ClientApplicantsPage() {
                                 
                                 {/* Header */}
                                 <div className="flex justify-between items-start">
-                                    <div className="space-y-1 max-w-[70%]">
+                                    <div className="space-y-1.5 max-w-[70%]">
                                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase border ${getStatusStyles(app.application_status)}`}>
                                             <span className={`h-1.5 w-1.5 rounded-full inline-block ${
                                                 app.application_status === 'ACCEPTED' ? 'bg-emerald-500' :
@@ -429,9 +452,31 @@ export default function ClientApplicantsPage() {
                                             }`} />
                                             {app.application_status.replace(/_/g, ' ')}
                                         </span>
-                                        <h4 className="font-extrabold text-slate-800 text-xs">
-                                            Ref: #{app._id.slice(-6).toUpperCase()}
-                                        </h4>
+                                        {/* Candidate Profile Info */}
+                                        <div className="flex items-center gap-2 pt-1">
+                                            {app.candidate_details?.avatar_url ? (
+                                                <img 
+                                                    src={app.candidate_details.avatar_url} 
+                                                    alt={app.candidate_details.full_name || 'Practitioner'} 
+                                                    className="w-8 h-8 rounded-full object-cover border border-slate-100 flex-shrink-0"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-650 font-black text-[9px] flex-shrink-0">
+                                                    {app.candidate_details?.full_name 
+                                                        ? app.candidate_details.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                                                        : 'CD'
+                                                    }
+                                                </div>
+                                            )}
+                                            <div className="leading-tight truncate">
+                                                <h4 className="font-extrabold text-slate-800 text-xs truncate" title={app.candidate_details?.full_name || 'Practitioner'}>
+                                                    {app.candidate_details?.full_name || 'Practitioner'}
+                                                </h4>
+                                                <p className="text-[9px] text-slate-400 font-bold truncate">
+                                                    {app.candidate_details?.email || `Ref: #${app._id.slice(-6).toUpperCase()}`}
+                                                </p>
+                                            </div>
+                                        </div>
                                         <p 
                                             onClick={() => job && navigate(`/client/jobs/view/${job._id}`)}
                                             className="font-extrabold text-slate-850 hover:text-indigo-600 transition-colors text-[11px] truncate cursor-pointer pt-0.5"

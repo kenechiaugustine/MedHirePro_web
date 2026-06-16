@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { 
@@ -40,6 +40,17 @@ export default function ClientJobDetailsPage() {
     const [updateStatus, { isLoading: isStatusUpdating }] = useUpdateApplicationStatusMutation();
 
     const [processingAppId, setProcessingAppId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'ALL' | 'SHORTLISTED' | 'HIRED' | 'DECLINED'>('ALL');
+
+    const filteredApps = useMemo(() => {
+        if (!applications) return [];
+        return applications.filter(app => {
+            if (activeTab === 'SHORTLISTED') return app.is_shortlisted && app.application_status !== 'DECLINED';
+            if (activeTab === 'HIRED') return app.application_status === 'ACCEPTED';
+            if (activeTab === 'DECLINED') return app.application_status === 'DECLINED';
+            return true;
+        });
+    }, [applications, activeTab]);
 
     const handleShortlist = async (appId: string, currentShortlisted: boolean) => {
         setProcessingAppId(appId);
@@ -424,6 +435,49 @@ export default function ClientJobDetailsPage() {
                         Audit qualifications, download compliance credential files, and select candidates for clinical placements.
                     </p>
                 </div>
+                {/* Tabs bar */}
+                <div className="flex border-b border-slate-100 pb-px">
+                    <button
+                        onClick={() => setActiveTab('ALL')}
+                        className={`pb-3 px-4 text-xs font-bold transition-all relative border-b-2 cursor-pointer ${
+                            activeTab === 'ALL'
+                                ? 'text-indigo-650 border-indigo-600 font-extrabold'
+                                : 'text-slate-400 border-transparent hover:text-slate-600'
+                        }`}
+                    >
+                        All ({applications?.length || 0})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('SHORTLISTED')}
+                        className={`pb-3 px-4 text-xs font-bold transition-all relative border-b-2 cursor-pointer ${
+                            activeTab === 'SHORTLISTED'
+                                ? 'text-blue-655 border-blue-600 font-extrabold'
+                                : 'text-slate-400 border-transparent hover:text-slate-600'
+                        }`}
+                    >
+                        Shortlisted ({applications?.filter(a => a.is_shortlisted && a.application_status !== 'DECLINED').length || 0})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('HIRED')}
+                        className={`pb-3 px-4 text-xs font-bold transition-all relative border-b-2 cursor-pointer ${
+                            activeTab === 'HIRED'
+                                ? 'text-emerald-650 border-emerald-600 font-extrabold'
+                                : 'text-slate-400 border-transparent hover:text-slate-600'
+                        }`}
+                    >
+                        Hired ({applications?.filter(a => a.application_status === 'ACCEPTED').length || 0})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('DECLINED')}
+                        className={`pb-3 px-4 text-xs font-bold transition-all relative border-b-2 cursor-pointer ${
+                            activeTab === 'DECLINED'
+                                ? 'text-red-655 border-red-600 font-extrabold'
+                                : 'text-slate-400 border-transparent hover:text-slate-600'
+                        }`}
+                    >
+                        Declined ({applications?.filter(a => a.application_status === 'DECLINED').length || 0})
+                    </button>
+                </div>
 
                 {isAppsLoading ? (
                     <div className="flex h-32 items-center justify-center">
@@ -444,6 +498,21 @@ export default function ClientJobDetailsPage() {
                             </p>
                         </div>
                     </div>
+                ) : filteredApps.length === 0 ? (
+                    <div className="p-12 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200 space-y-3">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 mx-auto text-xl">
+                            <FiUser />
+                        </div>
+                        <div className="space-y-0.5">
+                            <h4 className="text-xs font-extrabold text-slate-800">No Candidates Found</h4>
+                            <p className="text-[10px] text-slate-455 max-w-sm mx-auto font-medium">
+                                {activeTab === 'SHORTLISTED' && "You haven't shortlisted any candidates for this placement campaign yet."}
+                                {activeTab === 'HIRED' && "No candidates have been contracted or hired for this campaign yet."}
+                                {activeTab === 'DECLINED' && "There are no declined applicants for this placement campaign."}
+                                {activeTab === 'ALL' && "No candidates found."}
+                            </p>
+                        </div>
+                    </div>
                 ) : (
                     <>
                         {/* Desktop Table Layout */}
@@ -460,19 +529,42 @@ export default function ClientJobDetailsPage() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 text-xs text-slate-750">
-                                        {applications.map((app) => {
+                                        {filteredApps.map((app) => {
                                             const isProcessing = processingAppId === app._id;
                                             
                                             return (
                                                 <tr key={app._id} className="hover:bg-slate-50/50 transition-colors">
-                                                    <td className="px-6 py-5 max-w-xs space-y-1">
-                                                        <p className="font-extrabold text-slate-800">
-                                                            Ref: #{app._id.slice(-6).toUpperCase()}
-                                                        </p>
-                                                        <p className="text-[10px] text-slate-400 font-bold truncate">
-                                                            ID: {app.candidate_id}
-                                                        </p>
-                                                    </td>
+                                                    <td className="px-6 py-5 max-w-xs">
+                                                         <div className="flex items-center gap-3">
+                                                             {app.candidate_details?.avatar_url ? (
+                                                                 <img 
+                                                                     src={app.candidate_details.avatar_url} 
+                                                                     alt={app.candidate_details.full_name || 'Practitioner'} 
+                                                                     className="w-10 h-10 rounded-full object-cover border border-slate-100 shadow-sm flex-shrink-0"
+                                                                 />
+                                                             ) : (
+                                                                 <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-650 font-black text-xs flex-shrink-0">
+                                                                     {app.candidate_details?.full_name 
+                                                                         ? app.candidate_details.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                                                                         : 'CD'
+                                                                     }
+                                                                 </div>
+                                                             )}
+                                                             <div className="space-y-0.5 truncate">
+                                                                 <p className="font-extrabold text-slate-805 truncate" title={app.candidate_details?.full_name || 'Practitioner'}>
+                                                                     {app.candidate_details?.full_name || 'Practitioner'}
+                                                                 </p>
+                                                                 <p className="text-[10px] text-slate-400 font-bold truncate">
+                                                                     {app.candidate_details?.email || `ID: ${app.candidate_id}`}
+                                                                 </p>
+                                                                 {app.candidate_details?.specialty && (
+                                                                     <span className="inline-block text-[9px] font-bold text-indigo-650 bg-indigo-50/50 px-1.5 py-0.5 rounded border border-indigo-100/30">
+                                                                         {app.candidate_details.specialty.replace(/_/g, ' ')}
+                                                                     </span>
+                                                                 )}
+                                                             </div>
+                                                         </div>
+                                                     </td>
 
                                                     <td className="px-6 py-5 whitespace-nowrap text-slate-450 font-semibold">
                                                         {new Date(app.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -566,7 +658,7 @@ export default function ClientJobDetailsPage() {
 
                         {/* Mobile Responsive Cards Layout */}
                         <div className="grid grid-cols-1 gap-4 lg:hidden">
-                            {applications.map((app) => {
+                            {filteredApps.map((app) => {
                                 const isProcessing = processingAppId === app._id;
                                 
                                 return (
@@ -574,17 +666,36 @@ export default function ClientJobDetailsPage() {
                                         
                                         {/* Header */}
                                         <div className="flex justify-between items-start">
-                                            <div className="space-y-1 max-w-[70%]">
+                                            <div className="space-y-1.5 max-w-[70%]">
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase border ${getStatusStyles(app.application_status)}`}>
                                                     <span className={`h-1.5 w-1.5 rounded-full inline-block ${getStatusDotColor(app.application_status)}`} />
                                                     {app.application_status.replace(/_/g, ' ')}
                                                 </span>
-                                                <h4 className="font-extrabold text-slate-800 text-xs">
-                                                    Ref: #{app._id.slice(-6).toUpperCase()}
-                                                </h4>
-                                                <p className="text-[10px] text-slate-400 font-bold truncate">
-                                                    ID: {app.candidate_id}
-                                                </p>
+                                                {/* Candidate Profile Info */}
+                                                <div className="flex items-center gap-2 pt-1">
+                                                    {app.candidate_details?.avatar_url ? (
+                                                        <img 
+                                                            src={app.candidate_details.avatar_url} 
+                                                            alt={app.candidate_details.full_name || 'Practitioner'} 
+                                                            className="w-8 h-8 rounded-full object-cover border border-slate-100 flex-shrink-0"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-650 font-black text-[9px] flex-shrink-0">
+                                                            {app.candidate_details?.full_name 
+                                                                ? app.candidate_details.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                                                                : 'CD'
+                                                            }
+                                                        </div>
+                                                    )}
+                                                    <div className="leading-tight truncate">
+                                                        <h4 className="font-extrabold text-slate-800 text-xs truncate" title={app.candidate_details?.full_name || 'Practitioner'}>
+                                                            {app.candidate_details?.full_name || 'Practitioner'}
+                                                        </h4>
+                                                        <p className="text-[9px] text-slate-400 font-bold truncate">
+                                                            {app.candidate_details?.email || `Ref: #${app._id.slice(-6).toUpperCase()}`}
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <span className="text-[9px] font-bold text-slate-450">
                                                 {new Date(app.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}

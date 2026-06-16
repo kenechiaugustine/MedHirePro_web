@@ -58,7 +58,8 @@ export default function AdminJobApplicantsPage() {
         return acc;
     }, {} as Record<string, any>);
 
-    const postedByClinic = userMap[job.posted_by]?.facility_name || 'System Sponsor Clinic';
+    const postedById = typeof job.posted_by === 'object' ? job.posted_by._id : job.posted_by;
+    const postedByClinic = (typeof job.posted_by === 'object' ? job.posted_by.facility_name : null) || userMap[postedById]?.facility_name || 'System Sponsor Clinic';
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 animate-fadeIn duration-200">

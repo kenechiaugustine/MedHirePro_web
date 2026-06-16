@@ -368,7 +368,8 @@ export default function AdminLocumJobsPage() {
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
                                 {filteredJobs.map((job) => {
-                                    const posterName = userMap[job.posted_by] || 'MedHire Host Clinic';
+                                    const postedById = typeof job.posted_by === 'object' ? job.posted_by._id : job.posted_by;
+                                    const posterName = (typeof job.posted_by === 'object' ? (job.posted_by.facility_name || job.posted_by.full_name) : null) || userMap[postedById] || 'MedHire Host Clinic';
 
                                     const startStr = job.coverage_start_date
                                         ? new Date(job.coverage_start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
