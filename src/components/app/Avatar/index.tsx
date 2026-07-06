@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+
 interface AvatarProps {
     name?: string | null;
     avatarUrl?: string | null;
@@ -6,6 +8,13 @@ interface AvatarProps {
 }
 
 const Avatar = ({ name, avatarUrl, size = 'md', role = 'professional' }: AvatarProps) => {
+    const [hasError, setHasError] = useState(false);
+
+    // Reset error state when avatarUrl changes
+    useEffect(() => {
+        setHasError(false);
+    }, [avatarUrl]);
+
     const getInitials = (fullName: string | null | undefined) => {
         if (!fullName) return '?';
         const parts = fullName.trim().split(/\s+/);
@@ -27,22 +36,21 @@ const Avatar = ({ name, avatarUrl, size = 'md', role = 'professional' }: AvatarP
 
     const initials = getInitials(name);
 
-    if (avatarUrl) {
+    if (avatarUrl && !hasError) {
         return (
-            <img
-                src={avatarUrl}
-                alt={name || 'User Avatar'}
-                className={`${sizeClasses[size]} rounded-full object-cover border-2 border-white shadow-md`}
-                onError={(e) => {
-                    // Fail-safe if image fails to load: clear it to fallback to initials
-                    e.currentTarget.style.display = 'none';
-                }}
-            />
+            <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white shadow-md flex-shrink-0 aspect-square relative`}>
+                <img
+                    src={avatarUrl}
+                    alt={name || 'User Avatar'}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={() => setHasError(true)}
+                />
+            </div>
         );
     }
 
     return (
-        <div className={`${sizeClasses[size]} ${bgColors[role]} rounded-full flex items-center justify-center font-semibold shadow-md border-2 border-white tracking-wider`}>
+        <div className={`${sizeClasses[size]} ${bgColors[role]} rounded-full flex items-center justify-center font-semibold shadow-md border-2 border-white tracking-wider flex-shrink-0 aspect-square`}>
             {initials}
         </div>
     );

@@ -58,7 +58,8 @@ export default function AdminJobApplicantsPage() {
         return acc;
     }, {} as Record<string, any>);
 
-    const postedByClinic = userMap[job.posted_by]?.facility_name || 'System Sponsor Clinic';
+    const postedById = typeof job.posted_by === 'object' ? job.posted_by._id : job.posted_by;
+    const postedByClinic = (typeof job.posted_by === 'object' ? job.posted_by.facility_name : null) || userMap[postedById]?.facility_name || 'System Sponsor Clinic';
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 animate-fadeIn duration-200">
@@ -94,7 +95,7 @@ export default function AdminJobApplicantsPage() {
                 <div className="md:text-right flex flex-col justify-end space-y-1">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Compensation Rate</span>
                     <span className="text-xl font-black text-slate-800">
-                        {job.currency_symbol || '$'}{job.rate_amount_min.toLocaleString()} - {job.rate_amount_max.toLocaleString()}
+                        {job.currency_symbol || '₦'}{job.rate_amount_min.toLocaleString()} - {job.rate_amount_max.toLocaleString()}
                     </span>
                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Per {job.rate_type.toLowerCase()}</span>
                 </div>

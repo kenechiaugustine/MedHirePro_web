@@ -30,7 +30,7 @@ export default function ProfessionalJobSearchPage() {
     const [settingFilter, setSettingFilter] = useState<string>('ALL');
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
     };
 
     if (isLoading) {
@@ -183,9 +183,42 @@ export default function ProfessionalJobSearchPage() {
                                         </span>
                                     </div>
 
+                                    {/* Institute / Posted By Details */}
+                                    {typeof job.posted_by === 'object' && job.posted_by && (
+                                        <div className="flex items-center gap-2 pt-0.5">
+                                            {job.posted_by.avatar_url ? (
+                                                <img 
+                                                    src={job.posted_by.avatar_url} 
+                                                    alt={job.posted_by.facility_name || 'Institute'} 
+                                                    className="w-6 h-6 rounded-full object-cover border border-slate-100"
+                                                />
+                                            ) : (
+                                                <div className="w-6 h-6 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-650 font-black text-[8px]">
+                                                    {job.posted_by.facility_name 
+                                                        ? job.posted_by.facility_name.substring(0, 2).toUpperCase()
+                                                        : 'IN'
+                                                    }
+                                                </div>
+                                            )}
+                                            <div className="flex items-center gap-1.5 truncate">
+                                                <span className="text-[10px] font-extrabold text-slate-600 truncate" title={job.posted_by.facility_name}>
+                                                    {job.posted_by.facility_name || job.posted_by.full_name || 'Medical Facility'}
+                                                </span>
+                                                {job.posted_by.is_verified && (
+                                                    <span 
+                                                        className="inline-flex items-center justify-center w-3 h-3 rounded-full bg-emerald-500 text-white text-[8px] font-black"
+                                                        title="Verified Institute"
+                                                    >
+                                                        ✓
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Title and Dept */}
                                     <div className="space-y-0.5">
-                                        <h4 className="font-extrabold text-slate-850 text-sm hover:text-indigo-600 transition-colors truncate" title={job.position_title}>
+                                        <h4 className="font-extrabold text-slate-855 text-sm hover:text-indigo-600 transition-colors truncate" title={job.position_title}>
                                             {job.position_title}
                                         </h4>
                                         <p className="text-[10px] text-slate-400 font-bold truncate">

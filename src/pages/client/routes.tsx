@@ -11,6 +11,7 @@ import ClientApplicantsPage from "./applicants/page";
 import ClientProfilePage from "./profile/page";
 import ClientSettingsPage from "./settings/page";
 import ClientReferralsPage from "./referrals/page";
+import ClientSubmitReviewPage from "./reviews/page";
 
 const clientRoutes: RouteObject[] = [
     { path: CLIENT_ROUTES.DASHBOARD, element: <ClientDashboardPage /> },
@@ -24,6 +25,7 @@ const clientRoutes: RouteObject[] = [
     { path: CLIENT_ROUTES.PROFILE, element: <ClientProfilePage /> },
     { path: CLIENT_ROUTES.SETTINGS, element: <ClientSettingsPage /> },
     { path: CLIENT_ROUTES.REFERRALS, element: <ClientReferralsPage /> },
+    { path: CLIENT_ROUTES.REVIEWS, element: <ClientSubmitReviewPage /> },
 ];
 
 export default clientRoutes;

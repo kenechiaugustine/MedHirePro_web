@@ -463,7 +463,7 @@ export default function EditJobPage() {
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide font-extrabold text-slate-700">Minimum Rate ($)</label>
+                                <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide font-extrabold text-slate-700">Minimum Rate (₦) <span className="text-red-500">*</span></label>
                                 <input
                                     type="number"
                                     required
@@ -475,7 +475,7 @@ export default function EditJobPage() {
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide font-extrabold text-slate-700">Maximum Rate ($)</label>
+                                <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide font-extrabold text-slate-700">Maximum Rate (₦) <span className="text-red-500">*</span></label>
                                 <input
                                     type="number"
                                     required

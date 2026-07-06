@@ -14,7 +14,8 @@ import {
     FiMenu,
     FiX,
     FiList,
-    FiGift
+    FiGift,
+    FiStar
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -41,6 +42,7 @@ export default function ClientLayout() {
         { name: "Job Listings", path: "/client/jobs", icon: <FiList className="text-lg" /> },
         { name: "Manage Applicants", path: "/client/applicants", icon: <FiUsers className="text-lg" /> },
         { name: "Referrals", path: "/client/referrals", icon: <FiGift className="text-lg" /> },
+        { name: "Platform Review", path: "/client/reviews", icon: <FiStar className="text-lg" /> },
         { name: "Institute Profile", path: "/client/profile", icon: <FiUser className="text-lg" /> },
         { name: "Settings", path: "/client/settings", icon: <FiSettings className="text-lg" /> },
     ];
@@ -183,7 +185,7 @@ export default function ClientLayout() {
                 </header>
 
                 {/* Sub-page Render Box */}
-                <div className="flex-grow overflow-y-auto p-4 sm:p-6 md:p-8">
+                <div className="flex-grow overflow-y-auto p-4 sm:p-6 md:p-8 scroll-smooth">
                     <Outlet />
                 </div>
             </main>

@@ -11,7 +11,8 @@ import {
     FiUser,
     FiBriefcase,
     FiCreditCard,
-    FiMail
+    FiMail,
+    FiExternalLink
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -19,35 +20,46 @@ export default function UserProfilePage() {
     // API queries & mutations
     const { data: user, isLoading: isUserLoading, refetch } = useGetMeQuery();
     const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
-    const [uploadMedia, { isLoading: isUploading }] = useUploadMediaMutation();
+    const [uploadMedia] = useUploadMediaMutation();
 
     // Local form states
     const [fullName, setFullName] = useState('');
     const [specialty, setSpecialty] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (user) {
             setFullName(user.full_name || '');
             setSpecialty(user.specialty || '');
             setAvatarUrl(user.avatar_url || '');
+            setAvatarPreview(user.avatar_url || '');
         }
     }, [user]);
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        if (!avatarFile) return;
+        const objectUrl = URL.createObjectURL(avatarFile);
+        setAvatarPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [avatarFile]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const res = await uploadMedia(formData).unwrap();
-            setAvatarUrl(res.media.url);
-            toast.success("Profile picture uploaded successfully!");
-        } catch (err: any) {
-            toast.error(err?.data?.detail || "Image upload failed.");
+        // Size check: limit to 5MB
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image size cannot exceed 5MB.");
+            return;
         }
+
+        setAvatarFile(file);
+        toast.success(`Selected profile image: ${file.name}`);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -62,16 +74,31 @@ export default function UserProfilePage() {
         }
 
         try {
+            let finalAvatarUrl = avatarUrl;
+            if (avatarFile) {
+                setIsUploading(true);
+                toast.loading('Uploading profile picture...', { id: 'profile-upload' });
+                const formData = new FormData();
+                formData.append('file', avatarFile);
+                const res = await uploadMedia(formData).unwrap();
+                finalAvatarUrl = res.media.url;
+                setAvatarUrl(finalAvatarUrl);
+                setAvatarFile(null); // Clear selected file after successful upload
+            }
+
+            toast.loading('Saving profile changes...', { id: 'profile-upload' });
             await updateProfile({
                 full_name: fullName.trim(),
                 specialty: specialty,
-                avatar_url: avatarUrl || null
+                avatar_url: finalAvatarUrl || null
             }).unwrap();
 
-            toast.success("Professional profile updated successfully!");
+            toast.success("Professional profile updated successfully!", { id: 'profile-upload' });
             refetch();
         } catch (err: any) {
-            toast.error(err?.data?.detail || "Failed to update profile settings.");
+            toast.error(err?.data?.detail || "Failed to update profile settings.", { id: 'profile-upload' });
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -152,6 +179,72 @@ export default function UserProfilePage() {
                                 : 'Onboarding certificates are in review. Premium features activate once verified.'}
                         </p>
                     </div>
+
+                    {user?.onboarding_status === 'approved' && (
+                        <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 space-y-3">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Verified Credentials</h4>
+                            
+                            <div className="space-y-2.5 text-xs text-slate-600">
+                                <div className="border-b border-slate-50 pb-2">
+                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Registration Type</span>
+                                    <span className="font-extrabold text-slate-700">
+                                        {user.is_intern ? 'Clinical Intern / Student' : 'Fully Licensed Practitioner'}
+                                    </span>
+                                </div>
+
+                                {!user.is_intern ? (
+                                    <>
+                                        <div className="border-b border-slate-50 pb-2">
+                                            <span className="text-[9px] font-bold text-slate-400 block uppercase">License Number</span>
+                                            <span className="font-mono font-bold text-slate-700">{user.licence_number || 'N/A'}</span>
+                                        </div>
+                                        <div className="border-b border-slate-50 pb-2">
+                                            <span className="text-[9px] font-bold text-slate-400 block uppercase">License Expiration</span>
+                                            <span className="font-bold text-slate-700">{user.licence_expiry || 'N/A'}</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Placement / Dean Letter</span>
+                                        {user.school_or_placement_letter_url ? (
+                                            <a href={user.school_or_placement_letter_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                                View Placement Letter <FiExternalLink className="text-[10px]" />
+                                            </a>
+                                        ) : (
+                                            <span className="text-slate-400">Not provided</span>
+                                        )}
+                                    </div>
+                                )}
+
+                                {!user.is_intern && user.licence_document_url && (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Medical License Doc</span>
+                                        <a href={user.licence_document_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View License Certificate <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+
+                                {user.degree_document_url && (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Degree/Diploma</span>
+                                        <a href={user.degree_document_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Degree/Diploma <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+
+                                {user.id_document_url && (
+                                    <div>
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Government Photo ID</span>
+                                        <a href={user.id_document_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Photo ID Document <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Form Inputs Column */}
@@ -163,7 +256,7 @@ export default function UserProfilePage() {
                             <div className="relative group">
                                 <Avatar
                                     name={user?.full_name || 'Professional'}
-                                    avatarUrl={avatarUrl}
+                                    avatarUrl={avatarPreview}
                                     size="lg"
                                     role="professional"
                                 />

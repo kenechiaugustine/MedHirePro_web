@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { 
@@ -21,9 +21,42 @@ import {
     FiUploadCloud,
     FiX,
     FiAlertCircle,
-    FiInfo
+    FiInfo,
+    FiEye,
+    FiEdit2,
+    FiTrash2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+
+const getTrimmedFileName = (file: File | null, url: string, maxLength = 22) => {
+    let name = '';
+    if (file) {
+        name = file.name;
+    } else if (url) {
+        try {
+            const decoded = decodeURIComponent(url);
+            name = decoded.substring(decoded.lastIndexOf('/') + 1);
+            if (name.includes('?')) {
+                name = name.split('?')[0];
+            }
+        } catch (e) {
+            name = 'document.pdf';
+        }
+    }
+    if (!name) return 'document';
+    if (name.length <= maxLength) return name;
+    
+    const dotIdx = name.lastIndexOf('.');
+    if (dotIdx !== -1 && name.length - dotIdx <= 8) {
+        const ext = name.substring(dotIdx);
+        const nameWithoutExt = name.substring(0, dotIdx);
+        const keepLen = maxLength - ext.length - 3;
+        if (keepLen > 0) {
+            return nameWithoutExt.substring(0, keepLen) + '...' + ext;
+        }
+    }
+    return name.substring(0, maxLength - 3) + '...';
+};
 
 export default function ProfessionalJobDetailsPage() {
     const { id } = useParams<{ id: string }>();
@@ -36,18 +69,49 @@ export default function ProfessionalJobDetailsPage() {
 
     // Mutations
     const [submitApplication, { isLoading: isSubmitting }] = useSubmitApplicationMutation();
-    const [uploadMedia, { isLoading: isUploadingMedia }] = useUploadMediaMutation();
+    const [uploadMedia] = useUploadMediaMutation();
 
     // Application Form States
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
     const [clinicalSummary, setClinicalSummary] = useState('');
-    const [cvUrl, setCvUrl] = useState('');
-    const [credentialsList, setCredentialsList] = useState<string[]>([]);
+    
+    // Selected files holding states
+    const [cvFile, setCvFile] = useState<File | null>(null);
+    const [credentialsFiles, setCredentialsFiles] = useState<File[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
+    const [cvPreview, setCvPreview] = useState('');
+    const [credentialsPreviews, setCredentialsPreviews] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (!cvFile) {
+            setCvPreview('');
+            return;
+        }
+        const objectUrl = URL.createObjectURL(cvFile);
+        setCvPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [cvFile]);
 
     const hasApplied = checkAppliedData?.applied || false;
     const activeApplication = checkAppliedData?.application || null;
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'cv' | 'credential') => {
+    const resetForm = () => {
+        setClinicalSummary('');
+        setCvFile(null);
+        setCvPreview('');
+        credentialsPreviews.forEach(url => {
+            try {
+                URL.revokeObjectURL(url);
+            } catch (err) {}
+        });
+        setCredentialsFiles([]);
+        setCredentialsPreviews([]);
+        setIsUploading(false);
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'cv' | 'credential') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -57,34 +121,34 @@ export default function ProfessionalJobDetailsPage() {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const res = await uploadMedia(formData).unwrap();
-            if (type === 'cv') {
-                setCvUrl(res.media.url);
-                toast.success("CV successfully uploaded to credentials vault!");
-            } else {
-                setCredentialsList(prev => [...prev, res.media.url]);
-                toast.success("Supporting credential document uploaded!");
-            }
-        } catch (err: any) {
-            console.error(err);
-            toast.error(err?.data?.detail || "Failed to upload document to secure storage.");
+        if (type === 'cv') {
+            setCvFile(file);
+            toast.success(`Selected CV: ${file.name}`);
+        } else {
+            setCredentialsFiles(prev => [...prev, file]);
+            const objectUrl = URL.createObjectURL(file);
+            setCredentialsPreviews(prev => [...prev, objectUrl]);
+            toast.success(`Selected supporting document: ${file.name}`);
         }
     };
 
     const handleRemoveCredential = (indexToRemove: number) => {
-        setCredentialsList(prev => prev.filter((_, idx) => idx !== indexToRemove));
+        const urlToRemove = credentialsPreviews[indexToRemove];
+        if (urlToRemove) {
+            try {
+                URL.revokeObjectURL(urlToRemove);
+            } catch (err) {}
+        }
+        setCredentialsFiles(prev => prev.filter((_, idx) => idx !== indexToRemove));
+        setCredentialsPreviews(prev => prev.filter((_, idx) => idx !== indexToRemove));
     };
 
     const handleApplySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!id || !job) return;
 
-        if (!cvUrl) {
-            toast.error("Please upload your Curriculum Vitae (CV) to proceed.");
+        if (!cvFile) {
+            toast.error("Please select your Curriculum Vitae (CV) to proceed.");
             return;
         }
 
@@ -94,27 +158,48 @@ export default function ProfessionalJobDetailsPage() {
         }
 
         try {
+            setIsUploading(true);
+            toast.loading("Uploading CV...", { id: 'job-apply-upload' });
+
+            // Upload CV
+            const cvFormData = new FormData();
+            cvFormData.append('file', cvFile);
+            const cvRes = await uploadMedia(cvFormData).unwrap();
+            const finalCvUrl = cvRes.media.url;
+
+            // Upload all credentials
+            const finalCredentialUrls: string[] = [];
+            for (let i = 0; i < credentialsFiles.length; i++) {
+                toast.loading(`Uploading supporting document ${i + 1}/${credentialsFiles.length}...`, { id: 'job-apply-upload' });
+                const credFormData = new FormData();
+                credFormData.append('file', credentialsFiles[i]);
+                const credRes = await uploadMedia(credFormData).unwrap();
+                finalCredentialUrls.push(credRes.media.url);
+            }
+
+            toast.loading("Submitting your clinical application...", { id: 'job-apply-upload' });
+
             await submitApplication({
                 vacancy_id: id,
-                curriculum_vitae_url: cvUrl,
+                curriculum_vitae_url: finalCvUrl,
                 clinical_summary: clinicalSummary,
-                credentialing_packet_urls: credentialsList
+                credentialing_packet_urls: finalCredentialUrls
             }).unwrap();
 
-            toast.success("Clinical placement application successfully submitted!");
+            toast.success("Clinical placement application successfully submitted!", { id: 'job-apply-upload' });
             setIsApplyModalOpen(false);
-            setClinicalSummary('');
-            setCvUrl('');
-            setCredentialsList([]);
+            resetForm();
             navigate(USER_ROUTES.APPLICATIONS);
         } catch (err: any) {
             console.error(err);
-            toast.error(err?.data?.detail || "Failed to submit clinical placement request.");
+            toast.error(err?.data?.detail || "Failed to submit clinical placement request.", { id: 'job-apply-upload' });
+        } finally {
+            setIsUploading(false);
         }
     };
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
     };
 
     if (isJobLoading || isCheckAppliedLoading) {
@@ -446,13 +531,13 @@ export default function ProfessionalJobDetailsPage() {
                                 </div>
                                 <button 
                                     type="button" 
-                                    onClick={() => setIsApplyModalOpen(false)}
+                                    onClick={() => { setIsApplyModalOpen(false); resetForm(); }}
                                     className="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg cursor-pointer"
-                                >
+                                  >
                                     <FiX />
                                 </button>
                             </div>
-
+ 
                             {/* Alert/Guidelines */}
                             <div className="p-3 rounded-xl border bg-indigo-50/50 border-indigo-100 text-indigo-850 text-[10px] font-semibold leading-relaxed flex gap-2">
                                 <FiInfo className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
@@ -460,69 +545,139 @@ export default function ProfessionalJobDetailsPage() {
                                     <strong>Credentials Vault:</strong> All documents are uploaded securely and processed via Cloudinary encryption. Verify the license requirements match your profile.
                                 </p>
                             </div>
-
+ 
                             <div className="space-y-4 text-xs font-semibold text-slate-700">
                                 {/* CV / Resume Upload */}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">1. Upload Curriculum Vitae (CV)</label>
-                                    
-                                    <div className="flex items-center gap-3">
-                                        <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-55 hover:bg-indigo-100 border border-indigo-150 hover:border-indigo-200 text-indigo-600 rounded-xl text-xs font-black cursor-pointer transition-colors">
-                                            {isUploadingMedia ? <FiLoader className="animate-spin text-sm" /> : <FiUploadCloud className="text-sm" />}
-                                            {cvUrl ? 'CV Uploaded!' : 'Select PDF/Doc File'}
-                                            <input 
-                                                type="file"
-                                                accept=".pdf,.doc,.docx"
-                                                onChange={(e) => handleFileChange(e, 'cv')}
-                                                className="hidden"
-                                                disabled={isUploadingMedia}
-                                            />
-                                        </label>
-                                        {cvUrl && (
-                                            <span className="text-[10px] text-emerald-600 bg-emerald-50 px-2.5 py-1.5 rounded-xl border border-emerald-100 truncate max-w-[240px]">
-                                                Secure Link Synced
-                                            </span>
+                                    <label className="text-[10px] font-bold text-slate-455 uppercase block">1. Upload Curriculum Vitae (CV) <span className="text-red-500">*</span></label>
+                                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                        <input 
+                                            id="cv-upload-input"
+                                            type="file"
+                                            accept=".pdf,.doc,.docx"
+                                            onChange={(e) => handleFileChange(e, 'cv')}
+                                            className="hidden"
+                                            disabled={isUploading}
+                                        />
+                                        {cvFile ? (
+                                            <div className="flex flex-col items-center text-center space-y-2 w-full animate-fadeIn">
+                                                <FiCheckCircle className="w-8 h-8 text-emerald-500" />
+                                                <span className="text-[10px] text-slate-500 font-bold bg-slate-100/70 px-2.5 py-0.5 rounded-lg max-w-[200px] truncate" title={cvFile.name}>
+                                                    {getTrimmedFileName(cvFile, '')}
+                                                </span>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <a 
+                                                        href={cvPreview} 
+                                                        target="_blank" 
+                                                        rel="noreferrer" 
+                                                        title="View File"
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <FiEye className="w-3.5 h-3.5 text-indigo-650" /> View
+                                                    </a>
+                                                    <label 
+                                                        htmlFor="cv-upload-input"
+                                                        title="Change Document"
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                                    >
+                                                        <FiEdit2 className="w-3.5 h-3.5 text-amber-600" /> Change
+                                                    </label>
+                                                    <button
+                                                        type="button"
+                                                        title="Remove Document"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            e.preventDefault();
+                                                            setCvFile(null);
+                                                            setCvPreview('');
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-100 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                    >
+                                                        <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <label 
+                                                htmlFor="cv-upload-input"
+                                                className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-4"
+                                            >
+                                                <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                                <span className="text-xs font-bold text-slate-700 text-center">
+                                                    Select CV/Resume (PDF/Doc)
+                                                </span>
+                                            </label>
                                         )}
                                     </div>
                                 </div>
-
+ 
                                 {/* Supporting Documents */}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">2. Supporting Board Licences / Degree pack (Optional)</label>
+                                    <label className="text-[10px] font-bold text-slate-455 uppercase block">2. Supporting Board Licences / Degree pack (Optional)</label>
                                     
-                                    <div className="flex items-center gap-3">
-                                        <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold cursor-pointer transition-colors">
-                                            {isUploadingMedia ? <FiLoader className="animate-spin text-sm" /> : <FiUploadCloud className="text-sm" />}
-                                            Add Supporting Doc
-                                            <input 
-                                                type="file"
-                                                onChange={(e) => handleFileChange(e, 'credential')}
-                                                className="hidden"
-                                                disabled={isUploadingMedia}
-                                            />
+                                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50/50 rounded-2xl transition-all relative">
+                                        <input 
+                                            id="supporting-doc-input"
+                                            type="file"
+                                            onChange={(e) => handleFileChange(e, 'credential')}
+                                            className="hidden"
+                                            disabled={isUploading}
+                                        />
+                                        <label 
+                                            htmlFor="supporting-doc-input"
+                                            className="flex flex-col items-center justify-center w-full h-full cursor-pointer py-2"
+                                        >
+                                            <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                                            <span className="text-xs font-bold text-slate-700 text-center">
+                                                Add Supporting Document
+                                            </span>
                                         </label>
                                     </div>
-
-                                    {/* Uploaded pack list */}
-                                    {credentialsList.length > 0 && (
-                                        <div className="grid grid-cols-1 gap-2 pt-1.5">
-                                            {credentialsList.map((_, index) => (
-                                                <div key={index} className="flex justify-between items-center bg-slate-50 border border-slate-150 p-2.5 rounded-xl text-[10px]">
-                                                    <span className="truncate max-w-[300px] text-slate-500 font-bold">CredentialDoc_{index + 1}.pdf</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveCredential(index)}
-                                                        className="p-1 text-red-500 hover:text-red-700 bg-white border border-slate-150 rounded-lg cursor-pointer"
-                                                        title="Remove document"
-                                                    >
-                                                        <FiX />
-                                                    </button>
+ 
+                                    {/* selected pack list */}
+                                    {credentialsFiles.length > 0 && (
+                                        <div className="grid grid-cols-1 gap-3 pt-2">
+                                            {credentialsFiles.map((file, index) => (
+                                                <div key={index} className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-2xl">
+                                                    <div className="flex items-center gap-2">
+                                                        <FiCheckCircle className="text-emerald-505 w-4 h-4" />
+                                                        <span className="text-xs text-slate-550 font-bold bg-slate-100/70 px-2 py-0.5 rounded-lg max-w-[180px] truncate" title={file.name}>
+                                                            {getTrimmedFileName(file, '')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <a 
+                                                            href={credentialsPreviews[index]} 
+                                                            target="_blank" 
+                                                            rel="noreferrer" 
+                                                            title="View File"
+                                                            className="flex items-center gap-0 sm:gap-1.5 p-1.5 sm:px-3 sm:py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <FiEye className="w-3.5 h-3.5 text-indigo-650" />
+                                                            <span className="hidden sm:inline">View</span>
+                                                        </a>
+                                                        <button
+                                                            type="button"
+                                                            title="Remove File"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                handleRemoveCredential(index);
+                                                            }}
+                                                            className="flex items-center gap-0 sm:gap-1.5 p-1.5 sm:px-3 sm:py-1.5 bg-red-50/50 hover:bg-red-100/70 border border-red-150 rounded-xl text-[11px] font-bold text-red-650 transition-colors cursor-pointer"
+                                                        >
+                                                            <FiTrash2 className="w-3.5 h-3.5 text-red-500" />
+                                                            <span className="hidden sm:inline">Remove</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
                                 </div>
-
+ 
                                 {/* Summary */}
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wide">3. Clinical Work Capabilities Summary</label>
@@ -536,22 +691,22 @@ export default function ProfessionalJobDetailsPage() {
                                     />
                                 </div>
                             </div>
-
+ 
                             {/* Submit Buttons */}
                             <div className="flex justify-end items-center gap-3 border-t border-slate-100 pt-4">
                                 <button
                                     type="button"
-                                    onClick={() => setIsApplyModalOpen(false)}
+                                    onClick={() => { setIsApplyModalOpen(false); resetForm(); }}
                                     className="px-4 py-2.5 text-xs text-slate-500 hover:text-slate-800 font-bold bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting || isUploadingMedia || !cvUrl}
+                                    disabled={isSubmitting || isUploading || !cvFile}
                                     className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-lg shadow-indigo-600/15 transition-all cursor-pointer"
                                 >
-                                    {isSubmitting ? (
+                                    {isSubmitting || isUploading ? (
                                         <FiLoader className="animate-spin text-sm" />
                                     ) : (
                                         <FiCheckCircle className="text-sm" />

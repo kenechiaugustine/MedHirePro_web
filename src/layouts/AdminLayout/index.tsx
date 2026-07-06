@@ -14,7 +14,8 @@ import {
     FiX,
     FiList,
     FiBriefcase,
-    FiUser
+    FiUser,
+    FiStar
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -41,6 +42,7 @@ export default function AdminLayout() {
         { name: "User Management", path: "/admin/users", icon: <FiUsers className="text-lg" /> },
         { name: "Job Listings", path: "/admin/jobs", icon: <FiList className="text-lg" /> },
         { name: "Locum Jobs", path: "/admin/locum-jobs", icon: <FiBriefcase className="text-lg" /> },
+        { name: "Platform Reviews", path: "/admin/reviews", icon: <FiStar className="text-lg" /> },
         { name: "Admin Profile", path: "/admin/profile", icon: <FiUser className="text-lg" /> },
         { name: "Admin Settings", path: "/admin/settings", icon: <FiSettings className="text-lg" /> },
     ];
@@ -185,7 +187,7 @@ export default function AdminLayout() {
                 </header>
 
                 {/* Sub-page Render Box */}
-                <div className="flex-grow overflow-y-auto p-4 sm:p-6 md:p-8">
+                <div className="flex-grow overflow-y-auto p-4 sm:p-6 md:p-8 scroll-smooth">
                     <Outlet />
                 </div>
             </main>

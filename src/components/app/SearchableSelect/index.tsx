@@ -16,6 +16,7 @@ interface SearchableSelectProps {
     id?: string;
     focusColor?: string;
     icon?: React.ReactNode;
+    required?: boolean;
 }
 
 const SearchableSelect = ({
@@ -27,6 +28,7 @@ const SearchableSelect = ({
     id = 'searchable-select',
     focusColor = '#0b5cd5',
     icon = <MdWorkOutline className="text-lg" />,
+    required = false,
 }: SearchableSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -101,7 +103,7 @@ const SearchableSelect = ({
     return (
         <div className="flex flex-col gap-1.5 w-full relative" ref={containerRef}>
             <label htmlFor={id} className="text-[12px] font-bold text-[#0a192f]">
-                {label}
+                {label} {required && <span className="text-red-500">*</span>}
             </label>
 
             <div

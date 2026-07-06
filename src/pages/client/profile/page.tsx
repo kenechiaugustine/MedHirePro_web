@@ -10,7 +10,8 @@ import {
     FiUser,
     FiHome,
     FiCreditCard,
-    FiMail
+    FiMail,
+    FiExternalLink
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -18,35 +19,46 @@ export default function ClientProfilePage() {
     // API queries & mutations
     const { data: user, isLoading: isUserLoading, refetch } = useGetMeQuery();
     const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
-    const [uploadMedia, { isLoading: isUploading }] = useUploadMediaMutation();
+    const [uploadMedia] = useUploadMediaMutation();
 
     // Local form states
     const [facilityName, setFacilityName] = useState('');
     const [fullName, setFullName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (user) {
             setFacilityName(user.facility_name || '');
             setFullName(user.full_name || '');
             setAvatarUrl(user.avatar_url || '');
+            setAvatarPreview(user.avatar_url || '');
         }
     }, [user]);
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        if (!avatarFile) return;
+        const objectUrl = URL.createObjectURL(avatarFile);
+        setAvatarPreview(objectUrl);
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [avatarFile]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const res = await uploadMedia(formData).unwrap();
-            setAvatarUrl(res.media.url);
-            toast.success("Facility logo uploaded successfully!");
-        } catch (err: any) {
-            toast.error(err?.data?.detail || "Logo upload failed.");
+        // Size check: limit to 5MB
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Logo size cannot exceed 5MB.");
+            return;
         }
+
+        setAvatarFile(file);
+        toast.success(`Selected facility logo: ${file.name}`);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -57,16 +69,31 @@ export default function ClientProfilePage() {
         }
 
         try {
+            let finalAvatarUrl = avatarUrl;
+            if (avatarFile) {
+                setIsUploading(true);
+                toast.loading('Uploading facility logo...', { id: 'profile-upload' });
+                const formData = new FormData();
+                formData.append('file', avatarFile);
+                const res = await uploadMedia(formData).unwrap();
+                finalAvatarUrl = res.media.url;
+                setAvatarUrl(finalAvatarUrl);
+                setAvatarFile(null); // Clear selected file after successful upload
+            }
+
+            toast.loading('Saving profile changes...', { id: 'profile-upload' });
             await updateProfile({
                 facility_name: facilityName.trim(),
                 full_name: fullName.trim() || null,
-                avatar_url: avatarUrl || null
+                avatar_url: finalAvatarUrl || null
             }).unwrap();
 
-            toast.success("Institute profile updated successfully!");
+            toast.success("Institute profile updated successfully!", { id: 'profile-upload' });
             refetch();
         } catch (err: any) {
-            toast.error(err?.data?.detail || "Failed to update profile settings.");
+            toast.error(err?.data?.detail || "Failed to update profile settings.", { id: 'profile-upload' });
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -148,6 +175,63 @@ export default function ClientProfilePage() {
                             : 'Your institute verification is pending credential audit checks. Features may be restricted.'}
                         </p>
                     </div>
+
+                    {user?.onboarding_status === 'approved' && (
+                        <div className="bg-white border border-slate-150 rounded-2xl shadow-md p-6 space-y-3">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Verified Corporate Credentials</h4>
+                            
+                            <div className="space-y-2.5 text-xs text-slate-600">
+                                <div className="border-b border-slate-50 pb-2">
+                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Business Reg. Number</span>
+                                    <span className="font-mono font-bold text-slate-700">{user.business_registration_number || 'N/A'}</span>
+                                </div>
+
+                                <div className="border-b border-slate-50 pb-2">
+                                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Facility Type</span>
+                                    <span className="font-extrabold text-slate-700 uppercase">{user.facility_type || 'N/A'}</span>
+                                </div>
+
+                                {user.facility_address && (
+                                    <div className="border-b border-slate-50 pb-2 font-medium text-slate-700">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Registered Address</span>
+                                        <div className="font-semibold">
+                                            {user.facility_address.street}, {user.facility_address.city}, {user.facility_address.state}
+                                        </div>
+                                        <div className="font-semibold text-slate-500">
+                                            {user.facility_address.zip}, {user.facility_address.country}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {user.business_license_url && (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Operating Permit / License</span>
+                                        <a href={user.business_license_url} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Operating License <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+
+                                {user.proof_of_address_url && (
+                                    <div className="border-b border-slate-50 pb-2">
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Proof of Corporate Address</span>
+                                        <a href={user.proof_of_address_url} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Address Proof <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+
+                                {user.representative_id_url && (
+                                    <div>
+                                        <span className="text-[9px] font-bold text-slate-400 block uppercase">Authorized Rep Photo ID</span>
+                                        <a href={user.representative_id_url} target="_blank" rel="noreferrer" className="text-indigo-650 hover:underline font-bold inline-flex items-center gap-1">
+                                            View Representative ID <FiExternalLink className="text-[10px]" />
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Profile Edit Form Column */}
@@ -159,7 +243,7 @@ export default function ClientProfilePage() {
                             <div className="relative group">
                                 <Avatar 
                                     name={user?.facility_name || user?.full_name || 'Institute'} 
-                                    avatarUrl={avatarUrl} 
+                                    avatarUrl={avatarPreview} 
                                     size="lg" 
                                     role="institute" 
                                 />

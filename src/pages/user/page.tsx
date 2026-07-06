@@ -58,17 +58,17 @@ export default function UserDashboardPage() {
             {/* Onboarding Verification Action Banner */}
             {onboarding?.onboarding_status !== 'approved' && (
                 <div className={`p-6 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm ${onboarding?.onboarding_status === 'pending'
-                        ? 'bg-blue-50 border-blue-200 text-blue-800'
-                        : onboarding?.onboarding_status === 'rejected'
-                            ? 'bg-red-50 border-red-200 text-red-800'
-                            : 'bg-amber-50 border-amber-200 text-amber-800'
+                    ? 'bg-blue-50 border-blue-200 text-blue-800'
+                    : onboarding?.onboarding_status === 'rejected'
+                        ? 'bg-red-50 border-red-200 text-red-800'
+                        : 'bg-amber-50 border-amber-200 text-amber-800'
                     }`}>
                     <div className="flex gap-4">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${onboarding?.onboarding_status === 'pending'
-                                ? 'bg-blue-100 text-blue-600'
-                                : onboarding?.onboarding_status === 'rejected'
-                                    ? 'bg-red-100 text-red-600'
-                                    : 'bg-amber-100 text-amber-600'
+                            ? 'bg-blue-100 text-blue-600'
+                            : onboarding?.onboarding_status === 'rejected'
+                                ? 'bg-red-100 text-red-600'
+                                : 'bg-amber-100 text-amber-600'
                             }`}>
                             <FiAlertCircle />
                         </div>
@@ -94,10 +94,10 @@ export default function UserDashboardPage() {
                     <Link
                         to="/user/onboarding"
                         className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow transition-all hover:-translate-y-0.5 active:translate-y-0 text-center flex-shrink-0 ${onboarding?.onboarding_status === 'pending'
-                                ? 'bg-blue-600 text-white shadow-blue-500/10 hover:bg-blue-700'
-                                : onboarding?.onboarding_status === 'rejected'
-                                    ? 'bg-red-600 text-white shadow-red-500/10 hover:bg-red-700'
-                                    : 'bg-amber-600 text-white shadow-amber-500/10 hover:bg-amber-700'
+                            ? 'bg-blue-600 text-white shadow-blue-500/10 hover:bg-blue-700'
+                            : onboarding?.onboarding_status === 'rejected'
+                                ? 'bg-red-600 text-white shadow-red-500/10 hover:bg-red-700'
+                                : 'bg-amber-600 text-white shadow-amber-500/10 hover:bg-amber-700'
                             }`}
                     >
                         {onboarding?.onboarding_status === 'pending'
@@ -178,10 +178,10 @@ export default function UserDashboardPage() {
                     <div className="space-y-2">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Registry Profile</span>
                         <span className={`text-xs font-black px-2 py-0.5 rounded uppercase block mt-1.5 w-fit ${onboarding?.onboarding_status === 'approved'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
-                                : onboarding?.onboarding_status === 'pending'
-                                    ? 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
-                                    : 'bg-slate-50 text-slate-600 border border-slate-200'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
+                            : onboarding?.onboarding_status === 'pending'
+                                ? 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
+                                : 'bg-slate-50 text-slate-600 border border-slate-200'
                             }`}>
                             {onboarding?.onboarding_status || 'not_started'}
                         </span>
@@ -243,10 +243,10 @@ export default function UserDashboardPage() {
                                                 </td>
                                                 <td className="px-6 py-3.5 text-right">
                                                     <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${app.application_status === 'ACCEPTED'
-                                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
-                                                            : app.application_status === 'DECLINED'
-                                                                ? 'bg-red-50 text-red-700 border border-red-150'
-                                                                : 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
+                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-150'
+                                                        : app.application_status === 'DECLINED'
+                                                            ? 'bg-red-50 text-red-700 border border-red-150'
+                                                            : 'bg-blue-50 text-blue-700 border border-blue-150 animate-pulse'
                                                         }`}>
                                                         {app.application_status}
                                                     </span>

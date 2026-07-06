@@ -15,10 +15,29 @@ export interface IApplicationCreate {
     credentialing_packet_urls?: string[];
 }
 
+export interface ICandidateDetails {
+    id: string;
+    full_name?: string;
+    email?: string;
+    specialty?: string;
+    avatar_url?: string;
+    is_verified?: boolean;
+    employment_status?: string | null;
+    current_workplace?: string | null;
+    is_intern?: boolean;
+    licence_number?: string | null;
+    licence_expiry?: string | null;
+    licence_document_url?: string | null;
+    degree_document_url?: string | null;
+    id_document_url?: string | null;
+    school_or_placement_letter_url?: string | null;
+}
+
 export interface IApplicationResponse {
     _id: string;
     id: string;
     candidate_id: string;
+    candidate_details?: ICandidateDetails;
     vacancy_id: IJobListingResponse | string;
     vacancy_type: JobType;
     curriculum_vitae_url: string;

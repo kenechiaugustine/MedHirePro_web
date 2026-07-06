@@ -17,7 +17,8 @@ import {
     FiFileText,
     FiFilter,
     FiAlertTriangle,
-    FiEdit2
+    FiEdit2,
+    FiFlag
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -73,7 +74,7 @@ export default function ClientJobListingsPage() {
     });
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
     };
 
     return (
@@ -196,6 +197,19 @@ export default function ClientJobListingsPage() {
                                                     <p className="text-[10px] text-slate-400 font-semibold truncate">
                                                         {job.department_unit} • {(job.clinical_setting || '').replace(/_/g, ' ')}
                                                     </p>
+                                                    {job.status === 'FLAGGED' && (
+                                                        <div className="mt-1.5 bg-red-50 border border-red-200 rounded-xl p-2.5 max-w-sm">
+                                                            <p className="text-[9px] font-black text-red-700 uppercase tracking-wider flex items-center gap-1">
+                                                                <FiFlag className="w-3 h-3 text-red-500 animate-pulse" /> Flagged & Taken Down
+                                                            </p>
+                                                            <p className="text-[10px] text-red-600 font-bold mt-0.5 leading-relaxed">
+                                                                Reason: {job.flagged_reason || 'No reason provided.'}
+                                                            </p>
+                                                            <p className="text-[9px] text-slate-400 font-semibold mt-1">
+                                                                Please edit this listing to correct issues or delete it.
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     <span className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600">
@@ -245,12 +259,12 @@ export default function ClientJobListingsPage() {
                                             <td className="px-6 py-5 whitespace-nowrap">
                                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
                                                     job.status === 'OPEN'
-                                                        ? 'bg-emerald-50 border-emerald-250 text-emerald-700'
+                                                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                                                         : job.status === 'FILLED'
-                                                        ? 'bg-blue-50 border-blue-250 text-blue-700'
+                                                        ? 'bg-blue-50 border-blue-200 text-blue-700'
                                                         : job.status === 'DRAFT'
-                                                        ? 'bg-amber-50 border-amber-250 text-amber-700'
-                                                        : 'bg-red-50 border-red-250 text-red-700'
+                                                        ? 'bg-amber-50 border-amber-200 text-amber-700'
+                                                        : 'bg-red-50 border-red-200 text-red-700'
                                                 }`}>
                                                     <span className={`h-1.5 w-1.5 rounded-full inline-block ${
                                                         job.status === 'OPEN' ? 'bg-emerald-500' :
@@ -286,7 +300,7 @@ export default function ClientJobListingsPage() {
                                                         setIsDeleteModalOpen(true);
                                                     }}
                                                     disabled={isDeleting}
-                                                    className="p-2 text-red-650 hover:text-red-800 bg-red-50 hover:bg-red-150 rounded-lg cursor-pointer transition-colors inline-flex items-center"
+                                                    className="p-2 text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 rounded-lg cursor-pointer transition-colors inline-flex items-center"
                                                     title="Delete Listing"
                                                 >
                                                     <FiTrash2 className="text-sm" />
@@ -327,12 +341,12 @@ export default function ClientJobListingsPage() {
                                     <div className="space-y-1 max-w-[70%]">
                                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
                                             job.status === 'OPEN'
-                                                ? 'bg-emerald-50 border-emerald-250 text-emerald-700'
+                                                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                                                 : job.status === 'FILLED'
-                                                ? 'bg-blue-50 border-blue-250 text-blue-700'
+                                                ? 'bg-blue-50 border-blue-200 text-blue-700'
                                                 : job.status === 'DRAFT'
-                                                ? 'bg-amber-50 border-amber-250 text-amber-700'
-                                                : 'bg-red-50 border-red-250 text-red-700'
+                                                ? 'bg-amber-50 border-amber-200 text-amber-700'
+                                                : 'bg-red-50 border-red-200 text-red-700'
                                         }`}>
                                             <span className={`h-1.5 w-1.5 rounded-full inline-block ${
                                                 job.status === 'OPEN' ? 'bg-emerald-500' :
@@ -347,6 +361,19 @@ export default function ClientJobListingsPage() {
                                         <p className="text-[10px] text-slate-400 font-semibold truncate">
                                             {job.department_unit} • {(job.clinical_setting || '').replace(/_/g, ' ')}
                                         </p>
+                                        {job.status === 'FLAGGED' && (
+                                            <div className="mt-1.5 bg-red-50 border border-red-200 rounded-xl p-2.5 max-w-sm">
+                                                <p className="text-[9px] font-black text-red-700 uppercase tracking-wider flex items-center gap-1">
+                                                    <FiFlag className="w-3 h-3 text-red-500 animate-pulse" /> Flagged & Taken Down
+                                                </p>
+                                                <p className="text-[10px] text-red-600 font-bold mt-0.5 leading-relaxed">
+                                                    Reason: {job.flagged_reason || 'No reason provided.'}
+                                                </p>
+                                                <p className="text-[9px] text-slate-400 font-semibold mt-1">
+                                                    Please edit this listing to correct issues or delete it.
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wide border ${
                                         job.job_type === 'PERMANENT'

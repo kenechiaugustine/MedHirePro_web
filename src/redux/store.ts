@@ -8,6 +8,7 @@ import { onboardingApi } from './apis/onboardingApi';
 import { mediaApi } from './apis/mediaApi';
 import { referralApi } from './apis/referralApi';
 import { adminApi } from './apis/adminApi';
+import { reviewsApi } from './apis/reviewsApi';
 import authReducer, { logout } from './slices/authSlice';
 
 const logoutMiddleware: Middleware = (storeAPI) => (next) => (action) => {
@@ -21,6 +22,7 @@ const logoutMiddleware: Middleware = (storeAPI) => (next) => (action) => {
         storeAPI.dispatch(mediaApi.util.resetApiState());
         storeAPI.dispatch(referralApi.util.resetApiState());
         storeAPI.dispatch(adminApi.util.resetApiState());
+        storeAPI.dispatch(reviewsApi.util.resetApiState());
     }
     return next(action);
 };
@@ -37,6 +39,7 @@ export const store = configureStore({
         [mediaApi.reducerPath]: mediaApi.reducer,
         [referralApi.reducerPath]: referralApi.reducer,
         [adminApi.reducerPath]: adminApi.reducer,
+        [reviewsApi.reducerPath]: reviewsApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
@@ -49,6 +52,7 @@ export const store = configureStore({
             .concat(mediaApi.middleware)
             .concat(referralApi.middleware)
             .concat(adminApi.middleware)
+            .concat(reviewsApi.middleware)
             .concat(logoutMiddleware)
 });
 

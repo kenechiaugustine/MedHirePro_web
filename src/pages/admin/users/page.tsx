@@ -32,7 +32,6 @@ export default function AdminUserManagementPage() {
     const [selectedUser, setSelectedUser] = useState<any | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    // Form inputs for edit
     const [editForm, setEditForm] = useState({
         full_name: '',
         facility_name: '',
@@ -45,7 +44,9 @@ export default function AdminUserManagementPage() {
         specialty: '',
         employment_status: '',
         current_workplace: '',
-        onboarding_status: 'pending'
+        onboarding_status: 'pending',
+        banned_from_posting: false,
+        banned_from_applying: false
     });
 
     const params: any = {
@@ -80,7 +81,9 @@ export default function AdminUserManagementPage() {
             specialty: user.specialty || '',
             employment_status: user.employment_status || '',
             current_workplace: user.current_workplace || '',
-            onboarding_status: user.onboarding_status || 'pending'
+            onboarding_status: user.onboarding_status || 'pending',
+            banned_from_posting: user.banned_from_posting ?? false,
+            banned_from_applying: user.banned_from_applying ?? false
         });
         setIsEditModalOpen(true);
     };
@@ -100,7 +103,6 @@ export default function AdminUserManagementPage() {
         }
 
         try {
-            // Build update payload, formatting appropriate empty fields to null
             const payload: any = {
                 role: editForm.role,
                 credit_balance: Number(editForm.credit_balance),
@@ -109,6 +111,8 @@ export default function AdminUserManagementPage() {
                 is_verified: editForm.is_verified,
                 avatar_url: editForm.avatar_url.trim() ? editForm.avatar_url : null,
                 onboarding_status: editForm.onboarding_status || 'pending',
+                banned_from_posting: editForm.banned_from_posting,
+                banned_from_applying: editForm.banned_from_applying,
             };
 
             if (editForm.role === 'professional') {
@@ -337,10 +341,20 @@ export default function AdminUserManagementPage() {
                                                         role={user.role} 
                                                     />
                                                     <div className="space-y-0.5 truncate">
-                                                        <p className="font-extrabold text-slate-800 truncate" title={displayName}>
+                                                        <p className="font-extrabold text-slate-800 truncate flex items-center gap-1.5" title={displayName}>
                                                             {displayName}
+                                                            {user.banned_from_posting && (
+                                                                <span className="inline-flex items-center px-1.5 py-0.25 rounded text-[8px] font-black uppercase bg-red-50 text-red-600 border border-red-200">
+                                                                    No Post
+                                                                </span>
+                                                            )}
+                                                            {user.banned_from_applying && (
+                                                                <span className="inline-flex items-center px-1.5 py-0.25 rounded text-[8px] font-black uppercase bg-red-50 text-red-600 border border-red-200">
+                                                                    No Apply
+                                                                </span>
+                                                            )}
                                                         </p>
-                                                        <p className="text-[10px] text-slate-400 font-bold truncate">
+                                                        <p className="text-[10px] text-slate-400 font-semibold truncate">
                                                             {user.email} • ID: #{user._id.slice(-6).toUpperCase()}
                                                         </p>
                                                     </div>
@@ -540,6 +554,34 @@ export default function AdminUserManagementPage() {
                                             checked={editForm.is_verified}
                                             onChange={(e) => setEditForm(prev => ({ ...prev, is_verified: e.target.checked }))}
                                             className="h-4.5 w-4.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500/20"
+                                        />
+                                    </label>
+                                </div>
+
+                                {/* Ban switch buttons toggles */}
+                                <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                                    <label className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-150 cursor-pointer">
+                                        <div className="space-y-0.5">
+                                            <span className="text-[11px] font-extrabold text-slate-750 block">Ban from Posting</span>
+                                            <span className="text-[9px] text-slate-400 font-semibold block">Cannot create new jobs</span>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={editForm.banned_from_posting}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, banned_from_posting: e.target.checked }))}
+                                            className="h-4.5 w-4.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500/20 cursor-pointer"
+                                        />
+                                    </label>
+                                    <label className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-150 cursor-pointer">
+                                        <div className="space-y-0.5">
+                                            <span className="text-[11px] font-extrabold text-slate-750 block">Ban from Applying</span>
+                                            <span className="text-[9px] text-slate-400 font-semibold block">Cannot apply to jobs</span>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={editForm.banned_from_applying}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, banned_from_applying: e.target.checked }))}
+                                            className="h-4.5 w-4.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500/20 cursor-pointer"
                                         />
                                     </label>
                                 </div>

@@ -26,8 +26,16 @@
   }
 }
 
-/* Fix iOS Safari zoom issue */
+/* Fix iOS Safari zoom issue & lock main viewport */
 @layer base {
+  html, body, #root {
+    background-color: #f8fafc;
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
   input, select, textarea {
     font-size: 16px !important;
   }

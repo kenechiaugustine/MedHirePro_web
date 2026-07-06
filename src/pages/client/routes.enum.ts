@@ -10,4 +10,5 @@ export const CLIENT_ROUTES = {
     PROFILE: '/client/profile',
     SETTINGS: '/client/settings',
     REFERRALS: '/client/referrals',
+    REVIEWS: '/client/reviews',
 };
