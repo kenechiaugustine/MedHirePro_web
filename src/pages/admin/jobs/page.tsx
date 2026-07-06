@@ -4,7 +4,8 @@ import {
     usePostPermanentJobMutation,
     useReassignJobMutation,
     useDeleteJobListingMutation,
-    useFlagJobMutation
+    useFlagJobMutation,
+    useUnflagJobMutation
 } from '../../../redux/apis/jobsApi';
 import { useReadAllUsersQuery } from '../../../redux/apis/adminApi';
 import {
@@ -84,6 +85,7 @@ export default function AdminJobsPage() {
     const [deleteJob, { isLoading: isDeleting }] = useDeleteJobListingMutation();
     const [flagReason, setFlagReason] = useState('');
     const [flagJob, { isLoading: isFlagging }] = useFlagJobMutation();
+    const [unflagJob, { isLoading: isUnflagging }] = useUnflagJobMutation();
 
     // Lookups
     const userMap = users?.reduce((acc: any, u: any) => {
@@ -219,6 +221,18 @@ export default function AdminJobsPage() {
             refetchJobs();
         } catch (err: any) {
             toast.error(err?.data?.detail || "Failed to flag job posting.");
+        }
+    };
+
+    const handleUnflagJob = async () => {
+        if (!selectedJob) return;
+        try {
+            await unflagJob(selectedJob._id).unwrap();
+            toast.success("Job posting successfully unflagged and restored to OPEN.");
+            setIsConfigModalOpen(false);
+            refetchJobs();
+        } catch (err: any) {
+            toast.error(err?.data?.detail || "Failed to restore job posting.");
         }
     };
 
@@ -793,12 +807,21 @@ export default function AdminJobsPage() {
                                     <FiFlag /> Flag & Take Down Job Listing
                                 </h4>
                                 {selectedJob.status === 'FLAGGED' ? (
-                                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 space-y-1.5">
+                                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 space-y-2">
                                         <span className="text-[9px] font-black uppercase text-amber-600 tracking-wider block">Currently Flagged & Deactivated</span>
                                         <p className="text-xs font-bold text-slate-700">Reason: {selectedJob.flagged_reason || 'No reason provided.'}</p>
                                         {selectedJob.flagged_at && (
                                             <p className="text-[10px] text-slate-400 font-semibold">Flagged on: {new Date(selectedJob.flagged_at).toLocaleString()}</p>
                                         )}
+                                        <button
+                                            type="button"
+                                            disabled={isUnflagging}
+                                            onClick={handleUnflagJob}
+                                            className="w-full mt-2 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-md shadow-emerald-600/15 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                                        >
+                                            {isUnflagging && <FiLoader className="animate-spin" />}
+                                            Restore & Unflag Listing
+                                        </button>
                                     </div>
                                 ) : (
                                     <div className="space-y-3">

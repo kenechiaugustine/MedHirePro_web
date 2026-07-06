@@ -18,6 +18,8 @@ export interface IUser {
     onboarding_status?: string;
     employment_status?: string | null;
     current_workplace?: string | null;
+    banned_from_posting?: boolean;
+    banned_from_applying?: boolean;
     is_intern?: boolean;
     licence_number?: string | null;
     licence_expiry?: string | null;
