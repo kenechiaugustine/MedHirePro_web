@@ -42,6 +42,18 @@ export default function ClientJobDetailsPage() {
     const [processingAppId, setProcessingAppId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'ALL' | 'SHORTLISTED' | 'HIRED' | 'DECLINED'>('ALL');
 
+    // Confirmation Modal state
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        type: 'HIRE' | 'DECLINE' | null;
+        appId: string | null;
+        currentValue?: boolean;
+    }>({
+        isOpen: false,
+        type: null,
+        appId: null
+    });
+
     const filteredApps = useMemo(() => {
         if (!applications) return [];
         return applications.filter(app => {
@@ -607,9 +619,9 @@ export default function ClientJobDetailsPage() {
                                                     <td className="px-6 py-5 text-right whitespace-nowrap space-x-2">
                                                         {app.application_status !== 'DECLINED' && app.application_status !== 'ACCEPTED' && (
                                                             <button
-                                                                onClick={() => handleDecline(app._id)}
+                                                                onClick={() => setConfirmModal({ isOpen: true, type: 'DECLINE', appId: app._id })}
                                                                 disabled={isProcessing || isStatusUpdating}
-                                                                className="p-2 text-red-655 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-150 rounded-lg cursor-pointer transition-colors inline-flex items-center"
+                                                                className="p-2 text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-150 rounded-lg cursor-pointer transition-colors inline-flex items-center"
                                                                 title="Decline Candidate"
                                                             >
                                                                 <FiX className="text-sm" />
@@ -634,7 +646,7 @@ export default function ClientJobDetailsPage() {
 
                                                                 {/* Accept/Hire */}
                                                                 <button
-                                                                    onClick={() => handleAccept(app._id, app.is_accepted)}
+                                                                    onClick={() => setConfirmModal({ isOpen: true, type: 'HIRE', appId: app._id, currentValue: app.is_accepted })}
                                                                     disabled={isProcessing || isAccepting}
                                                                     className={`p-2 rounded-lg cursor-pointer transition-colors inline-flex items-center border ${
                                                                         app.is_accepted
@@ -735,7 +747,7 @@ export default function ClientJobDetailsPage() {
                                         <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100">
                                             {app.application_status !== 'DECLINED' && app.application_status !== 'ACCEPTED' && (
                                                 <button
-                                                    onClick={() => handleDecline(app._id)}
+                                                    onClick={() => setConfirmModal({ isOpen: true, type: 'DECLINE', appId: app._id })}
                                                     disabled={isProcessing || isStatusUpdating}
                                                     className="px-3 py-2 text-[10px] font-black text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-150 rounded-xl cursor-pointer transition-colors"
                                                 >
@@ -760,7 +772,7 @@ export default function ClientJobDetailsPage() {
 
                                                     {/* Accept/Hire */}
                                                     <button
-                                                        onClick={() => handleAccept(app._id, app.is_accepted)}
+                                                        onClick={() => setConfirmModal({ isOpen: true, type: 'HIRE', appId: app._id, currentValue: app.is_accepted })}
                                                         disabled={isProcessing || isAccepting}
                                                         className={`px-3 py-2 text-[10px] font-black rounded-xl cursor-pointer border transition-all shadow-sm ${
                                                             app.is_accepted
@@ -780,6 +792,74 @@ export default function ClientJobDetailsPage() {
                     </>
                 )}
             </div>
+            {/* Confirmation Modal */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div 
+                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-fadeIn"
+                        onClick={() => setConfirmModal({ isOpen: false, type: null, appId: null })}
+                    />
+                    
+                    {/* Content Card */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-sm w-full p-6 space-y-6 relative z-10 animate-scaleUp">
+                        <div className="flex flex-col items-center text-center space-y-3">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                confirmModal.type === 'DECLINE' 
+                                    ? 'bg-red-50 text-red-600 border-4 border-red-100' 
+                                    : 'bg-emerald-50 text-emerald-600 border-4 border-emerald-100'
+                            }`}>
+                                {confirmModal.type === 'DECLINE' ? <FiX className="w-5 h-5" /> : <FiCheckCircle className="w-5 h-5" />}
+                            </div>
+                            
+                            <div className="space-y-1">
+                                <h3 className="text-base font-black text-slate-800">
+                                    {confirmModal.type === 'DECLINE' ? 'Decline Application?' : confirmModal.currentValue ? 'Revert Hire Contract?' : 'Hire Candidate?'}
+                                </h3>
+                                <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+                                    {confirmModal.type === 'DECLINE' 
+                                        ? 'Are you sure you want to decline this applicant? This action will set their application status to Declined.'
+                                        : confirmModal.currentValue
+                                        ? 'Are you sure you want to revert this hire placement? The candidate will return to credential review status.'
+                                        : 'Are you sure you want to contract this practitioner? An acceptance notification will be logged to their dashboard.'
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setConfirmModal({ isOpen: false, type: null, appId: null })}
+                                className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-650 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    const { type, appId, currentValue } = confirmModal;
+                                    setConfirmModal({ isOpen: false, type: null, appId: null });
+                                    if (appId) {
+                                        if (type === 'DECLINE') {
+                                            await handleDecline(appId);
+                                        } else if (type === 'HIRE') {
+                                            await handleAccept(appId, !!currentValue);
+                                        }
+                                    }
+                                }}
+                                className={`flex-1 px-4 py-2.5 text-white font-bold text-xs rounded-xl cursor-pointer transition-colors shadow-sm ${
+                                    confirmModal.type === 'DECLINE'
+                                        ? 'bg-red-600 hover:bg-red-700 shadow-red-500/10'
+                                        : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/10'
+                                }`}
+                            >
+                                {confirmModal.type === 'DECLINE' ? 'Yes, Decline' : confirmModal.currentValue ? 'Yes, Revert' : 'Yes, Hire'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
