@@ -3,7 +3,8 @@ import {
     useGetJobListingsQuery,
     usePostLocumJobMutation,
     useReassignJobMutation,
-    useDeleteJobListingMutation
+    useDeleteJobListingMutation,
+    useFlagJobMutation
 } from '../../../redux/apis/jobsApi';
 import { useReadAllUsersQuery } from '../../../redux/apis/adminApi';
 import {
@@ -15,7 +16,8 @@ import {
     FiCalendar,
     FiTrash2,
     FiUsers,
-    FiSettings
+    FiSettings,
+    FiFlag
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import {
@@ -82,6 +84,8 @@ export default function AdminLocumJobsPage() {
     const [postLocumJob, { isLoading: isCreating }] = usePostLocumJobMutation();
     const [reassignJob, { isLoading: isReassigning }] = useReassignJobMutation();
     const [deleteJob, { isLoading: isDeleting }] = useDeleteJobListingMutation();
+    const [flagReason, setFlagReason] = useState('');
+    const [flagJob, { isLoading: isFlagging }] = useFlagJobMutation();
 
     // Lookups
     const userMap = users?.reduce((acc: any, u: any) => {
@@ -97,6 +101,7 @@ export default function AdminLocumJobsPage() {
     const handleConfigClick = (job: any) => {
         setSelectedJob(job);
         setNewOwnerId(job.posted_by);
+        setFlagReason('');
         setIsConfigModalOpen(true);
     };
 
@@ -213,6 +218,24 @@ export default function AdminLocumJobsPage() {
             refetchJobs();
         } catch (err: any) {
             toast.error(err?.data?.detail || "Failed to remove locum listing.");
+        }
+    };
+
+    const handleFlagJob = async () => {
+        if (!selectedJob) return;
+        if (!flagReason.trim() || flagReason.trim().length < 5) {
+            toast.error("Please provide a flag reason (min 5 characters).");
+            return;
+        }
+
+        try {
+            await flagJob({ id: selectedJob._id, body: { reason: flagReason } }).unwrap();
+            toast.success("Locum shift successfully flagged and taken down.");
+            setFlagReason('');
+            setIsConfigModalOpen(false);
+            refetchJobs();
+        } catch (err: any) {
+            toast.error(err?.data?.detail || "Failed to flag locum listing.");
         }
     };
 
@@ -335,6 +358,7 @@ export default function AdminLocumJobsPage() {
                         <option value="DRAFT">Draft</option>
                         <option value="FILLED">Filled</option>
                         <option value="EXPIRED">Expired</option>
+                        <option value="FLAGGED">Flagged</option>
                     </select>
                 </div>
             </div>
@@ -425,9 +449,11 @@ export default function AdminLocumJobsPage() {
                                                         ? 'bg-emerald-50 border-emerald-250 text-emerald-700'
                                                         : job.status === 'FILLED'
                                                             ? 'bg-blue-50 border-blue-200 text-blue-700'
-                                                            : 'bg-slate-100 border-slate-200 text-slate-400'
+                                                            : job.status === 'FLAGGED'
+                                                                ? 'bg-amber-50 border-amber-200 text-amber-700'
+                                                                : 'bg-slate-100 border-slate-200 text-slate-400'
                                                     }`}>
-                                                    <span className={`h-1.5 w-1.5 rounded-full inline-block ${job.status === 'OPEN' ? 'bg-emerald-500' : job.status === 'FILLED' ? 'bg-blue-500' : 'bg-slate-350'}`} />
+                                                    <span className={`h-1.5 w-1.5 rounded-full inline-block ${job.status === 'OPEN' ? 'bg-emerald-500' : job.status === 'FILLED' ? 'bg-blue-500' : job.status === 'FLAGGED' ? 'bg-amber-500' : 'bg-slate-350'}`} />
                                                     {job.status}
                                                 </span>
                                             </td>
@@ -820,6 +846,44 @@ export default function AdminLocumJobsPage() {
                                     {isReassigning && <FiLoader className="animate-spin" />}
                                     Reassign Shift Ownership
                                 </button>
+                            </div>
+
+                            {/* Flag / Take Down Panel */}
+                            <div className="border-t border-slate-100 pt-4 space-y-4">
+                                <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-wider flex items-center gap-1">
+                                    <FiFlag /> Flag & Take Down Job Listing
+                                </h4>
+                                {selectedJob.status === 'FLAGGED' ? (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 space-y-1.5">
+                                        <span className="text-[9px] font-black uppercase text-amber-600 tracking-wider block">Currently Flagged & Deactivated</span>
+                                        <p className="text-xs font-bold text-slate-700">Reason: {selectedJob.flagged_reason || 'No reason provided.'}</p>
+                                        {selectedJob.flagged_at && (
+                                            <p className="text-[10px] text-slate-400 font-semibold">Flagged on: {new Date(selectedJob.flagged_at).toLocaleString()}</p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">Reason for Flagging / Take Down</label>
+                                            <textarea
+                                                rows={2}
+                                                value={flagReason}
+                                                onChange={(e) => setFlagReason(e.target.value)}
+                                                placeholder="Provide a detailed reason for taking down this job (e.g. fraudulent post, missing licensing, offensive content)..."
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 font-semibold text-slate-700 placeholder-slate-400 resize-none"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            disabled={isFlagging || !flagReason.trim() || flagReason.trim().length < 5}
+                                            onClick={handleFlagJob}
+                                            className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-black shadow-md shadow-amber-500/15 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                                        >
+                                            {isFlagging && <FiLoader className="animate-spin" />}
+                                            <FiFlag /> Flag and Take Down Listing
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Delete Vacancy Panel */}

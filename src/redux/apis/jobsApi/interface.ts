@@ -8,7 +8,8 @@ export const JobStatus = {
     DRAFT: 'DRAFT',
     OPEN: 'OPEN',
     FILLED: 'FILLED',
-    EXPIRED: 'EXPIRED'
+    EXPIRED: 'EXPIRED',
+    FLAGGED: 'FLAGGED'
 } as const;
 export type JobStatus = typeof JobStatus[keyof typeof JobStatus];
 
@@ -170,6 +171,8 @@ export interface IJobListingResponse {
     travel_housing_reimbursement: boolean | null;
     on_call_requirements: string | null;
     total_applicants?: number | null;
+    flagged_reason?: string | null;
+    flagged_at?: string | null;
     created_at: string;
     updated_at: string;
 }

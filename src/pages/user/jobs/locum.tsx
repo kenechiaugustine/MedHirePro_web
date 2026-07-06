@@ -14,7 +14,8 @@ import {
     FiFileText, 
     FiCalendar, 
     FiShield,
-    FiPlus
+    FiPlus,
+    FiFlag
 } from 'react-icons/fi';
 import { 
     ClinicalSpecialty, 
@@ -288,6 +289,19 @@ export default function ProfessionalLocumSearchPage() {
                                         <p className="text-[10px] text-slate-400 font-bold truncate">
                                             {job.department_unit} • {(job.clinical_setting || '').replace(/_/g, ' ')}
                                         </p>
+                                        {job.status === 'FLAGGED' && (
+                                            <div className="mt-1.5 bg-red-50 border border-red-200 rounded-xl p-2.5">
+                                                <p className="text-[9px] font-black text-red-700 uppercase tracking-wider flex items-center gap-1">
+                                                    <FiFlag className="w-3 h-3 text-red-500 animate-pulse" /> Flagged & Taken Down
+                                                </p>
+                                                <p className="text-[10px] text-red-650 font-bold mt-0.5 leading-relaxed">
+                                                    Reason: {job.flagged_reason || 'No reason provided.'}
+                                                </p>
+                                                <p className="text-[9px] text-slate-400 font-semibold mt-1">
+                                                    Please edit this shift to correct issues, or it will be deleted.
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Timeframe Card */}

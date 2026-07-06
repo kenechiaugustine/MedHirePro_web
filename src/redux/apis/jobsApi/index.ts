@@ -81,6 +81,18 @@ export const jobsApi = createApi({
                 { type: 'JobDetails', id },
             ],
         }),
+        flagJob: builder.mutation<IJobListingResponse, { id: string; body: { reason: string } }>({
+            query: ({ id, body }) => ({
+                url: `/admin/jobs/${id}/flag`,
+                method: 'PUT',
+                body,
+            }),
+            invalidatesTags: (_result, _error, { id }) => [
+                'JobListings',
+                'UserJobListings',
+                { type: 'JobDetails', id },
+            ],
+        }),
     }),
 });
 
@@ -96,4 +108,5 @@ export const {
     useUpdateJobListingMutation,
     useDeleteJobListingMutation,
     useReassignJobMutation,
+    useFlagJobMutation,
 } = jobsApi;
