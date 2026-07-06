@@ -11,4 +11,5 @@ export const USER_ROUTES = {
     PROFILE: '/user/profile',
     SETTINGS: '/user/settings',
     REFERRALS: '/user/referrals',
+    REVIEWS: '/user/reviews',
 };

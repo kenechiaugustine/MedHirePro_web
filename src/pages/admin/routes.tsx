@@ -10,6 +10,7 @@ import AdminLocumJobsPage from "./locum-jobs/page";
 import AdminProfilePage from "./profile/page";
 import AdminSettingsPage from "./settings/page";
 import AdminJobApplicantsPage from "./jobs/applicants";
+import AdminReviewsPage from "./reviews/page";
 
 const adminRoutes: RouteObject[] = [
     { path: ADMIN_ROUTES.DASHBOARD, element: <AdminDashboardPage /> },
@@ -22,6 +23,7 @@ const adminRoutes: RouteObject[] = [
     { path: ADMIN_ROUTES.PROFILE, element: <AdminProfilePage /> },
     { path: ADMIN_ROUTES.SETTINGS, element: <AdminSettingsPage /> },
     { path: ADMIN_ROUTES.JOB_APPLICANTS, element: <AdminJobApplicantsPage /> },
+    { path: ADMIN_ROUTES.REVIEWS, element: <AdminReviewsPage /> },
 ];
 
 export default adminRoutes;

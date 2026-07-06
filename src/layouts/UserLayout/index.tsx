@@ -15,7 +15,8 @@ import {
     FiMenu,
     FiX,
     FiBriefcase,
-    FiGift
+    FiGift,
+    FiStar
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -43,6 +44,7 @@ export default function UserLayout() {
         { name: "Locum Jobs", path: "/user/locum-jobs", icon: <FiBriefcase className="text-lg" /> },
         { name: "My Applications", path: "/user/applications", icon: <FiCompass className="text-lg" /> },
         { name: "Referrals", path: "/user/referrals", icon: <FiGift className="text-lg" /> },
+        { name: "Platform Review", path: "/user/reviews", icon: <FiStar className="text-lg" /> },
         { name: "Profile", path: "/user/profile", icon: <FiUser className="text-lg" /> },
         { name: "Settings", path: "/user/settings", icon: <FiSettings className="text-lg" /> },
     ];

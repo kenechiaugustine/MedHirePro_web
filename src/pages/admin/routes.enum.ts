@@ -9,4 +9,5 @@ export const ADMIN_ROUTES = {
     PROFILE: '/admin/profile',
     SETTINGS: '/admin/settings',
     JOB_APPLICANTS: '/admin/jobs/:id/applicants',
+    REVIEWS: '/admin/reviews',
 };
