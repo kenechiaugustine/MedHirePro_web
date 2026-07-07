@@ -1,6 +1,6 @@
 import docin from '../../../assets/docin.png';
-import docpat from '../../../assets/docpat.png';
 import doctorPortrait from '../../../assets/portrait-black-man-doctor-healthcare-career-professional-service-smile-hospital-job-mindset-face-headshot-young-medical-person-cardiologist-with-leadership-happy-opportunity_5904.avif';
+import femaleDoctorPortrait from '../../../assets/doctor-uniform-standing-smiling_688921-4354.avif';
 
 const Testimonials = () => {
     // Testimonial data
@@ -15,10 +15,10 @@ const Testimonials = () => {
         },
         {
             id: 2,
-            name: 'Mrs. Funmi Adeyemi',
+            name: 'Dr. Femi Adeyemi',
             role: 'HR Director, St. Nicholas Hospital',
             quote: '"Recruiting verified nurses used to take weeks of background checks. With MedHirePro, we get pre-vetted candidates within days. It\'s a game-changer for our HR team."',
-            image: docpat,
+            image: femaleDoctorPortrait,
             theme: 'purple', // matches the "For Institutions" color
         },
         {
