@@ -49,7 +49,7 @@ export default function ClientLayout() {
 
     if (isLoading) {
         return (
-            <div className="flex h-screen w-screen items-center justify-center bg-[#f8fafc]">
+            <div className="flex h-dvh w-screen items-center justify-center bg-[#f8fafc]">
                 <div className="flex flex-col items-center gap-4">
                     <svg className="animate-spin h-10 w-10 text-indigo-600" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
@@ -62,7 +62,7 @@ export default function ClientLayout() {
     }
 
     return (
-        <div className="flex h-screen bg-[#f8fafc] overflow-hidden font-sans">
+        <div className="flex h-dvh bg-[#f8fafc] overflow-hidden font-sans">
             {/* Backdrop for Mobile Sidebar */}
             {isSidebarOpen && (
                 <div
