@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom';
 import heroimage from '../../../assets/heroimage.png';
+import doctorPortrait from '../../../assets/portrait-black-man-doctor-healthcare-career-professional-service-smile-hospital-job-mindset-face-headshot-young-medical-person-cardiologist-with-leadership-happy-opportunity_5904.avif';
+import doctorStanding from '../../../assets/doctor-uniform-standing-smiling_688921-4354.avif';
 import { WEBSITE_ROUTES } from '../../../pages/website/routes.enum';
+
+const socialProofImages = [doctorPortrait, doctorStanding, heroimage];
 
 const Hero = () => {
     return (
@@ -69,9 +73,14 @@ const Hero = () => {
                         {/* Social Proof Section */}
                         <div className="mt-10 flex items-center gap-4">
                             <div className="flex -space-x-3">
-                                <img className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm" src="https://placehold.co/100x100/e2e8f0/64748b?text=D1" alt="Doctor 1" />
-                                <img className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm" src="https://placehold.co/100x100/cbd5e1/475569?text=D2" alt="Doctor 2" />
-                                <img className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm" src="https://placehold.co/100x100/94a3b8/334155?text=D3" alt="Doctor 3" />
+                                {socialProofImages.map((image, index) => (
+                                    <img
+                                        key={`${image}-${index}`}
+                                        className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm"
+                                        src={image}
+                                        alt={`Verified medical professional ${index + 1}`}
+                                    />
+                                ))}
                             </div>
                             <p className="text-sm font-medium text-slate-600">
                                 Joined by <span className="text-slate-800 font-semibold">5,000+</span> Licensed Professionals

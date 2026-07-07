@@ -22,7 +22,7 @@ const Headquarters = () => {
                     <div className="bg-white/95 backdrop-blur-sm p-8 sm:p-10 rounded-2xl w-full sm:max-w-md shadow-2xl border border-white/50">
                         <h3 className="text-2xl font-bold text-[#0a192f] mb-3">Our Headquarters</h3>
                         <p className="text-slate-600 text-[15px] leading-relaxed mb-6">
-                            Located in the heart of Victoria Island, facilitating healthcare excellence across the country.
+                            Located in Nigeria, facilitating healthcare excellence across the country.
                         </p>
 
                         <a

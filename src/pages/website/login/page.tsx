@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { HiOutlineBadgeCheck } from "react-icons/hi";
 import { EmailInput, PasswordInput } from "../../../components/app";
 import heroimage from "../../../assets/heroimage.png";
+import doctorPortrait from "../../../assets/portrait-black-man-doctor-healthcare-career-professional-service-smile-hospital-job-mindset-face-headshot-young-medical-person-cardiologist-with-leadership-happy-opportunity_5904.avif";
+import doctorStanding from "../../../assets/doctor-uniform-standing-smiling_688921-4354.avif";
 import { WEBSITE_ROUTES } from "../routes.enum";
 import { useLoginWithEmailMutation } from "../../../redux/apis/authApi";
 import { useAppDispatch } from "../../../redux/hooks";
@@ -13,6 +15,8 @@ import type { UserRole } from "../../../redux/apis/userApi/interface";
 import toast from "react-hot-toast";
 import { getErrorMessage } from "../../../lib/utils";
 
+const doctorAvatars = [heroimage, doctorPortrait, doctorStanding, heroimage];
+
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -21,7 +25,7 @@ export default function LoginPage() {
     const navigate = useNavigate();
     const [loginWithEmail, { isLoading }] = useLoginWithEmailMutation();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!email.trim() || !password.trim()) {
@@ -47,9 +51,7 @@ export default function LoginPage() {
 
     return (
         <div className="flex flex-col h-dvh overflow-hidden">
-
             <main className="flex flex-1 overflow-hidden">
-
                 {/* LEFT SIDE */}
                 <div className="hidden lg:flex w-1/2 relative overflow-hidden">
                     <img
@@ -61,10 +63,7 @@ export default function LoginPage() {
                     <div className="absolute inset-0 bg-gradient-to-br from-[#0A2540]/95 via-[#0A3D91]/85 to-[#0EA5E9]/60"></div>
 
                     <div className="relative z-10 flex flex-col justify-center h-full px-16 text-white">
-
                         <div className="max-w-xl">
-
-                            {/* Badge */}
                             <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-1.5 rounded-full text-sm mb-6 w-fit shadow-sm">
                                 <div className="w-5 h-5 flex items-center justify-center bg-blue-600 rounded-full">
                                     <HiOutlineBadgeCheck className="w-3 h-3 text-white" />
@@ -88,19 +87,22 @@ export default function LoginPage() {
                                 The trusted platform connecting healthcare professionals and institutions across Nigeria.
                             </p>
 
-                            <div className="flex items-center mt-8 gap-4">
+                            <div className="flex items-center mt-8">
                                 <div className="flex -space-x-3">
-                                    <img className="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/40?img=1" alt="User 1" />
-                                    <img className="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/40?img=2" alt="User 2" />
-                                    <img className="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/40?img=3" alt="User 3" />
-                                    <img className="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/40?img=4" alt="User 4" />
+                                    {doctorAvatars.map((src, index) => (
+                                        <img
+                                            key={`${src}-${index}`}
+                                            className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                                            src={src}
+                                            alt={`Doctor ${index + 1}`}
+                                        />
+                                    ))}
                                 </div>
-
-                                <p className="text-sm text-blue-200">
-                                    Trusted by 12,000+ Professionals & Institutions
-                                </p>
                             </div>
 
+                            <p className="mt-3 text-sm text-blue-200">
+                                Trusted by 12,000+ Professionals & Institutions
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -108,8 +110,6 @@ export default function LoginPage() {
                 {/* RIGHT SIDE */}
                 <div className="flex w-full lg:w-1/2 items-center justify-center p-0 sm:p-8 bg-white sm:bg-[#f8fafc] overflow-y-auto">
                     <div className="w-full min-h-full sm:min-h-0 sm:max-w-md bg-white pt-16 pb-6 px-6 sm:p-8 rounded-none sm:rounded-xl shadow-none sm:shadow-sm flex flex-col justify-center relative">
-
-                        {/* Back to site — top left */}
                         <div className="absolute top-6 left-6 sm:static sm:mb-6">
                             <Link
                                 to={WEBSITE_ROUTES.HOME}
@@ -120,7 +120,6 @@ export default function LoginPage() {
                             </Link>
                         </div>
 
-                        {/* Welcome */}
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
                             Welcome Back
                         </h2>
@@ -129,9 +128,7 @@ export default function LoginPage() {
                             Sign in to access your MedHirePro dashboard.
                         </p>
 
-                        {/* FORM */}
                         <form className="space-y-5" onSubmit={handleSubmit}>
-
                             <EmailInput
                                 id="login-email"
                                 label="EMAIL ADDRESS"
@@ -140,7 +137,6 @@ export default function LoginPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                             />
 
-                            {/* PASSWORD */}
                             <div className="flex flex-col gap-1.5">
                                 <label htmlFor="login-password" className="text-[12px] font-bold text-[#0a192f]">
                                     PASSWORD
@@ -154,7 +150,6 @@ export default function LoginPage() {
                                 />
                             </div>
 
-                            {/* REMEMBER & FORGOT PASSWORD */}
                             <div className="flex items-center justify-between text-sm">
                                 <div className="flex items-center gap-2 text-gray-500">
                                     <input type="checkbox" id="remember-device" className="accent-blue-600" />
@@ -187,17 +182,14 @@ export default function LoginPage() {
                             </button>
                         </form>
 
-                        {/* SIGNUP */}
                         <p className="text-sm text-gray-500 text-center mt-6">
                             New to the platform{" "}
                             <Link to={WEBSITE_ROUTES.SIGNUP} className="text-blue-600 font-medium hover:underline">
                                 Sign Up
                             </Link>
                         </p>
-
                     </div>
                 </div>
-
             </main>
         </div>
     );

@@ -33,7 +33,7 @@ const ContactHero = () => {
                                     <MdEmail className="w-5 h-5" />
                                 </div>
                                 <h4 className="text-[15px] font-bold text-[#0a192f] mb-2">Email Us</h4>
-                                <p className="text-sm text-slate-500">support@medhirepro.ng</p>
+                                <p className="text-sm text-slate-500">medhirepro@gmail.com</p>
                             </div>
 
                             {/* Location Card */}
@@ -41,9 +41,9 @@ const ContactHero = () => {
                                 <div className="w-10 h-10 bg-[#e0f4f9] text-[#00838f] rounded-xl flex items-center justify-center mb-4">
                                     <MdLocationOn className="w-5 h-5" />
                                 </div>
-                                <h4 className="text-[15px] font-bold text-[#0a192f] mb-2">Visit Lagos</h4>
+                                <h4 className="text-[15px] font-bold text-[#0a192f] mb-2">Visit Enugu/Portharcourt</h4>
                                 <p className="text-sm text-slate-500 leading-relaxed">
-                                    15 Victoria Island, Lagos State, Nigeria
+                                    Enugu State/portharcourt, Nigeria
                                 </p>
                             </div>
 
