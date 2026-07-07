@@ -15,7 +15,7 @@ const Testimonials = () => {
         },
         {
             id: 2,
-            name: 'Dr. Femi Adeyemi',
+            name: 'Mr. Femi Adeyemi',
             role: 'HR Director, St. Nicholas Hospital',
             quote: '"Recruiting verified nurses used to take weeks of background checks. With MedHirePro, we get pre-vetted candidates within days. It\'s a game-changer for our HR team."',
             image: femaleDoctorPortrait,
@@ -23,7 +23,7 @@ const Testimonials = () => {
         },
         {
             id: 3,
-            name: 'Dr. Sarah Bello',
+            name: 'Dr. Matthew Bello',
             role: 'Pediatrician, Abuja',
             quote: '"The platform is incredibly user-friendly. I uploaded my MDCN certificates once, and within a week, I had three interview requests from top-tier clinics in my area."',
             image: docin,
