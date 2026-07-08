@@ -115,6 +115,14 @@ export default function ProfessionalJobDetailsPage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Format check: PDF, DOCX, JPG, PNG only
+        const allowedExtensions = ['pdf', 'docx', 'jpg', 'jpeg', 'png'];
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+        if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+            toast.error("Only PDF, DOCX, JPG, and PNG files are allowed for documents.");
+            return;
+        }
+
         // Size check: limit to 10MB
         if (file.size > 10 * 1024 * 1024) {
             toast.error("Document size cannot exceed 10MB.");
@@ -164,6 +172,7 @@ export default function ProfessionalJobDetailsPage() {
             // Upload CV
             const cvFormData = new FormData();
             cvFormData.append('file', cvFile);
+            cvFormData.append('upload_type', 'document');
             const cvRes = await uploadMedia(cvFormData).unwrap();
             const finalCvUrl = cvRes.media.url;
 
@@ -173,6 +182,7 @@ export default function ProfessionalJobDetailsPage() {
                 toast.loading(`Uploading supporting document ${i + 1}/${credentialsFiles.length}...`, { id: 'job-apply-upload' });
                 const credFormData = new FormData();
                 credFormData.append('file', credentialsFiles[i]);
+                credFormData.append('upload_type', 'document');
                 const credRes = await uploadMedia(credFormData).unwrap();
                 finalCredentialUrls.push(credRes.media.url);
             }
@@ -554,7 +564,7 @@ export default function ProfessionalJobDetailsPage() {
                                         <input 
                                             id="cv-upload-input"
                                             type="file"
-                                            accept=".pdf,.doc,.docx"
+                                            accept=".pdf,.docx,.jpg,.jpeg,.png"
                                             onChange={(e) => handleFileChange(e, 'cv')}
                                             className="hidden"
                                             disabled={isUploading}
@@ -605,7 +615,7 @@ export default function ProfessionalJobDetailsPage() {
                                             >
                                                 <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
                                                 <span className="text-xs font-bold text-slate-700 text-center">
-                                                    Select CV/Resume (PDF/Doc)
+                                                    Select CV/Resume (PDF, DOCX, JPG, PNG)
                                                 </span>
                                             </label>
                                         )}
@@ -620,6 +630,7 @@ export default function ProfessionalJobDetailsPage() {
                                         <input 
                                             id="supporting-doc-input"
                                             type="file"
+                                            accept=".pdf,.docx,.jpg,.jpeg,.png"
                                             onChange={(e) => handleFileChange(e, 'credential')}
                                             className="hidden"
                                             disabled={isUploading}
@@ -630,7 +641,7 @@ export default function ProfessionalJobDetailsPage() {
                                         >
                                             <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
                                             <span className="text-xs font-bold text-slate-700 text-center">
-                                                Add Supporting Document
+                                                Add Supporting Document (PDF, DOCX, JPG, PNG)
                                             </span>
                                         </label>
                                     </div>

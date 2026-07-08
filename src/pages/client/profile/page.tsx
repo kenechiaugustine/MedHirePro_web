@@ -51,6 +51,14 @@ export default function ClientProfilePage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Format check: JPG, PNG only
+        const allowedExtensions = ['jpg', 'jpeg', 'png'];
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+        if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+            toast.error("Only JPG and PNG files are allowed for pictures.");
+            return;
+        }
+
         // Size check: limit to 5MB
         if (file.size > 5 * 1024 * 1024) {
             toast.error("Logo size cannot exceed 5MB.");
@@ -75,6 +83,7 @@ export default function ClientProfilePage() {
                 toast.loading('Uploading facility logo...', { id: 'profile-upload' });
                 const formData = new FormData();
                 formData.append('file', avatarFile);
+                formData.append('upload_type', 'picture');
                 const res = await uploadMedia(formData).unwrap();
                 finalAvatarUrl = res.media.url;
                 setAvatarUrl(finalAvatarUrl);
@@ -256,7 +265,7 @@ export default function ClientProfilePage() {
                                     <FiCamera className="w-3.5 h-3.5" />
                                     <input 
                                         type="file" 
-                                        accept="image/*" 
+                                        accept=".jpg,.jpeg,.png" 
                                         onChange={handleFileChange} 
                                         className="hidden" 
                                     />

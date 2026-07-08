@@ -227,6 +227,14 @@ export default function ProfessionalOnboardingPage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Format check: PDF, DOCX, JPG, PNG only
+        const allowedExtensions = ['pdf', 'docx', 'jpg', 'jpeg', 'png'];
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+        if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+            toast.error("Only PDF, DOCX, JPG, and PNG files are allowed for documents.");
+            return;
+        }
+
         // Size check: Max 10MB
         if (file.size > 10 * 1024 * 1024) {
             toast.error('File size exceeds the 10MB limit.');
@@ -240,6 +248,7 @@ export default function ProfessionalOnboardingPage() {
     const uploadSingleFile = async (file: File): Promise<string> => {
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('upload_type', 'document');
         const res = await uploadMedia(formData).unwrap();
         return res.media.url;
     };
@@ -575,12 +584,12 @@ export default function ProfessionalOnboardingPage() {
         return (
             <label
                 htmlFor={inputId}
-                className="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-slate-250 hover:border-blue-400 hover:bg-blue-50/5 rounded-2xl cursor-pointer transition-all group text-center"
+                className="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-slate-255 hover:border-blue-400 hover:bg-blue-50/5 rounded-2xl cursor-pointer transition-all group text-center"
             >
                 <input
                     id={inputId}
                     type="file"
-                    accept="image/*,.pdf"
+                    accept=".pdf,.docx,.jpg,.jpeg,.png"
                     onChange={onChange}
                     className="hidden"
                 />
@@ -591,7 +600,7 @@ export default function ProfessionalOnboardingPage() {
                     {labelText}
                 </span>
                 <span className="text-[10px] text-slate-400 font-semibold block mt-1">
-                    Supports PDF, JPG, PNG up to 10MB
+                    Supports PDF, DOCX, JPG, PNG up to 10MB
                 </span>
             </label>
         );
