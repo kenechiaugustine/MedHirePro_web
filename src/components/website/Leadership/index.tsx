@@ -26,7 +26,7 @@ const Leadership = () => {
             name: 'Dr. James Kalu',
             role: 'MEDICAL ADVISOR',
             linkedin: 'https://linkedin.com',
-            image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400',
+            image: advisor,
         }
     };
 

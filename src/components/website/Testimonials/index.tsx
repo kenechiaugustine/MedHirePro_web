@@ -1,3 +1,7 @@
+import docin from '../../../assets/docin.png';
+import doctorPortrait from '../../../assets/portrait-black-man-doctor-healthcare-career-professional-service-smile-hospital-job-mindset-face-headshot-young-medical-person-cardiologist-with-leadership-happy-opportunity_5904.avif';
+import femaleDoctorPortrait from '../../../assets/doctor-uniform-standing-smiling_688921-4354.avif';
+
 const Testimonials = () => {
     // Testimonial data
     const testimonials = [
@@ -6,23 +10,23 @@ const Testimonials = () => {
             name: 'Dr. Emmanuel Okoro',
             role: 'General Practitioner, Lagos',
             quote: '"MedHirePro revolutionized how I found my current residency position. The verification process was seamless, and the hospital knew they were hiring a professional from day one."',
-            image: 'https://placehold.co/150x150/1e3a8a/ffffff?text=EO',
+            image: doctorPortrait,
             theme: 'teal', // matches the "For Professionals" color
         },
         {
             id: 2,
-            name: 'Mrs. Funmi Adeyemi',
+            name: 'Mr. Femi Adeyemi',
             role: 'HR Director, St. Nicholas Hospital',
             quote: '"Recruiting verified nurses used to take weeks of background checks. With MedHirePro, we get pre-vetted candidates within days. It\'s a game-changer for our HR team."',
-            image: 'https://placehold.co/150x150/4631ab/ffffff?text=FA',
+            image: femaleDoctorPortrait,
             theme: 'purple', // matches the "For Institutions" color
         },
         {
             id: 3,
-            name: 'Dr. Sarah Bello',
+            name: 'Dr. Matthew Bello',
             role: 'Pediatrician, Abuja',
             quote: '"The platform is incredibly user-friendly. I uploaded my MDCN certificates once, and within a week, I had three interview requests from top-tier clinics in my area."',
-            image: 'https://placehold.co/150x150/066b77/ffffff?text=SB',
+            image: docin,
             theme: 'teal',
         },
     ];

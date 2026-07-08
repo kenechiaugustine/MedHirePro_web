@@ -10,6 +10,7 @@ import { setCredentials } from '../../../../redux/slices/authSlice';
 import toast from 'react-hot-toast';
 
 import { getErrorMessage } from '../../../../lib/utils';
+import doctorStanding from '../../../../assets/doctor-uniform-standing-smiling_688921-4354.avif';
 
 const SignupAsInstitute = () => {
     const [facilityName, setFacilityName] = useState('');
@@ -68,8 +69,8 @@ const SignupAsInstitute = () => {
 
                     <div className="relative rounded-2xl overflow-hidden shadow-xl mb-8 h-64 xl:h-72 w-full max-w-lg">
                         <img
-                            src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800"
-                            alt="Hospital Building"
+                            src={doctorStanding}
+                            alt="Medical professional supporting healthcare recruitment"
                             className="absolute inset-0 w-full h-full object-cover"
                         />
                     </div>

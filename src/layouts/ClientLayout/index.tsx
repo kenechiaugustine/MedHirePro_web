@@ -42,8 +42,8 @@ export default function ClientLayout() {
         { name: "Job Listings", path: "/client/jobs", icon: <FiList className="text-lg" /> },
         { name: "Manage Applicants", path: "/client/applicants", icon: <FiUsers className="text-lg" /> },
         { name: "Referrals", path: "/client/referrals", icon: <FiGift className="text-lg" /> },
-        { name: "Platform Review", path: "/client/reviews", icon: <FiStar className="text-lg" /> },
-        { name: "Institute Profile", path: "/client/profile", icon: <FiUser className="text-lg" /> },
+        { name: "Reviews", path: "/client/reviews", icon: <FiStar className="text-lg" /> },
+        { name: "Profile", path: "/client/profile", icon: <FiUser className="text-lg" /> },
         { name: "Settings", path: "/client/settings", icon: <FiSettings className="text-lg" /> },
     ];
 

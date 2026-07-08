@@ -80,7 +80,7 @@ export default function TermsPage() {
                     </div>
 
                     {/* Section 3 */}
-                    <div className="mb-12">
+                    {/* <div className="mb-12">
                         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
                             3. Subscription Terms
                         </h2>
@@ -110,7 +110,7 @@ export default function TermsPage() {
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Agreement Confirmation */}
                     <div className="mb-16">
