@@ -172,6 +172,14 @@ export default function InstituteOnboardingPage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Format check: PDF, DOCX, JPG, PNG only
+        const allowedExtensions = ['pdf', 'docx', 'jpg', 'jpeg', 'png'];
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+        if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+            toast.error("Only PDF, DOCX, JPG, and PNG files are allowed for documents.");
+            return;
+        }
+
         // Size check: Max 10MB
         if (file.size > 10 * 1024 * 1024) {
             toast.error('File size exceeds the 10MB limit.');
@@ -185,6 +193,7 @@ export default function InstituteOnboardingPage() {
     const uploadSingleFile = async (file: File): Promise<string> => {
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('upload_type', 'document');
         const res = await uploadMedia(formData).unwrap();
         return res.media.url;
     };
@@ -684,7 +693,7 @@ export default function InstituteOnboardingPage() {
                                             <input
                                                 id="license-upload"
                                                 type="file"
-                                                accept="image/*,.pdf"
+                                                accept=".pdf,.docx,.jpg,.jpeg,.png"
                                                 onChange={(e) => handleFileSelect(e, setLicenseFile)}
                                                 className="hidden"
                                             />
@@ -737,6 +746,9 @@ export default function InstituteOnboardingPage() {
                                                     <span className="text-xs font-bold text-slate-700 text-center">
                                                         Select Corporate License
                                                     </span>
+                                                    <span className="text-[10px] text-slate-400 font-bold mt-1 text-center">
+                                                        Accepted formats: PDF, DOCX, JPG, PNG (Max 10MB)
+                                                    </span>
                                                 </label>
                                             )}
                                         </div>
@@ -749,7 +761,7 @@ export default function InstituteOnboardingPage() {
                                             <input
                                                 id="proof-address-upload"
                                                 type="file"
-                                                accept="image/*,.pdf"
+                                                accept=".pdf,.docx,.jpg,.jpeg,.png"
                                                 onChange={(e) => handleFileSelect(e, setProofAddressFile)}
                                                 className="hidden"
                                             />
@@ -802,6 +814,9 @@ export default function InstituteOnboardingPage() {
                                                     <span className="text-xs font-bold text-slate-700 text-center">
                                                         Select Proof of Address
                                                     </span>
+                                                    <span className="text-[10px] text-slate-400 font-bold mt-1 text-center">
+                                                        Accepted formats: PDF, DOCX, JPG, PNG (Max 10MB)
+                                                    </span>
                                                 </label>
                                             )}
                                         </div>
@@ -814,7 +829,7 @@ export default function InstituteOnboardingPage() {
                                             <input
                                                 id="rep-id-upload"
                                                 type="file"
-                                                accept="image/*,.pdf"
+                                                accept=".pdf,.docx,.jpg,.jpeg,.png"
                                                 onChange={(e) => handleFileSelect(e, setRepIdFile)}
                                                 className="hidden"
                                             />
@@ -866,6 +881,9 @@ export default function InstituteOnboardingPage() {
                                                     <FiUploadCloud className="w-8 h-8 text-slate-400 mb-2" />
                                                     <span className="text-xs font-bold text-slate-700 text-center">
                                                         Select Representative ID
+                                                    </span>
+                                                    <span className="text-[10px] text-slate-400 font-bold mt-1 text-center">
+                                                        Accepted formats: PDF, DOCX, JPG, PNG (Max 10MB)
                                                     </span>
                                                 </label>
                                             )}

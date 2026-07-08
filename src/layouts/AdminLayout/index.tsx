@@ -37,7 +37,7 @@ export default function AdminLayout() {
     };
 
     const sidebarLinks = [
-        { name: "Overview Dashboard", path: "/admin/dashboard", icon: <FiGrid className="text-lg" /> },
+        { name: "Dashboard", path: "/admin/dashboard", icon: <FiGrid className="text-lg" /> },
         { name: "Verify Credentials", path: "/admin/verifications", icon: <FiCheckSquare className="text-lg" /> },
         { name: "User Management", path: "/admin/users", icon: <FiUsers className="text-lg" /> },
         { name: "Job Listings", path: "/admin/jobs", icon: <FiList className="text-lg" /> },

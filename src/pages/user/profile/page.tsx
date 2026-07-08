@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useGetMeQuery, useUpdateProfileMutation } from '../../../redux/apis/userApi';
 import { useUploadMediaMutation } from '../../../redux/apis/mediaApi';
-import { ClinicalSpecialty } from '../../../redux/apis/jobsApi/interface';
-import { Avatar } from '../../../components/app';
+import { Avatar, SearchableSelect } from '../../../components/app';
+import { medicalData } from '../../../data/medicalData';
 import {
     FiShield,
     FiLoader,
@@ -30,6 +30,34 @@ export default function UserProfilePage() {
     const [avatarPreview, setAvatarPreview] = useState('');
     const [isUploading, setIsUploading] = useState(false);
 
+    // Get clinical specialty options from medicalData
+    const specialtyOptions = useMemo(() => {
+        const options = medicalData.departments.flatMap(dept => {
+            if (dept.specialties.length === 0) {
+                return [{
+                    label: dept.name,
+                    value: dept.name,
+                    group: 'General Services'
+                }];
+            }
+            return dept.specialties.map(spec => ({
+                label: spec,
+                value: spec,
+                group: dept.name
+            }));
+        });
+
+        // Ensure currently selected specialty is in options
+        if (specialty && !options.some(opt => opt.value === specialty)) {
+            options.push({
+                label: specialty,
+                value: specialty,
+                group: 'Registered Specialty'
+            });
+        }
+        return options;
+    }, [specialty]);
+
     useEffect(() => {
         if (user) {
             setFullName(user.full_name || '');
@@ -51,6 +79,14 @@ export default function UserProfilePage() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Format check: JPG, PNG only
+        const allowedExtensions = ['jpg', 'jpeg', 'png'];
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+        if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+            toast.error("Only JPG and PNG files are allowed for pictures.");
+            return;
+        }
 
         // Size check: limit to 5MB
         if (file.size > 5 * 1024 * 1024) {
@@ -80,6 +116,7 @@ export default function UserProfilePage() {
                 toast.loading('Uploading profile picture...', { id: 'profile-upload' });
                 const formData = new FormData();
                 formData.append('file', avatarFile);
+                formData.append('upload_type', 'picture');
                 const res = await uploadMedia(formData).unwrap();
                 finalAvatarUrl = res.media.url;
                 setAvatarUrl(finalAvatarUrl);
@@ -269,7 +306,7 @@ export default function UserProfilePage() {
                                     <FiCamera className="w-3.5 h-3.5" />
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept=".jpg,.jpeg,.png"
                                         onChange={handleFileChange}
                                         className="hidden"
                                     />
@@ -303,32 +340,17 @@ export default function UserProfilePage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Primary Clinical Specialty</label>
-                                <div className="relative">
-                                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
-                                        <FiBriefcase className="text-xs" />
-                                    </span>
-                                    <select
-                                        required
-                                        value={specialty}
-                                        onChange={(e) => setSpecialty(e.target.value)}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-400 font-semibold text-slate-700 appearance-none"
-                                    >
-                                        <option value="">Select your medical specialty</option>
-                                        {Object.values(ClinicalSpecialty).map((spec) => (
-                                            <option key={spec} value={spec}>
-                                                {spec}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
+                            <SearchableSelect
+                                id="prof-specialty"
+                                label="Primary Clinical Specialty"
+                                placeholder="Select primary clinical specialty..."
+                                options={specialtyOptions}
+                                value={specialty}
+                                onChange={(val) => setSpecialty(val)}
+                                focusColor="#0b5cd5"
+                                icon={<FiBriefcase className="text-lg" />}
+                                required={true}
+                            />
 
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Registration Email (Read-Only)</label>
