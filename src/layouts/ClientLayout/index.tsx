@@ -47,6 +47,14 @@ export default function ClientLayout() {
         { name: "Settings", path: "/client/settings", icon: <FiSettings className="text-lg" /> },
     ];
 
+    const isVerified = user?.onboarding_status === 'approved';
+    const visibleLinks = sidebarLinks.filter(link => {
+        if (link.path === "/client/onboarding" && isVerified) {
+            return false;
+        }
+        return true;
+    });
+
     if (isLoading) {
         return (
             <div className="flex h-dvh w-screen items-center justify-center bg-[#f8fafc]">
@@ -95,7 +103,7 @@ export default function ClientLayout() {
 
                 {/* Navigation links */}
                 <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-                    {sidebarLinks.map((link) => {
+                    {visibleLinks.map((link) => {
                         const isActive = location.pathname === link.path;
                         return (
                             <Link
