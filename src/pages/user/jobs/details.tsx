@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { 
     useCheckAppliedQuery,
@@ -24,9 +24,11 @@ import {
     FiInfo,
     FiEye,
     FiEdit2,
-    FiTrash2
+    FiTrash2,
+    FiShare2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import ShareJobModal from '../../../components/app/ShareJobModal';
 
 const getTrimmedFileName = (file: File | null, url: string, maxLength = 22) => {
     let name = '';
@@ -73,6 +75,7 @@ export default function ProfessionalJobDetailsPage() {
 
     // Application Form States
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [clinicalSummary, setClinicalSummary] = useState('');
     
     // Selected files holding states
@@ -282,8 +285,16 @@ export default function ProfessionalJobDetailsPage() {
                         </p>
                     </div>
 
-                    <div className="text-[10px] text-slate-400 font-bold md:text-right">
-                        <p>Published: {new Date(job.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                    <div className="flex flex-wrap items-center gap-3 md:justify-end">
+                        <button
+                            onClick={() => setIsShareModalOpen(true)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-extrabold text-xs transition border border-indigo-200 cursor-pointer shadow-xs"
+                        >
+                            <FiShare2 className="text-sm" /> Share Public Link
+                        </button>
+                        <div className="text-[10px] text-slate-400 font-bold">
+                            <p>Published: {new Date(job.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -501,21 +512,29 @@ export default function ProfessionalJobDetailsPage() {
                         ) : (
                             <div className="space-y-3">
                                 {onboarding?.onboarding_status !== 'approved' ? (
-                                    <div className="p-3.5 bg-amber-50/50 border border-amber-100 rounded-xl text-amber-850 text-[10px] font-semibold leading-relaxed flex gap-2">
-                                        <FiAlertCircle className="w-4.5 h-4.5 text-amber-600 flex-shrink-0 mt-0.5" />
-                                        <p>
-                                            <strong>Verification Required:</strong> Your profile onboarding dossier is not approved yet. Only certified practitioners can apply for openings.
-                                        </p>
-                                    </div>
-                                ) : null}
+                                    <div className="space-y-3">
+                                        <button
+                                            disabled
+                                            className="w-full py-3.5 bg-slate-200 text-slate-400 cursor-not-allowed rounded-xl text-xs font-black flex items-center justify-center gap-2"
+                                        >
+                                            <FiCheckCircle className="text-sm" /> Apply for Placement
+                                        </button>
 
-                                <button
-                                    onClick={() => setIsApplyModalOpen(true)}
-                                    disabled={onboarding?.onboarding_status !== 'approved'}
-                                    className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-xs font-black shadow-lg shadow-indigo-600/15 flex items-center justify-center gap-2 cursor-pointer transition-all hover:-translate-y-0.5 active:translate-y-0"
-                                >
-                                    <FiCheckCircle className="text-sm" /> Apply for Placement
-                                </button>
+                                        <Link
+                                            to={USER_ROUTES.ONBOARDING}
+                                            className="block text-center text-xs font-extrabold text-indigo-600 hover:text-indigo-800 transition hover:underline"
+                                        >
+                                            Verify your profile credentials to enable applying →
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => setIsApplyModalOpen(true)}
+                                        className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-600/15 flex items-center justify-center gap-2 cursor-pointer transition-all hover:-translate-y-0.5 active:translate-y-0"
+                                    >
+                                        <FiCheckCircle className="text-sm" /> Apply for Placement
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
@@ -728,6 +747,16 @@ export default function ProfessionalJobDetailsPage() {
                         </form>
                     </div>
                 </div>
+            )}
+            {/* SHARE JOB MODAL */}
+            {job && (
+                <ShareJobModal
+                    isOpen={isShareModalOpen}
+                    onClose={() => setIsShareModalOpen(false)}
+                    jobId={job._id || job.id}
+                    jobTitle={job.position_title}
+                    location={`${job.city}, ${job.state}`}
+                />
             )}
         </div>
     );

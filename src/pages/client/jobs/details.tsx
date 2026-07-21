@@ -22,9 +22,12 @@ import {
     FiDownload, 
     FiCheck, 
     FiX,
-    FiAlertCircle
+    FiAlertCircle,
+    FiShare2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import ShareJobModal from '../../../components/app/ShareJobModal';
+import { exportApplicantsToExcel } from '../../../lib/utils/exportExcel';
 
 export default function ClientJobDetailsPage() {
     const { id } = useParams<{ id: string }>();
@@ -41,6 +44,7 @@ export default function ClientJobDetailsPage() {
 
     const [processingAppId, setProcessingAppId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'ALL' | 'SHORTLISTED' | 'HIRED' | 'DECLINED'>('ALL');
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     // Confirmation Modal state
     const [confirmModal, setConfirmModal] = useState<{
@@ -230,9 +234,17 @@ export default function ClientJobDetailsPage() {
                         </p>
                     </div>
 
-                    <div className="text-[10px] text-slate-400 font-bold md:text-right space-y-1">
-                        <p>Published: {new Date(job.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                        <p>Last Audit: {new Date(job.updated_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    <div className="flex flex-wrap items-center gap-3 md:justify-end">
+                        <button
+                            onClick={() => setIsShareModalOpen(true)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-extrabold text-xs transition border border-indigo-200 cursor-pointer shadow-xs"
+                        >
+                            <FiShare2 className="text-sm" /> Share Public Link
+                        </button>
+                        <div className="text-[10px] text-slate-400 font-bold space-y-0.5">
+                            <p>Published: {new Date(job.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                            <p>Last Audit: {new Date(job.updated_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -439,13 +451,24 @@ export default function ClientJobDetailsPage() {
 
             {/* CANDIDATE APPLICATIONS SECTION */}
             <div className="bg-white rounded-2xl border border-slate-150 shadow-sm p-6 space-y-6">
-                <div className="border-b border-slate-100 pb-4">
-                    <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                        <FiUser className="text-indigo-500" /> Practitioner Campaign Applications ({applications?.length || 0})
-                    </h3>
-                    <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
-                        Audit qualifications, download compliance credential files, and select candidates for clinical placements.
-                    </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <FiUser className="text-indigo-500" /> Practitioner Campaign Applications ({applications?.length || 0})
+                        </h3>
+                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                            Audit qualifications, download compliance credential files, and select candidates for clinical placements.
+                        </p>
+                    </div>
+
+                    {applications && applications.length > 0 && (
+                        <button
+                            onClick={() => exportApplicantsToExcel(filteredApps.length > 0 ? filteredApps : applications, job.position_title)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer w-fit"
+                        >
+                            <FiDownload className="text-sm text-emerald-600" /> Export Applicants (Excel)
+                        </button>
+                    )}
                 </div>
                 {/* Tabs bar */}
                 <div className="flex border-b border-slate-100 pb-px">
@@ -859,6 +882,16 @@ export default function ClientJobDetailsPage() {
                         </div>
                     </div>
                 </div>
+            )}
+            {/* SHARE JOB MODAL */}
+            {job && (
+                <ShareJobModal
+                    isOpen={isShareModalOpen}
+                    onClose={() => setIsShareModalOpen(false)}
+                    jobId={job._id || job.id}
+                    jobTitle={job.position_title}
+                    location={`${job.city}, ${job.state}`}
+                />
             )}
         </div>
     );
