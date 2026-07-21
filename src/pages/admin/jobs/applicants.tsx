@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { useGetApplicationsQuery } from '../../../redux/apis/applicationsApi';
@@ -9,12 +10,15 @@ import {
     FiBriefcase, 
     FiDownload, 
     FiFileText, 
-    FiUser
+    FiUser,
+    FiShare2
 } from 'react-icons/fi';
 import { exportApplicantsToExcel } from '../../../lib/utils/exportExcel';
+import ShareJobModal from '../../../components/app/ShareJobModal';
 
 export default function AdminJobApplicantsPage() {
     const { id } = useParams<{ id: string }>();
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     // Fetch API details
     const { data: job, isLoading: isJobLoading } = useGetJobListingDetailsQuery(id || '');
@@ -65,15 +69,24 @@ export default function AdminJobApplicantsPage() {
     return (
         <div className="max-w-6xl mx-auto space-y-6 animate-fadeIn duration-200">
             {/* Control Header & Back button */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <Link 
                     to={job.job_type === 'LOCUM' ? '/admin/locum-jobs' : '/admin/jobs'}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-black text-slate-600 shadow-sm transition-all"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-black text-slate-600 shadow-xs transition-all w-full sm:w-auto"
                 >
                     <FiArrowLeft /> Back to Listings
                 </Link>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 text-teal-700 text-[10px] font-black border border-teal-500/20 uppercase tracking-wider">
-                    <FiShield /> Supervisor Dossier View
+
+                <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto flex-wrap">
+                    <button
+                        onClick={() => setIsShareModalOpen(true)}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                    >
+                        <FiShare2 className="text-sm text-blue-600" /> Share Job Link
+                    </button>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-500/10 text-teal-700 text-[10px] font-black border border-teal-500/20 uppercase tracking-wider">
+                        <FiShield /> Supervisor Dossier View
+                    </div>
                 </div>
             </div>
 
@@ -104,14 +117,14 @@ export default function AdminJobApplicantsPage() {
 
             {/* Applicants Table */}
             <div className="bg-white border border-slate-150 rounded-2xl shadow-md overflow-hidden">
-                <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">
                         Applicant Telemetry Records ({applications?.length || 0})
                     </h3>
                     {applications && applications.length > 0 && (
                         <button
                             onClick={() => exportApplicantsToExcel(applications, job.position_title)}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer w-full sm:w-auto"
                         >
                             <FiDownload className="text-sm text-emerald-600" /> Export Applicants (Excel)
                         </button>
@@ -282,6 +295,18 @@ export default function AdminJobApplicantsPage() {
                     </>
                 )}
             </div>
+
+            {/* SHARE JOB MODAL */}
+            {job && (
+                <ShareJobModal
+                    isOpen={isShareModalOpen}
+                    onClose={() => setIsShareModalOpen(false)}
+                    jobId={job._id || job.id || ''}
+                    jobTitle={job.position_title || ''}
+                    location={`${job.city || ''}, ${job.state || ''}`}
+                    facilityName={postedByClinic}
+                />
+            )}
         </div>
     );
 }
