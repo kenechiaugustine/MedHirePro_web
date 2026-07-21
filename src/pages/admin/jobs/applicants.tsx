@@ -11,6 +11,7 @@ import {
     FiFileText, 
     FiUser
 } from 'react-icons/fi';
+import { exportApplicantsToExcel } from '../../../lib/utils/exportExcel';
 
 export default function AdminJobApplicantsPage() {
     const { id } = useParams<{ id: string }>();
@@ -107,6 +108,14 @@ export default function AdminJobApplicantsPage() {
                     <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">
                         Applicant Telemetry Records ({applications?.length || 0})
                     </h3>
+                    {applications && applications.length > 0 && (
+                        <button
+                            onClick={() => exportApplicantsToExcel(applications, job.position_title)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                        >
+                            <FiDownload className="text-sm text-emerald-600" /> Export Applicants (Excel)
+                        </button>
+                    )}
                 </div>
 
                 {!applications || applications.length === 0 ? (

@@ -27,6 +27,7 @@ import {
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import ShareJobModal from '../../../components/app/ShareJobModal';
+import { exportApplicantsToExcel } from '../../../lib/utils/exportExcel';
 
 export default function ClientJobDetailsPage() {
     const { id } = useParams<{ id: string }>();
@@ -450,13 +451,24 @@ export default function ClientJobDetailsPage() {
 
             {/* CANDIDATE APPLICATIONS SECTION */}
             <div className="bg-white rounded-2xl border border-slate-150 shadow-sm p-6 space-y-6">
-                <div className="border-b border-slate-100 pb-4">
-                    <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                        <FiUser className="text-indigo-500" /> Practitioner Campaign Applications ({applications?.length || 0})
-                    </h3>
-                    <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
-                        Audit qualifications, download compliance credential files, and select candidates for clinical placements.
-                    </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <FiUser className="text-indigo-500" /> Practitioner Campaign Applications ({applications?.length || 0})
+                        </h3>
+                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                            Audit qualifications, download compliance credential files, and select candidates for clinical placements.
+                        </p>
+                    </div>
+
+                    {applications && applications.length > 0 && (
+                        <button
+                            onClick={() => exportApplicantsToExcel(filteredApps.length > 0 ? filteredApps : applications, job.position_title)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer w-fit"
+                        >
+                            <FiDownload className="text-sm text-emerald-600" /> Export Applicants (Excel)
+                        </button>
+                    )}
                 </div>
                 {/* Tabs bar */}
                 <div className="flex border-b border-slate-100 pb-px">
