@@ -18,9 +18,11 @@ import {
     FiTrash2,
     FiUsers,
     FiSettings,
-    FiFlag
+    FiFlag,
+    FiShare2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import ShareJobModal from '../../../components/app/ShareJobModal';
 import {
     ClinicalSpecialty,
     ClinicalSetting,
@@ -45,6 +47,8 @@ export default function AdminLocumJobsPage() {
     const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
     const [selectedJob, setSelectedJob] = useState<any | null>(null);
     const [newOwnerId, setNewOwnerId] = useState('');
+    const [shareJob, setShareJob] = useState<any | null>(null);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     // Form inputs for locum creation
     const [createForm, setCreateForm] = useState({
@@ -473,6 +477,17 @@ export default function AdminLocumJobsPage() {
                                             </td>
 
                                             <td className="px-6 py-4.5 text-right whitespace-nowrap space-x-2">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setShareJob(job);
+                                                        setIsShareModalOpen(true);
+                                                    }}
+                                                    className="p-2 text-slate-600 hover:text-blue-700 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-lg cursor-pointer transition-colors inline-flex items-center"
+                                                    title="Share Public Link"
+                                                >
+                                                    <FiShare2 className="text-xs" />
+                                                </button>
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -925,6 +940,21 @@ export default function AdminLocumJobsPage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* SHARE JOB MODAL */}
+            {shareJob && (
+                <ShareJobModal
+                    isOpen={isShareModalOpen}
+                    onClose={() => {
+                        setIsShareModalOpen(false);
+                        setShareJob(null);
+                    }}
+                    jobId={shareJob._id || shareJob.id || ''}
+                    jobTitle={shareJob.position_title || ''}
+                    location={`${shareJob.city || ''}, ${shareJob.state || ''}`}
+                    facilityName={userMap[shareJob.posted_by]}
+                />
             )}
         </div>
     );
