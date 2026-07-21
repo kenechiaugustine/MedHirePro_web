@@ -10,6 +10,8 @@ import TermsPage from "./terms/page";
 import FAQPage from "./faq/page";
 import LoginPage from "./login/page";
 import SignupPage from "./signup/page";
+import PublicJobsPage from "./jobs/page";
+import PublicJobDetailsPage from "./jobs/details";
 
 const websiteRoutes: RouteObject[] = [
     { path: WEBSITE_ROUTES.HOME, element: <HomePage /> },
@@ -20,6 +22,8 @@ const websiteRoutes: RouteObject[] = [
     { path: WEBSITE_ROUTES.PRIVACY, element: <PrivacyPage /> },
     { path: WEBSITE_ROUTES.TERMS, element: <TermsPage /> },
     { path: WEBSITE_ROUTES.FAQ, element: <FAQPage /> },
+    { path: WEBSITE_ROUTES.JOBS, element: <PublicJobsPage /> },
+    { path: WEBSITE_ROUTES.JOB_DETAILS, element: <PublicJobDetailsPage /> },
     { path: WEBSITE_ROUTES.LOGIN, element: <LoginPage /> },
     { path: WEBSITE_ROUTES.SIGNUP, element: <SignupPage /> },
 ];

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { HiOutlineBadgeCheck } from "react-icons/hi";
 import { EmailInput, PasswordInput } from "../../../components/app";
@@ -23,7 +23,11 @@ export default function LoginPage() {
 
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams] = useSearchParams();
     const [loginWithEmail, { isLoading }] = useLoginWithEmailMutation();
+
+    const redirectParam = searchParams.get("redirect") || (location.state as any)?.from?.pathname;
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -43,7 +47,12 @@ export default function LoginPage() {
             }));
 
             toast.success("Logged in successfully!");
-            navigate(getRoleDashboard(result.user_role as UserRole), { replace: true });
+            
+            const targetRoute = (result.user_role === 'professional' && redirectParam)
+                ? redirectParam
+                : getRoleDashboard(result.user_role as UserRole);
+
+            navigate(targetRoute, { replace: true });
         } catch (err: unknown) {
             toast.error(getErrorMessage(err, "Login failed. Please check your credentials."));
         }

@@ -26,6 +26,7 @@ const Navbar = () => {
 
     // Define navigation links for easy mapping and maintainability
     const navLinks = [
+        // { name: 'Browse Jobs', path: WEBSITE_ROUTES.JOBS },
         { name: 'For Professionals', path: WEBSITE_ROUTES.PROFESSIONAL },
         { name: 'For Institutes', path: WEBSITE_ROUTES.INSTITUTE },
         { name: 'About us', path: WEBSITE_ROUTES.ABOUT },

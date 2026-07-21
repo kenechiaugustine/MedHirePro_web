@@ -24,9 +24,11 @@ import {
     FiInfo,
     FiEye,
     FiEdit2,
-    FiTrash2
+    FiTrash2,
+    FiShare2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import ShareJobModal from '../../../components/app/ShareJobModal';
 
 const getTrimmedFileName = (file: File | null, url: string, maxLength = 22) => {
     let name = '';
@@ -73,6 +75,7 @@ export default function ProfessionalJobDetailsPage() {
 
     // Application Form States
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [clinicalSummary, setClinicalSummary] = useState('');
     
     // Selected files holding states
@@ -282,8 +285,16 @@ export default function ProfessionalJobDetailsPage() {
                         </p>
                     </div>
 
-                    <div className="text-[10px] text-slate-400 font-bold md:text-right">
-                        <p>Published: {new Date(job.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                    <div className="flex flex-wrap items-center gap-3 md:justify-end">
+                        <button
+                            onClick={() => setIsShareModalOpen(true)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-extrabold text-xs transition border border-indigo-200 cursor-pointer shadow-xs"
+                        >
+                            <FiShare2 className="text-sm" /> Share Public Link
+                        </button>
+                        <div className="text-[10px] text-slate-400 font-bold">
+                            <p>Published: {new Date(job.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -728,6 +739,16 @@ export default function ProfessionalJobDetailsPage() {
                         </form>
                     </div>
                 </div>
+            )}
+            {/* SHARE JOB MODAL */}
+            {job && (
+                <ShareJobModal
+                    isOpen={isShareModalOpen}
+                    onClose={() => setIsShareModalOpen(false)}
+                    jobId={job._id || job.id}
+                    jobTitle={job.position_title}
+                    location={`${job.city}, ${job.state}`}
+                />
             )}
         </div>
     );

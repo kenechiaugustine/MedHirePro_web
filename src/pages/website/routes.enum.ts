@@ -8,6 +8,8 @@ export const WEBSITE_ROUTES = {
     PRIVACY: '/privacy',
     TERMS: '/terms',
     FAQ: '/faq',
+    JOBS: '/jobs',
+    JOB_DETAILS: '/jobs/:id',
 
     // authentication routes
     LOGIN: '/login',

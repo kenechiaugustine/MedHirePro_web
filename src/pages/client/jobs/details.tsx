@@ -22,9 +22,11 @@ import {
     FiDownload, 
     FiCheck, 
     FiX,
-    FiAlertCircle
+    FiAlertCircle,
+    FiShare2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import ShareJobModal from '../../../components/app/ShareJobModal';
 
 export default function ClientJobDetailsPage() {
     const { id } = useParams<{ id: string }>();
@@ -41,6 +43,7 @@ export default function ClientJobDetailsPage() {
 
     const [processingAppId, setProcessingAppId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'ALL' | 'SHORTLISTED' | 'HIRED' | 'DECLINED'>('ALL');
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     // Confirmation Modal state
     const [confirmModal, setConfirmModal] = useState<{
@@ -230,9 +233,17 @@ export default function ClientJobDetailsPage() {
                         </p>
                     </div>
 
-                    <div className="text-[10px] text-slate-400 font-bold md:text-right space-y-1">
-                        <p>Published: {new Date(job.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                        <p>Last Audit: {new Date(job.updated_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    <div className="flex flex-wrap items-center gap-3 md:justify-end">
+                        <button
+                            onClick={() => setIsShareModalOpen(true)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-extrabold text-xs transition border border-indigo-200 cursor-pointer shadow-xs"
+                        >
+                            <FiShare2 className="text-sm" /> Share Public Link
+                        </button>
+                        <div className="text-[10px] text-slate-400 font-bold space-y-0.5">
+                            <p>Published: {new Date(job.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                            <p>Last Audit: {new Date(job.updated_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -859,6 +870,16 @@ export default function ClientJobDetailsPage() {
                         </div>
                     </div>
                 </div>
+            )}
+            {/* SHARE JOB MODAL */}
+            {job && (
+                <ShareJobModal
+                    isOpen={isShareModalOpen}
+                    onClose={() => setIsShareModalOpen(false)}
+                    jobId={job._id || job.id}
+                    jobTitle={job.position_title}
+                    location={`${job.city}, ${job.state}`}
+                />
             )}
         </div>
     );
