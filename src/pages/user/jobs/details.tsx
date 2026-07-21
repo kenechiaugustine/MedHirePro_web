@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { 
     useCheckAppliedQuery,
@@ -512,21 +512,29 @@ export default function ProfessionalJobDetailsPage() {
                         ) : (
                             <div className="space-y-3">
                                 {onboarding?.onboarding_status !== 'approved' ? (
-                                    <div className="p-3.5 bg-amber-50/50 border border-amber-100 rounded-xl text-amber-850 text-[10px] font-semibold leading-relaxed flex gap-2">
-                                        <FiAlertCircle className="w-4.5 h-4.5 text-amber-600 flex-shrink-0 mt-0.5" />
-                                        <p>
-                                            <strong>Verification Required:</strong> Your profile onboarding dossier is not approved yet. Only certified practitioners can apply for openings.
-                                        </p>
-                                    </div>
-                                ) : null}
+                                    <div className="space-y-3">
+                                        <button
+                                            disabled
+                                            className="w-full py-3.5 bg-slate-200 text-slate-400 cursor-not-allowed rounded-xl text-xs font-black flex items-center justify-center gap-2"
+                                        >
+                                            <FiCheckCircle className="text-sm" /> Apply for Placement
+                                        </button>
 
-                                <button
-                                    onClick={() => setIsApplyModalOpen(true)}
-                                    disabled={onboarding?.onboarding_status !== 'approved'}
-                                    className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-xs font-black shadow-lg shadow-indigo-600/15 flex items-center justify-center gap-2 cursor-pointer transition-all hover:-translate-y-0.5 active:translate-y-0"
-                                >
-                                    <FiCheckCircle className="text-sm" /> Apply for Placement
-                                </button>
+                                        <Link
+                                            to={USER_ROUTES.ONBOARDING}
+                                            className="block text-center text-xs font-extrabold text-indigo-600 hover:text-indigo-800 transition hover:underline"
+                                        >
+                                            Verify your profile credentials to enable applying →
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => setIsApplyModalOpen(true)}
+                                        className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-600/15 flex items-center justify-center gap-2 cursor-pointer transition-all hover:-translate-y-0.5 active:translate-y-0"
+                                    >
+                                        <FiCheckCircle className="text-sm" /> Apply for Placement
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

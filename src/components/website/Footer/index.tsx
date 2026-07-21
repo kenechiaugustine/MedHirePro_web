@@ -4,7 +4,7 @@ import { WEBSITE_ROUTES } from '../../../pages/website/routes.enum';
 const Footer = () => {
     // Define footer links for easy maintenance
     const footerLinks = [
-        // { name: 'Browse Jobs', path: WEBSITE_ROUTES.JOBS },
+        { name: 'Browse Jobs', path: WEBSITE_ROUTES.JOBS },
         { name: 'For Professionals', path: WEBSITE_ROUTES.PROFESSIONAL },
         { name: 'For Institutes', path: WEBSITE_ROUTES.INSTITUTE },
         { name: 'About us', path: WEBSITE_ROUTES.ABOUT },

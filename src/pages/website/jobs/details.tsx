@@ -9,6 +9,7 @@ import {
 } from '../../../redux/apis/applicationsApi';
 import { useUploadMediaMutation } from '../../../redux/apis/mediaApi';
 import { useAuth } from '../../../hooks/useAuth';
+import { useGetOnboardingStatusQuery } from '../../../redux/apis/onboardingApi';
 import { WEBSITE_ROUTES } from '../routes.enum';
 import { 
     FiArrowLeft, 
@@ -41,6 +42,11 @@ export default function PublicJobDetailsPage() {
         { skip: !id || !isAuthenticated || !isProfessional }
     );
 
+    // Onboarding query
+    const { data: onboarding } = useGetOnboardingStatusQuery(undefined, {
+        skip: !isAuthenticated || !isProfessional,
+    });
+
     // Mutations
     const [submitApplication, { isLoading: isSubmitting }] = useSubmitApplicationMutation();
     const [uploadMedia] = useUploadMediaMutation();
@@ -67,6 +73,12 @@ export default function PublicJobDetailsPage() {
 
         if (isInstitute || isAdmin) {
             toast.error("Only clinical professionals can apply for job vacancies. Institutes and admins cannot submit applications.");
+            return;
+        }
+
+        if (isProfessional && onboarding?.onboarding_status !== 'approved') {
+            toast.error("Your practitioner profile is unverified. Please complete verification to apply.");
+            navigate('/user/onboarding');
             return;
         }
 
@@ -385,6 +397,25 @@ export default function PublicJobDetailsPage() {
                                     </div>
                                 )}
 
+                                {/* If logged in as Professional but Unverified */}
+                                {isAuthenticated && isProfessional && onboarding?.onboarding_status !== 'approved' && !hasApplied && (
+                                    <div className="space-y-3 mb-4">
+                                        <button
+                                            disabled
+                                            className="w-full py-3.5 px-4 bg-gray-200 text-gray-400 font-bold text-sm rounded-xl cursor-not-allowed flex items-center justify-center gap-2"
+                                        >
+                                            <FiLock /> Apply for Vacancy
+                                        </button>
+
+                                        <Link
+                                            to="/user/onboarding"
+                                            className="flex items-center justify-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition hover:underline"
+                                        >
+                                            Verify your profile to enable applying →
+                                        </Link>
+                                    </div>
+                                )}
+
                                 {/* If user has already applied */}
                                 {hasApplied && (
                                     <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-center mb-4">
@@ -396,8 +427,8 @@ export default function PublicJobDetailsPage() {
                                     </div>
                                 )}
 
-                                {/* Main Apply Action Button */}
-                                {!hasApplied && (!isAuthenticated || isProfessional) && (
+                                {/* Main Apply Action Button (Active) */}
+                                {!hasApplied && (!isAuthenticated || (isProfessional && onboarding?.onboarding_status === 'approved')) && (
                                     <button
                                         onClick={handleApplyClick}
                                         className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
@@ -463,7 +494,7 @@ export default function PublicJobDetailsPage() {
                             </button>
 
                             <button
-                                onClick={() => navigate(`/signup?redirect=${encodeURIComponent(redirectPath)}`)}
+                                onClick={() => navigate(`/signup?as=professional&redirect=${encodeURIComponent(redirectPath)}`)}
                                 className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition cursor-pointer"
                             >
                                 Create New Account
