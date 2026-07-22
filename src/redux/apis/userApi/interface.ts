@@ -6,6 +6,7 @@ export interface IUser {
     _id: string;
     email: string;
     full_name: string | null;
+    phone_number?: string | null;
     specialty: string | null;
     facility_name: string | null;
     avatar_url: string | null;
@@ -40,6 +41,7 @@ export interface IUser {
 
 export interface IUpdateProfileRequest {
     full_name?: string | null;
+    phone_number?: string | null;
     specialty?: string | null;
     facility_name?: string | null;
     avatar_url?: string | null;

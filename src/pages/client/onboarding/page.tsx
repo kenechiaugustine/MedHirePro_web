@@ -79,6 +79,7 @@ export default function InstituteOnboardingPage() {
         : null;
 
     // Form fields state
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [businessRegistrationNumber, setBusinessRegistrationNumber] = useState('');
     const [facilityType, setFacilityType] = useState('');
 
@@ -148,6 +149,7 @@ export default function InstituteOnboardingPage() {
     useEffect(() => {
         if (submissionDetails) {
             const details = submissionDetails;
+            setPhoneNumber(details.phone_number || '');
             setBusinessRegistrationNumber(details.business_registration_number || '');
             setFacilityType(details.facility_type || '');
 
@@ -201,6 +203,10 @@ export default function InstituteOnboardingPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!phoneNumber.trim()) {
+            toast.error('Please enter your contact phone number.');
+            return;
+        }
         if (!businessRegistrationNumber) {
             toast.error('Please enter your business registration number.');
             return;
@@ -252,6 +258,7 @@ export default function InstituteOnboardingPage() {
             toast.loading('Submitting verification credentials...', { id: 'onboarding-upload' });
 
             const payload = {
+                phone_number: phoneNumber,
                 business_registration_number: businessRegistrationNumber,
                 facility_type: facilityType,
                 business_license_url: finalLicenseUrl,
@@ -588,6 +595,18 @@ export default function InstituteOnboardingPage() {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-1.5 md:col-span-2">
+                                        <label className="text-xs font-bold text-slate-450 uppercase block">Representative Phone Number <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="tel"
+                                            value={phoneNumber}
+                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                            placeholder="e.g. +234 801 234 5678"
+                                            className="w-full bg-slate-50/70 border border-slate-200 rounded-xl p-3 text-sm focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-800 outline-none"
+                                            required
+                                        />
+                                    </div>
+
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-450 uppercase block">Corporate Registration No. (EIN/CAC) <span className="text-red-500">*</span></label>
                                         <input

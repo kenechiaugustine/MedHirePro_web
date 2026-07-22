@@ -8,6 +8,7 @@ import {
     FiCamera, 
     FiInfo,
     FiUser,
+    FiPhone,
     FiHome,
     FiCreditCard,
     FiMail,
@@ -24,6 +25,7 @@ export default function ClientProfilePage() {
     // Local form states
     const [facilityName, setFacilityName] = useState('');
     const [fullName, setFullName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState('');
@@ -33,6 +35,7 @@ export default function ClientProfilePage() {
         if (user) {
             setFacilityName(user.facility_name || '');
             setFullName(user.full_name || '');
+            setPhoneNumber(user.phone_number || '');
             setAvatarUrl(user.avatar_url || '');
             setAvatarPreview(user.avatar_url || '');
         }
@@ -75,6 +78,10 @@ export default function ClientProfilePage() {
             toast.error("Please enter a valid facility name.");
             return;
         }
+        if (!phoneNumber.trim()) {
+            toast.error("Please enter a valid representative phone number.");
+            return;
+        }
 
         try {
             let finalAvatarUrl = avatarUrl;
@@ -94,6 +101,7 @@ export default function ClientProfilePage() {
             await updateProfile({
                 facility_name: facilityName.trim(),
                 full_name: fullName.trim() || null,
+                phone_number: phoneNumber.trim() || null,
                 avatar_url: finalAvatarUrl || null
             }).unwrap();
 
@@ -310,6 +318,23 @@ export default function ClientProfilePage() {
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
                                         placeholder="e.g. Dr. Jane Doe"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 font-semibold text-slate-700"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Representative Phone Number</label>
+                                <div className="relative">
+                                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                        <FiPhone className="text-xs" />
+                                    </span>
+                                    <input
+                                        type="tel"
+                                        required
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        placeholder="e.g. +234 801 234 5678"
                                         className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 font-semibold text-slate-700"
                                     />
                                 </div>

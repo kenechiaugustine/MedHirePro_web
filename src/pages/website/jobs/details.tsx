@@ -117,7 +117,20 @@ export default function PublicJobDetailsPage() {
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!id) return;
+        if (!id || !job) return;
+
+        const isLocum = job.job_type === 'LOCUM';
+
+        if (!isLocum) {
+            if (!cvFile) {
+                toast.error("Curriculum Vitae (CV) is mandatory when applying for permanent roles.");
+                return;
+            }
+            if (credentialsFiles.length === 0) {
+                toast.error("At least one supporting document (license/certificate) is mandatory when applying for permanent roles.");
+                return;
+            }
+        }
 
         if (!clinicalSummary.trim()) {
             toast.error("Please provide a clinical summary / cover note.");
@@ -128,7 +141,7 @@ export default function PublicJobDetailsPage() {
             setIsUploading(true);
 
             let cv_url = '';
-            if (cvFile) {
+            if (!isLocum && cvFile) {
                 const cvFormData = new FormData();
                 cvFormData.append('file', cvFile);
                 cvFormData.append('upload_type', 'document');
@@ -137,12 +150,14 @@ export default function PublicJobDetailsPage() {
             }
 
             const supporting_docs: string[] = [];
-            for (const docFile of credentialsFiles) {
-                const docFormData = new FormData();
-                docFormData.append('file', docFile);
-                docFormData.append('upload_type', 'document');
-                const docRes = await uploadMedia(docFormData).unwrap();
-                supporting_docs.push(docRes.media.url);
+            if (!isLocum && credentialsFiles.length > 0) {
+                for (const docFile of credentialsFiles) {
+                    const docFormData = new FormData();
+                    docFormData.append('file', docFile);
+                    docFormData.append('upload_type', 'document');
+                    const docRes = await uploadMedia(docFormData).unwrap();
+                    supporting_docs.push(docRes.media.url);
+                }
             }
 
             setIsUploading(false);
@@ -521,52 +536,66 @@ export default function PublicJobDetailsPage() {
                         <form onSubmit={handleFormSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 mb-1">
-                                    CLINICAL SUMMARY & COVER NOTE <span className="text-red-500">*</span>
+                                    {job?.job_type === 'LOCUM' ? 'COVER NOTE & CLINICAL SUMMARY' : 'CLINICAL SUMMARY & COVER NOTE'} <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
                                     required
                                     rows={4}
-                                    placeholder="Briefly state your clinical experience and availability for this position..."
+                                    placeholder={job?.job_type === 'LOCUM' ? "Briefly state your clinical experience and availability for this locum position..." : "Briefly state your clinical experience and suitability for this permanent position..."}
                                     value={clinicalSummary}
                                     onChange={(e) => setClinicalSummary(e.target.value)}
                                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-600 focus:outline-none"
                                 />
                             </div>
 
-                            {/* CV Upload */}
-                            <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-1">
-                                    CURRICULUM VITAE (CV / RESUME)
-                                </label>
-                                <input
-                                    type="file"
-                                    accept=".pdf,.docx,.jpg,.png"
-                                    onChange={(e) => handleFileChange(e, 'cv')}
-                                    className="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                />
-                            </div>
+                            {job?.job_type !== 'LOCUM' && (
+                                <>
+                                    {/* CV Upload */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                                            CURRICULUM VITAE (CV / RESUME) <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.docx,.jpg,.png"
+                                            onChange={(e) => handleFileChange(e, 'cv')}
+                                            className="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        />
+                                        {cvFile && (
+                                            <p className="text-[11px] text-emerald-600 font-semibold mt-1">
+                                                Attached CV: {cvFile.name}
+                                            </p>
+                                        )}
+                                    </div>
 
-                            {/* Supporting Docs */}
-                            <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-1">
-                                    SUPPORTING DOCUMENTS (OPTIONAL)
-                                </label>
-                                <input
-                                    type="file"
-                                    accept=".pdf,.docx,.jpg,.png"
-                                    onChange={(e) => handleFileChange(e, 'credential')}
-                                    className="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
-                                />
-                                {credentialsFiles.length > 0 && (
-                                    <p className="text-[11px] text-gray-500 mt-1">
-                                        Attached {credentialsFiles.length} file(s)
-                                    </p>
-                                )}
-                            </div>
+                                    {/* Supporting Docs */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                                            SUPPORTING DOCUMENTS (LICENSES / CERTIFICATES) <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.docx,.jpg,.png"
+                                            onChange={(e) => handleFileChange(e, 'credential')}
+                                            className="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+                                        />
+                                        {credentialsFiles.length > 0 && (
+                                            <p className="text-[11px] text-gray-500 mt-1">
+                                                Attached {credentialsFiles.length} file(s)
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
+                            )}
 
                             <button
                                 type="submit"
-                                disabled={isSubmitting || isUploading}
+                                disabled={
+                                    isSubmitting || 
+                                    isUploading || 
+                                    !clinicalSummary.trim() || 
+                                    (job?.job_type !== 'LOCUM' && (!cvFile || credentialsFiles.length === 0))
+                                }
                                 className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-6"
                             >
                                 {isSubmitting || isUploading ? (

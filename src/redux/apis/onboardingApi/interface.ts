@@ -1,4 +1,5 @@
 export interface IProfessionalOnboardingSubmit {
+    phone_number?: string | null;
     is_intern: boolean;
     licence_number?: string | null;
     licence_expiry?: string | null; // YYYY-MM-DD
@@ -20,6 +21,7 @@ export interface IFacilityAddress {
 }
 
 export interface IInstituteOnboardingSubmit {
+    phone_number?: string | null;
     business_registration_number: string;
     facility_type: string;
     business_license_url: string;

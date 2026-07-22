@@ -19,6 +19,7 @@ export default function AdminProfilePage() {
 
     // Local form states
     const [fullName, setFullName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState('');
@@ -27,6 +28,7 @@ export default function AdminProfilePage() {
     useEffect(() => {
         if (user) {
             setFullName(user.full_name || '');
+            setPhoneNumber(user.phone_number || '');
             setAvatarUrl(user.avatar_url || '');
             setAvatarPreview(user.avatar_url || '');
         }
@@ -87,6 +89,7 @@ export default function AdminProfilePage() {
             toast.loading('Saving profile changes...', { id: 'profile-upload' });
             await updateProfile({
                 full_name: fullName.trim(),
+                phone_number: phoneNumber.trim() || null,
                 avatar_url: finalAvatarUrl || null
             }).unwrap();
 
@@ -179,6 +182,18 @@ export default function AdminProfilePage() {
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                                 placeholder="e.g. Chief Administrator"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-400 font-semibold text-slate-700"
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Administrator Phone Number</label>
+                            <input
+                                type="tel"
+                                required
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                placeholder="e.g. +234 801 234 5678"
                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-400 font-semibold text-slate-700"
                             />
                         </div>

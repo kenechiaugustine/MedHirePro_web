@@ -10,7 +10,7 @@ export type ApplicationStatus = typeof ApplicationStatus[keyof typeof Applicatio
 
 export interface IApplicationCreate {
     vacancy_id: string;
-    curriculum_vitae_url: string;
+    curriculum_vitae_url?: string;
     clinical_summary: string;
     credentialing_packet_urls?: string[];
 }
@@ -19,6 +19,7 @@ export interface ICandidateDetails {
     id: string;
     full_name?: string;
     email?: string;
+    phone_number?: string;
     specialty?: string;
     avatar_url?: string;
     is_verified?: boolean;
@@ -40,7 +41,7 @@ export interface IApplicationResponse {
     candidate_details?: ICandidateDetails;
     vacancy_id: IJobListingResponse | string;
     vacancy_type: JobType;
-    curriculum_vitae_url: string;
+    curriculum_vitae_url?: string;
     clinical_summary: string;
     credentialing_packet_urls: string[];
     is_shortlisted: boolean;
