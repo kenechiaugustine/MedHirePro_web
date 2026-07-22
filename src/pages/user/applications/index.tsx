@@ -286,34 +286,40 @@ export default function ProfessionalApplicationsPage() {
                                 </div>
 
                                 {/* Documents List */}
-                                <div className="space-y-2">
-                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Dossier Documents Pack</span>
-                                    
-                                    <div className="flex flex-wrap gap-2 pt-0.5">
-                                        {/* CV */}
-                                        <a
-                                            href={selectedApp.curriculum_vitae_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 border border-indigo-150 hover:bg-indigo-100 text-indigo-750 text-[10px] font-black transition-colors"
-                                        >
-                                            <FiDownload /> Curriculum Vitae (CV)
-                                        </a>
+                                {(selectedApp.vacancy_type !== 'LOCUM' && (typeof selectedApp.vacancy_id !== 'object' || selectedApp.vacancy_id?.job_type !== 'LOCUM')) && (
+                                    (selectedApp.curriculum_vitae_url || (selectedApp.credentialing_packet_urls && selectedApp.credentialing_packet_urls.length > 0)) && (
+                                        <div className="space-y-2">
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Dossier Documents Pack</span>
+                                            
+                                            <div className="flex flex-wrap gap-2 pt-0.5">
+                                                {/* CV */}
+                                                {selectedApp.curriculum_vitae_url && (
+                                                    <a
+                                                        href={selectedApp.curriculum_vitae_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 border border-indigo-150 hover:bg-indigo-100 text-indigo-750 text-[10px] font-black transition-colors"
+                                                    >
+                                                        <FiDownload /> Curriculum Vitae (CV)
+                                                    </a>
+                                                )}
 
-                                        {/* Secondary credentials */}
-                                        {selectedApp.credentialing_packet_urls && selectedApp.credentialing_packet_urls.map((docUrl: string, idx: number) => (
-                                            <a
-                                                key={idx}
-                                                href={docUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-650 text-[10px] font-black transition-colors"
-                                            >
-                                                <FiFileText /> Credential Pack #{idx + 1}
-                                            </a>
-                                        ))}
-                                    </div>
-                                </div>
+                                                {/* Secondary credentials */}
+                                                {selectedApp.credentialing_packet_urls && selectedApp.credentialing_packet_urls.map((docUrl: string, idx: number) => (
+                                                    <a
+                                                        key={idx}
+                                                        href={docUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-650 text-[10px] font-black transition-colors"
+                                                    >
+                                                        <FiFileText /> Credential Pack #{idx + 1}
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )
+                                )}
                             </div>
 
                             {/* Close Trigger */}

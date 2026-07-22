@@ -166,8 +166,11 @@ export default function AdminJobApplicantsPage() {
                                                     <div className="font-extrabold text-slate-800">
                                                         {candidate?.full_name || 'New Clinician Practitioner'}
                                                     </div>
-                                                    <div className="text-[10px] text-slate-400 font-bold truncate">
-                                                        {candidate?.email} (ID: {app.candidate_id.slice(-6).toUpperCase()})
+                                                    <div className="text-[10px] text-slate-400 font-bold space-y-0.5">
+                                                        <p className="truncate">{candidate?.email} (ID: {app.candidate_id.slice(-6).toUpperCase()})</p>
+                                                        {candidate?.phone_number && (
+                                                            <p className="text-slate-600 font-semibold text-[10px] block">{candidate.phone_number}</p>
+                                                        )}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-5 max-w-xs">
@@ -198,14 +201,16 @@ export default function AdminJobApplicantsPage() {
                                                 </td>
                                                 <td className="px-6 py-5 text-right whitespace-nowrap">
                                                     <div className="inline-flex gap-2">
-                                                        <a 
-                                                            href={app.curriculum_vitae_url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-150 transition-colors"
-                                                        >
-                                                            <FiDownload /> CV
-                                                        </a>
+                                                        {app.curriculum_vitae_url && (
+                                                            <a 
+                                                                href={app.curriculum_vitae_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-150 transition-colors"
+                                                            >
+                                                                <FiDownload /> CV
+                                                            </a>
+                                                        )}
                                                         {app.credentialing_packet_urls && app.credentialing_packet_urls.map((docUrl: string, dIdx: number) => (
                                                             <a
                                                                 key={dIdx}
@@ -233,13 +238,18 @@ export default function AdminJobApplicantsPage() {
                                 return (
                                     <div key={app._id} className="bg-slate-50/50 border border-slate-150 rounded-xl p-4 space-y-4 text-xs font-semibold text-slate-600">
                                         <div className="flex justify-between items-start">
-                                            <div>
+                                            <div className="space-y-0.5">
                                                 <h4 className="font-extrabold text-slate-800 text-sm">
                                                     {candidate?.full_name || 'Clinician Practitioner'}
                                                 </h4>
                                                 <p className="text-[10px] text-slate-400 font-bold truncate">
                                                     {candidate?.email}
                                                 </p>
+                                                {candidate?.phone_number && (
+                                                    <p className="text-[10px] text-slate-600 font-bold block">
+                                                        {candidate.phone_number}
+                                                    </p>
+                                                )}
                                             </div>
                                             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
                                                 app.application_status === 'ACCEPTED' 
@@ -261,20 +271,22 @@ export default function AdminJobApplicantsPage() {
                                             </p>
                                         </div>
 
-                                        <div className="flex justify-between items-center text-[10px] text-slate-450 font-bold">
+                                        <div className="flex justify-between items-center text-[10px] text-slate-455 font-bold">
                                             <span>
                                                 Applied: {new Date(app.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </span>
                                             
                                             <div className="inline-flex gap-2">
-                                                <a 
-                                                    href={app.curriculum_vitae_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-150 transition-colors"
-                                                >
-                                                    <FiDownload /> CV
-                                                </a>
+                                                {app.curriculum_vitae_url && (
+                                                    <a 
+                                                        href={app.curriculum_vitae_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-150 transition-colors"
+                                                    >
+                                                        <FiDownload /> CV
+                                                    </a>
+                                                )}
                                                 {app.credentialing_packet_urls && app.credentialing_packet_urls.map((docUrl: string, dIdx: number) => (
                                                     <a
                                                         key={dIdx}

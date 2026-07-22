@@ -91,6 +91,7 @@ export default function ProfessionalOnboardingPage() {
 
     // Form fields state
     const [isIntern, setIsIntern] = useState(false);
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [specialty, setSpecialty] = useState('');
     const [employmentStatus, setEmploymentStatus] = useState('FULL_TIME');
     const [currentWorkplace, setCurrentWorkplace] = useState('');
@@ -206,6 +207,7 @@ export default function ProfessionalOnboardingPage() {
         if (submissionDetails) {
             const details = submissionDetails;
             setIsIntern(!!details.is_intern);
+            setPhoneNumber(details.phone_number || userData?.phone_number || '');
             setSpecialty(details.specialty || '');
             setEmploymentStatus(details.employment_status || 'FULL_TIME');
             setCurrentWorkplace(details.current_workplace || '');
@@ -217,6 +219,7 @@ export default function ProfessionalOnboardingPage() {
             setSchoolLetterUrl(details.school_or_placement_letter_url || '');
         } else if (userData) {
             setSpecialty(userData.specialty || '');
+            setPhoneNumber(userData.phone_number || '');
         }
     }, [statusData, submissionDetails, userData]);
 
@@ -256,6 +259,10 @@ export default function ProfessionalOnboardingPage() {
     // Step navigation and validation
     const handleNextStep = () => {
         if (activeStep === 0) {
+            if (!phoneNumber.trim()) {
+                toast.error('Please enter your contact phone number.');
+                return;
+            }
             if (!specialty) {
                 toast.error('Please select your specialty.');
                 return;
@@ -293,6 +300,12 @@ export default function ProfessionalOnboardingPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!phoneNumber.trim()) {
+            toast.error('Please enter your contact phone number.');
+            setActiveStep(0);
+            return;
+        }
 
         if (!specialty) {
             toast.error('Please select your specialty.');
@@ -371,6 +384,7 @@ export default function ProfessionalOnboardingPage() {
             toast.loading('Submitting verification credentials...', { id: 'onboarding-upload' });
 
             const payload = {
+                phone_number: phoneNumber,
                 is_intern: isIntern,
                 specialty,
                 employment_status: employmentStatus,
@@ -476,6 +490,10 @@ export default function ProfessionalOnboardingPage() {
                             <div>
                                 <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Clinician Name</span>
                                 <span className="font-extrabold text-slate-800 text-sm block mt-0.5">{userData?.full_name}</span>
+                            </div>
+                            <div>
+                                <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Phone Number</span>
+                                <span className="font-extrabold text-slate-800 text-sm block mt-0.5">{phoneNumber || submissionDetails?.phone_number || userData?.phone_number || 'N/A'}</span>
                             </div>
                             <div>
                                 <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Registered Specialty</span>
@@ -870,6 +888,18 @@ export default function ProfessionalOnboardingPage() {
                                     <hr className="border-slate-100" />
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-1.5 md:col-span-2">
+                                            <label className="text-[12px] font-bold text-slate-500 uppercase block">Phone Number <span className="text-red-500">*</span></label>
+                                            <input
+                                                type="tel"
+                                                value={phoneNumber}
+                                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                                placeholder="e.g. +234 801 234 5678"
+                                                className="w-full bg-[#f4f8fc] border border-transparent rounded-xl p-3.5 text-sm focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-slate-700 outline-none"
+                                                required
+                                            />
+                                        </div>
+
                                         <SearchableSelect
                                             id="prof-specialty"
                                             label="Clinical Specialty"

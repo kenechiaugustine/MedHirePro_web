@@ -21,6 +21,7 @@ export function exportApplicantsToExcel(
                 'S/N': index + 1,
                 'Candidate Name': candidate?.full_name || 'N/A',
                 'Email Address': candidate?.email || 'N/A',
+                'Phone Number': candidate?.phone_number || 'N/A',
                 'Clinical Specialty': candidate?.specialty || 'N/A',
                 'License Number': candidate?.licence_number || 'N/A',
                 'Verification Status': candidate?.is_verified ? 'Verified' : 'Unverified',

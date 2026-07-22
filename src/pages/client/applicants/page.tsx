@@ -303,13 +303,16 @@ export default function ClientApplicantsPage() {
                                                             }
                                                         </div>
                                                     )}
-                                                    <div className="space-y-0.5 truncate">
+                                                    <div className="space-y-0.5 max-w-[200px]">
                                                         <p className="font-extrabold text-slate-805 truncate" title={app.candidate_details?.full_name || 'Practitioner'}>
                                                             {app.candidate_details?.full_name || 'Practitioner'}
                                                         </p>
-                                                        <p className="text-[10px] text-slate-400 font-bold truncate">
-                                                            {app.candidate_details?.email || `ID: ${app.candidate_id}`}
-                                                        </p>
+                                                        <div className="text-[10px] text-slate-400 font-bold space-y-0.5">
+                                                            <p className="truncate">{app.candidate_details?.email || `ID: ${app.candidate_id}`}</p>
+                                                            {app.candidate_details?.phone_number && (
+                                                                <p className="text-slate-600 font-semibold text-[10px] block">{app.candidate_details.phone_number}</p>
+                                                            )}
+                                                        </div>
                                                         {app.candidate_details?.specialty && (
                                                             <span className="inline-block text-[9px] font-bold text-indigo-650 bg-indigo-50/50 px-1.5 py-0.5 rounded border border-indigo-100/30">
                                                                 {app.candidate_details.specialty.replace(/_/g, ' ')}
@@ -347,14 +350,16 @@ export default function ClientApplicantsPage() {
                                                     {app.clinical_summary}
                                                 </p>
                                                 <div className="flex gap-2">
-                                                    <a 
-                                                        href={app.curriculum_vitae_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-150 transition-colors"
-                                                    >
-                                                        <FiDownload /> CV
-                                                    </a>
+                                                    {app.curriculum_vitae_url && (
+                                                        <a 
+                                                            href={app.curriculum_vitae_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-150 transition-colors"
+                                                        >
+                                                            <FiDownload /> CV
+                                                        </a>
+                                                    )}
                                                     {app.credentialing_packet_urls && app.credentialing_packet_urls.map((docUrl: string, dIdx: number) => (
                                                         <a
                                                             key={dIdx}
@@ -363,7 +368,7 @@ export default function ClientApplicantsPage() {
                                                             rel="noopener noreferrer"
                                                             className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-650 border border-slate-200 transition-colors"
                                                         >
-                                                            <FiFileText /> Pack #{dIdx + 1}
+                                                            <FiFileText /> Doc #{dIdx + 1}
                                                         </a>
                                                     ))}
                                                 </div>
@@ -491,13 +496,18 @@ export default function ClientApplicantsPage() {
                                                     }
                                                 </div>
                                             )}
-                                            <div className="leading-tight truncate">
+                                            <div className="leading-tight space-y-0.5">
                                                 <h4 className="font-extrabold text-slate-800 text-xs truncate" title={app.candidate_details?.full_name || 'Practitioner'}>
                                                     {app.candidate_details?.full_name || 'Practitioner'}
                                                 </h4>
                                                 <p className="text-[9px] text-slate-400 font-bold truncate">
                                                     {app.candidate_details?.email || `Ref: #${app._id.slice(-6).toUpperCase()}`}
                                                 </p>
+                                                {app.candidate_details?.phone_number && (
+                                                    <p className="text-[10px] text-slate-600 font-bold block">
+                                                        {app.candidate_details.phone_number}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         <p 
@@ -533,14 +543,16 @@ export default function ClientApplicantsPage() {
 
                                 {/* File downloads */}
                                 <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
-                                    <a 
-                                        href={app.curriculum_vitae_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1 text-[10px] font-black px-3.5 py-1.5 rounded-xl bg-indigo-50 border border-indigo-150 hover:bg-indigo-100 text-indigo-750 transition-colors"
-                                    >
-                                        <FiDownload /> Resume CV
-                                    </a>
+                                    {app.curriculum_vitae_url && (
+                                        <a 
+                                            href={app.curriculum_vitae_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-[10px] font-black px-3.5 py-1.5 rounded-xl bg-indigo-50 border border-indigo-150 hover:bg-indigo-100 text-indigo-750 transition-colors"
+                                        >
+                                            <FiDownload /> Resume CV
+                                        </a>
+                                    )}
                                     {app.credentialing_packet_urls && app.credentialing_packet_urls.map((docUrl: string, dIdx: number) => (
                                         <a
                                             key={dIdx}

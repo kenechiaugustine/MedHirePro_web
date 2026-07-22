@@ -9,6 +9,7 @@ import {
     FiCamera,
     FiInfo,
     FiUser,
+    FiPhone,
     FiBriefcase,
     FiCreditCard,
     FiMail,
@@ -24,6 +25,7 @@ export default function UserProfilePage() {
 
     // Local form states
     const [fullName, setFullName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [specialty, setSpecialty] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -61,6 +63,7 @@ export default function UserProfilePage() {
     useEffect(() => {
         if (user) {
             setFullName(user.full_name || '');
+            setPhoneNumber(user.phone_number || '');
             setSpecialty(user.specialty || '');
             setAvatarUrl(user.avatar_url || '');
             setAvatarPreview(user.avatar_url || '');
@@ -104,6 +107,10 @@ export default function UserProfilePage() {
             toast.error("Please enter your full name.");
             return;
         }
+        if (!phoneNumber.trim()) {
+            toast.error("Please enter your phone number.");
+            return;
+        }
         if (!specialty) {
             toast.error("Please select a clinical specialty.");
             return;
@@ -126,6 +133,7 @@ export default function UserProfilePage() {
             toast.loading('Saving profile changes...', { id: 'profile-upload' });
             await updateProfile({
                 full_name: fullName.trim(),
+                phone_number: phoneNumber.trim() || null,
                 specialty: specialty,
                 avatar_url: finalAvatarUrl || null
             }).unwrap();
@@ -323,22 +331,39 @@ export default function UserProfilePage() {
 
                         {/* Inputs panel */}
                         <div className="space-y-5">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Full Name</label>
-                                <div className="relative">
-                                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
-                                        <FiUser className="text-xs" />
-                                    </span>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={fullName}
-                                        onChange={(e) => setFullName(e.target.value)}
-                                        placeholder="e.g. Dr. Jane Smith"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-400 font-semibold text-slate-700"
-                                    />
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Full Name</label>
+                                    <div className="relative">
+                                        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                            <FiUser className="text-xs" />
+                                        </span>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
+                                            placeholder="e.g. Dr. Jane Smith"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-400 font-semibold text-slate-700"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Phone Number</label>
+                                    <div className="relative">
+                                        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                            <FiPhone className="text-xs" />
+                                        </span>
+                                        <input
+                                            type="tel"
+                                            required
+                                            value={phoneNumber}
+                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                            placeholder="e.g. +234 801 234 5678"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-400 font-semibold text-slate-700"
+                                        />
+                                    </div>
+                                </div>
 
                             <SearchableSelect
                                 id="prof-specialty"

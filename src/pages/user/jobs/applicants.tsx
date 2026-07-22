@@ -172,9 +172,16 @@ export default function ProfessionalLocumApplicantsPage() {
                                                     </span>
                                                 )}
                                             </h4>
-                                            <p className="text-[10px] text-slate-400 font-bold">
-                                                {specialty} • {email}
-                                            </p>
+                                            <div className="space-y-0.5">
+                                                <p className="text-[10px] text-slate-400 font-bold">
+                                                    {specialty} • {email}
+                                                </p>
+                                                {candidate?.phone_number && (
+                                                    <p className="text-[11px] text-slate-700 font-bold block">
+                                                        {candidate.phone_number}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -282,14 +289,16 @@ export default function ProfessionalLocumApplicantsPage() {
 
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-slate-50 text-[11px]">
                                     <div className="flex flex-wrap gap-3">
-                                        <a 
-                                            href={app.curriculum_vitae_url}
-                                            target="_blank" 
-                                            rel="noreferrer"
-                                            className="inline-flex items-center gap-1 text-indigo-600 hover:underline font-extrabold"
-                                        >
-                                            <FiFileText className="text-sm" /> View Curriculum Vitae (CV) <FiExternalLink />
-                                        </a>
+                                        {app.curriculum_vitae_url && (
+                                            <a 
+                                                href={app.curriculum_vitae_url}
+                                                target="_blank" 
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-1 text-indigo-600 hover:underline font-extrabold"
+                                            >
+                                                <FiFileText className="text-sm" /> View Curriculum Vitae (CV) <FiExternalLink />
+                                            </a>
+                                        )}
 
                                         {app.credentialing_packet_urls && app.credentialing_packet_urls.length > 0 && (
                                             <div className="flex items-center gap-1.5">

@@ -466,10 +466,11 @@ export default function AdminJobsPage() {
                                                         e.stopPropagation();
                                                         navigate(`/admin/jobs/${job._id}/applicants`);
                                                     }}
-                                                    className="p-2 text-slate-600 hover:text-indigo-700 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg cursor-pointer transition-colors inline-flex items-center"
+                                                    className="p-2 text-slate-600 hover:text-indigo-700 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg cursor-pointer transition-colors inline-flex items-center gap-1"
                                                     title="View Applicants"
                                                 >
                                                     <FiUsers className="text-xs" />
+                                                    <span className="text-[10px] font-extrabold text-slate-700">({job.total_applicants || 0})</span>
                                                 </button>
                                                 <button
                                                     onClick={(e) => {
