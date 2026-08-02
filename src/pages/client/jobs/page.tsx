@@ -5,6 +5,8 @@ import {
     useDeleteJobListingMutation 
 } from '../../../redux/apis/jobsApi';
 import { CLIENT_ROUTES } from '../routes.enum';
+import { usePagination } from '../../../hooks/usePagination';
+import { Pagination } from '../../../components/app';
 import { 
     FiPlus, 
     FiBriefcase, 
@@ -24,7 +26,8 @@ import toast from 'react-hot-toast';
 
 export default function ClientJobListingsPage() {
     const navigate = useNavigate();
-    const { data: jobs, isLoading, refetch } = useGetMyJobListingsQuery();
+    const [pageSize, setPageSize] = useState(10);
+    const { data: jobs, isLoading, refetch } = useGetMyJobListingsQuery({ limit: pageSize });
     const [deleteJobListing, { isLoading: isDeleting }] = useDeleteJobListingMutation();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -72,6 +75,14 @@ export default function ClientJobListingsPage() {
 
         return matchesSearch && matchesType && matchesStatus;
     });
+
+    const {
+        currentPage,
+        setCurrentPage,
+        paginatedItems: paginatedJobs,
+        totalItems,
+    } = usePagination(filteredJobs, pageSize);
+
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
@@ -184,7 +195,7 @@ export default function ClientJobListingsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50 text-xs">
-                                {filteredJobs.map((job) => {
+                                {paginatedJobs.map((job) => {
                                     const formattedRate = `${formatCurrency(job.rate_amount_min)} - ${formatCurrency(job.rate_amount_max)}`;
                                     
                                     return (
@@ -311,6 +322,14 @@ export default function ClientJobListingsPage() {
                                 })}
                             </tbody>
                         </table>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={setCurrentPage}
+                            onPageSizeChange={setPageSize}
+                            pageSizeOptions={[5, 10, 20, 50]}
+                        />
                     </div>
                 )}
             </div>

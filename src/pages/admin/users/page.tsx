@@ -4,7 +4,8 @@ import {
     useReadAllUsersQuery, 
     useAdminUpdateUserDetailsMutation 
 } from '../../../redux/apis/adminApi';
-import { Avatar } from '../../../components/app';
+import { Avatar, Pagination } from '../../../components/app';
+import { usePagination } from '../../../hooks/usePagination';
 import { 
     FiShield, 
     FiLoader, 
@@ -49,9 +50,11 @@ export default function AdminUserManagementPage() {
         banned_from_applying: false
     });
 
+    const [pageSize, setPageSize] = useState(10);
+
     const params: any = {
         page,
-        limit: 100, // Fetch up to 100 users for a solid overview
+        limit: pageSize,
     };
     if (selectedRole !== 'ALL') {
         params.role = selectedRole;
@@ -66,6 +69,14 @@ export default function AdminUserManagementPage() {
     // Queries & Mutations
     const { data: users, isLoading, error, refetch } = useReadAllUsersQuery(params);
     const [updateUserDetails, { isLoading: isUpdating }] = useAdminUpdateUserDetailsMutation();
+
+    const {
+        currentPage,
+        setCurrentPage,
+        paginatedItems: paginatedUsersList,
+        totalItems,
+    } = usePagination(users || [], pageSize);
+
 
     const handleEditClick = (user: any) => {
         setSelectedUser(user);
@@ -321,7 +332,7 @@ export default function AdminUserManagementPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                                {users.map((user) => {
+                                {paginatedUsersList.map((user) => {
                                     const displayName = user.role === 'institute' 
                                         ? (user.facility_name || 'Host Clinic')
                                         : (user.full_name || 'Candidate Practitioner');
@@ -416,6 +427,13 @@ export default function AdminUserManagementPage() {
                                 })}
                             </tbody>
                         </table>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={setCurrentPage}
+                            onPageSizeChange={setPageSize}
+                        />
                     </div>
                 )}
             </div>

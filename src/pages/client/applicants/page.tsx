@@ -6,6 +6,8 @@ import {
     useAcceptApplicationMutation,
     useUpdateApplicationStatusMutation
 } from '../../../redux/apis/applicationsApi';
+import { usePagination } from '../../../hooks/usePagination';
+import { Pagination } from '../../../components/app';
 import { 
     FiCompass, 
     FiLoader, 
@@ -24,9 +26,9 @@ import { exportApplicantsToExcel } from '../../../lib/utils/exportExcel';
 
 export default function ClientApplicantsPage() {
     const navigate = useNavigate();
-
-    // Fetch all applications for listings posted by this recruiter
-    const { data: applications, isLoading, refetch } = useGetApplicationsQuery();
+    const [pageSize, setPageSize] = useState(10);
+    // Fetch applications for listings posted by this recruiter using dynamic pageSize limit
+    const { data: applications, isLoading, refetch } = useGetApplicationsQuery({ limit: pageSize });
 
     // Mutations
     const [shortlistApplication] = useShortlistApplicationMutation();
@@ -151,6 +153,13 @@ export default function ClientApplicantsPage() {
 
         return matchesSearch && matchesStatus && matchesType && matchesShortlisted;
     });
+
+    const {
+        currentPage,
+        setCurrentPage,
+        paginatedItems: paginatedFilteredApps,
+        totalItems,
+    } = usePagination(filteredApps, pageSize);
 
     return (
         <div className="space-y-6 animate-fadeIn duration-200">
@@ -281,7 +290,7 @@ export default function ClientApplicantsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                                {filteredApps.map((app) => {
+                                {paginatedFilteredApps.map((app) => {
                                     const job = typeof app.vacancy_id === 'object' ? app.vacancy_id : null;
                                     const isProcessing = processingAppId === app._id;
                                     
@@ -443,6 +452,14 @@ export default function ClientApplicantsPage() {
                                 })}
                             </tbody>
                         </table>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={setCurrentPage}
+                            onPageSizeChange={setPageSize}
+                            pageSizeOptions={[5, 10, 20, 50]}
+                        />
                     </div>
                 )}
             </div>

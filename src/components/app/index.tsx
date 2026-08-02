@@ -4,4 +4,5 @@ export { default as PasswordInput } from './PasswordInput';
 export { default as SearchableSelect } from './SearchableSelect';
 export { default as Avatar } from './Avatar';
 export { default as ShareJobModal } from './ShareJobModal';
+export { default as Pagination } from './Pagination';
 

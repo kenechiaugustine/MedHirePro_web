@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { useGetApplicationsQuery } from '../../../redux/apis/applicationsApi';
 import { useReadAllUsersQuery } from '../../../redux/apis/adminApi';
+import { usePagination } from '../../../hooks/usePagination';
+import { Pagination } from '../../../components/app';
 import { 
     FiShield, 
     FiLoader, 
@@ -19,11 +21,19 @@ import ShareJobModal from '../../../components/app/ShareJobModal';
 export default function AdminJobApplicantsPage() {
     const { id } = useParams<{ id: string }>();
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [pageSize, setPageSize] = useState(10);
 
     // Fetch API details
     const { data: job, isLoading: isJobLoading } = useGetJobListingDetailsQuery(id || '');
-    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery({ vacancy_id: id });
-    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery();
+    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery({ vacancy_id: id, limit: pageSize });
+    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 10 });
+
+    const {
+        currentPage,
+        setCurrentPage,
+        paginatedItems: paginatedApplications,
+        totalItems,
+    } = usePagination(applications || [], pageSize);
 
     const isLoading = isJobLoading || isAppsLoading || isUsersLoading;
 
@@ -158,7 +168,7 @@ export default function AdminJobApplicantsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                                    {applications.map((app) => {
+                                    {paginatedApplications.map((app) => {
                                         const candidate = userMap[app.candidate_id];
                                         return (
                                             <tr key={app._id} className="hover:bg-slate-50/40">
@@ -229,7 +239,16 @@ export default function AdminJobApplicantsPage() {
                                     })}
                                 </tbody>
                             </table>
+                            <Pagination
+                                currentPage={currentPage}
+                                totalItems={totalItems}
+                                pageSize={pageSize}
+                                onPageChange={setCurrentPage}
+                                onPageSizeChange={setPageSize}
+                                pageSizeOptions={[5, 10, 20, 50]}
+                            />
                         </div>
+
 
                         {/* Mobile View Card Grid */}
                         <div className="grid grid-cols-1 gap-4 p-4 md:hidden">

@@ -22,7 +22,8 @@ export default function ProfessionalJobSearchPage() {
     // Fetch only open permanent vacancies
     const { data: jobs, isLoading, error } = useGetJobListingsQuery({
         job_type: 'PERMANENT',
-        status: 'OPEN'
+        status: 'OPEN',
+        limit: 50000
     });
 
     const [searchTerm, setSearchTerm] = useState('');

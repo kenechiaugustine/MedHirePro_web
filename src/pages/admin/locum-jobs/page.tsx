@@ -8,6 +8,8 @@ import {
     useUnflagJobMutation
 } from '../../../redux/apis/jobsApi';
 import { useReadAllUsersQuery } from '../../../redux/apis/adminApi';
+import { usePagination } from '../../../hooks/usePagination';
+import { Pagination } from '../../../components/app';
 import {
     FiLoader,
     FiSearch,
@@ -73,18 +75,20 @@ export default function AdminLocumJobsPage() {
         on_call_requirements: ''
     });
 
+    const [pageSize, setPageSize] = useState(10);
+
     // API hooks
     const jobParams: any = {
         job_type: 'LOCUM',
         page,
-        limit: 100,
+        limit: pageSize,
     };
     if (selectedSpecialty !== 'ALL') jobParams.clinical_specialty = selectedSpecialty;
     if (selectedSetting !== 'ALL') jobParams.clinical_setting = selectedSetting;
     if (selectedStatus !== 'ALL') jobParams.status = selectedStatus;
 
     const { data: jobs, isLoading: isJobsLoading, refetch: refetchJobs } = useGetJobListingsQuery(jobParams);
-    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 100 });
+    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 50000 });
 
     const [postLocumJob, { isLoading: isCreating }] = usePostLocumJobMutation();
     const [reassignJob, { isLoading: isReassigning }] = useReassignJobMutation();
@@ -269,6 +273,15 @@ export default function AdminLocumJobsPage() {
         );
     }) || [];
 
+    const {
+        currentPage,
+        setCurrentPage,
+        paginatedItems: paginatedLocumJobs,
+        totalItems,
+    } = usePagination(filteredJobs, pageSize);
+
+
+
     if (isJobsLoading || isUsersLoading) {
         return (
             <div className="flex h-96 items-center justify-center">
@@ -409,7 +422,7 @@ export default function AdminLocumJobsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                                {filteredJobs.map((job) => {
+                                {paginatedLocumJobs.map((job) => {
                                     const postedById = typeof job.posted_by === 'object' ? job.posted_by._id : job.posted_by;
                                     const posterName = (typeof job.posted_by === 'object' ? (job.posted_by.facility_name || job.posted_by.full_name) : null) || userMap[postedById] || 'MedHire Host Clinic';
 
@@ -515,6 +528,14 @@ export default function AdminLocumJobsPage() {
                                 })}
                             </tbody>
                         </table>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={setCurrentPage}
+                            onPageSizeChange={setPageSize}
+                            pageSizeOptions={[5, 10, 20, 50]}
+                        />
                     </div>
                 )}
             </div>

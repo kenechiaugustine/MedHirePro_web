@@ -27,10 +27,11 @@ export const referralApi = createApi({
             }),
             providesTags: ['ReferralDetails'],
         }),
-        getReferredUsers: builder.query<IReferredUser[], void>({
-            query: () => ({
+        getReferredUsers: builder.query<IReferredUser[], { page?: number; limit?: number } | void>({
+            query: (params) => ({
                 url: '/referral/users',
                 method: 'GET',
+                params: params || undefined,
             }),
             providesTags: ['ReferredUsers'],
         }),

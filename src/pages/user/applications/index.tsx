@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useGetMyApplicationsQuery } from '../../../redux/apis/applicationsApi';
+import { usePagination } from '../../../hooks/usePagination';
+import { Pagination } from '../../../components/app';
 import { 
     FiCompass, 
     FiLoader, 
@@ -11,8 +13,16 @@ import {
 } from 'react-icons/fi';
 
 export default function ProfessionalApplicationsPage() {
-    // Fetch all applications submitted by current professional
-    const { data: applications, isLoading, error } = useGetMyApplicationsQuery();
+    const [pageSize, setPageSize] = useState(10);
+    // Fetch applications submitted by current professional using dynamic pageSize limit
+    const { data: applications, isLoading, error } = useGetMyApplicationsQuery({ limit: pageSize });
+
+    const {
+        currentPage,
+        setCurrentPage,
+        paginatedItems: paginatedApps,
+        totalItems,
+    } = usePagination(applications || [], pageSize);
 
     const [selectedApp, setSelectedApp] = useState<any | null>(null);
 
@@ -139,7 +149,7 @@ export default function ProfessionalApplicationsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                                {applications.map((app) => {
+                                {paginatedApps.map((app) => {
                                     // Parse vacancy details (vacancy_id is populated as IJobListingResponse object)
                                     const job = typeof app.vacancy_id === 'object' ? app.vacancy_id : null;
                                     
@@ -212,6 +222,14 @@ export default function ProfessionalApplicationsPage() {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setCurrentPage}
+                        onPageSizeChange={setPageSize}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                    />
                 </div>
             )}
 
