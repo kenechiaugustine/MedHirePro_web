@@ -50,7 +50,7 @@ export default function AdminUserManagementPage() {
         banned_from_applying: false
     });
 
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(500);
 
     const params: any = {
         page,
