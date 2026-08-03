@@ -19,8 +19,11 @@ import {
 export default function UserDashboardPage() {
     const { data: user, isLoading: isUserLoading } = useGetMeQuery();
     const { data: onboarding, isLoading: isOnboardingLoading } = useGetOnboardingStatusQuery();
-    const { data: myApps, isLoading: isAppsLoading } = useGetMyApplicationsQuery();
-    const { data: jobs, isLoading: isJobsLoading } = useGetJobListingsQuery();
+    const { data: myAppsRes, isLoading: isAppsLoading } = useGetMyApplicationsQuery({ limit: 5 });
+    const { data: jobsRes, isLoading: isJobsLoading } = useGetJobListingsQuery({ limit: 10 });
+
+    const myApps = myAppsRes?.data || [];
+    const jobs = jobsRes?.data || [];
 
     const isLoading = isUserLoading || isOnboardingLoading || isAppsLoading || isJobsLoading;
 
@@ -36,22 +39,19 @@ export default function UserDashboardPage() {
     }
 
     // Counters calculations
-    const totalApps = myApps?.length || 0;
-    const pendingApps = myApps?.filter(a => a.application_status === 'SUBMITTED' || a.application_status === 'CREDENTIALING_REVIEW').length || 0;
-    const acceptedApps = myApps?.filter(a => a.application_status === 'ACCEPTED').length || 0;
+    const totalApps = myApps.length;
+    const pendingApps = myApps.filter(a => a.application_status === 'SUBMITTED' || a.application_status === 'CREDENTIALING_REVIEW').length;
+    const acceptedApps = myApps.filter(a => a.application_status === 'ACCEPTED').length;
 
     // Filter recommended jobs matching the user's specialty
     const userSpecialty = user?.specialty;
-    const recommendedJobs = jobs
-        ? jobs.filter(job => job.status === 'OPEN' && (!userSpecialty || job.clinical_specialty === userSpecialty)).slice(0, 4)
-        : [];
+    const recommendedJobs = jobs.filter(job => job.status === 'OPEN' && (!userSpecialty || job.clinical_specialty === userSpecialty)).slice(0, 4);
 
     // Fallback if no exact specialty matches
     const displayJobs = recommendedJobs.length > 0
         ? recommendedJobs
         : (jobs ? jobs.filter(job => job.status === 'OPEN').slice(0, 4) : []);
 
-    const latestApplications = myApps ? [...myApps].slice(-4).reverse() : [];
 
     return (
         <div className="space-y-8 animate-fadeIn duration-300">
@@ -219,14 +219,14 @@ export default function UserDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {latestApplications.length === 0 ? (
+                                {myApps.length === 0 ? (
                                     <tr>
                                         <td colSpan={3} className="text-center py-8 text-slate-400 font-medium">
                                             You haven't submitted any job applications yet.
                                         </td>
                                     </tr>
                                 ) : (
-                                    latestApplications.map((app) => {
+                                    myApps.map((app) => {
                                         const job = typeof app.vacancy_id === 'object' ? app.vacancy_id : null;
                                         return (
                                             <tr key={app._id} className="hover:bg-slate-50/40 font-medium text-slate-700">

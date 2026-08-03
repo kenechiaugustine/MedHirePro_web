@@ -6,6 +6,7 @@ import {
     useAcceptApplicationMutation,
     useUpdateApplicationStatusMutation
 } from '../../../redux/apis/applicationsApi';
+import { Pagination } from '../../../components/app';
 import { 
     FiCompass, 
     FiLoader, 
@@ -24,9 +25,12 @@ import { exportApplicantsToExcel } from '../../../lib/utils/exportExcel';
 
 export default function ClientApplicantsPage() {
     const navigate = useNavigate();
-
-    // Fetch all applications for listings posted by this recruiter
-    const { data: applications, isLoading, refetch } = useGetApplicationsQuery();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    // Fetch applications for listings posted by this recruiter using dynamic pageSize limit
+    const { data: applicationsRes, isLoading, refetch } = useGetApplicationsQuery({ page, limit: pageSize });
+    const applications = applicationsRes?.data || [];
+    const totalItems = applicationsRes?.pagination?.totalDocumentCount || 0;
 
     // Mutations
     const [shortlistApplication] = useShortlistApplicationMutation();
@@ -269,7 +273,8 @@ export default function ClientApplicantsPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                        <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-150 text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -444,6 +449,18 @@ export default function ClientApplicantsPage() {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination
+                        currentPage={page}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                    />
+                    </>
                 )}
             </div>
 

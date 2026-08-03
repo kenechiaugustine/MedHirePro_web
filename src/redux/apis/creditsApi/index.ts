@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '../../api';
+import type { IPaginatedResponse, ISingleResponse } from '../../types';
 import type {
     ICreditEligibility,
     ICreditEligibilityParams,
@@ -14,23 +15,25 @@ export const creditsApi = createApi({
     baseQuery: baseQueryWithReauth,
     tagTypes: ['CreditHistory', 'CreditEligibility'],
     endpoints: (builder) => ({
-        earnCredits: builder.mutation<void, IEarnCreditRequest>({
+        earnCredits: builder.mutation<ICreditTransaction, IEarnCreditRequest>({
             query: (body) => ({
                 url: '/credits/earn',
                 method: 'POST',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<ICreditTransaction>) => res.data,
             invalidatesTags: ['CreditHistory', 'CreditEligibility'],
         }),
-        spendCredits: builder.mutation<void, ISpendCreditRequest>({
+        spendCredits: builder.mutation<ICreditTransaction, ISpendCreditRequest>({
             query: (body) => ({
                 url: '/credits/spend',
                 method: 'POST',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<ICreditTransaction>) => res.data,
             invalidatesTags: ['CreditHistory', 'CreditEligibility'],
         }),
-        getCreditHistory: builder.query<ICreditTransaction[], ICreditHistoryParams | void>({
+        getCreditHistory: builder.query<IPaginatedResponse<ICreditTransaction>, ICreditHistoryParams | void>({
             query: (params) => ({
                 url: `/credits/history`,
                 params: params || {}
@@ -42,6 +45,7 @@ export const creditsApi = createApi({
                 url: `/credits/eligibility`,
                 params: params || {}
             }),
+            transformResponse: (res: ISingleResponse<ICreditEligibility>) => res.data,
             providesTags: ['CreditEligibility'],
         }),
     }),

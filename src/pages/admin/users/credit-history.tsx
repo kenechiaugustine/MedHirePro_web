@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
     useReadUserByIdQuery, 
     useReadUserCreditsHistoryQuery 
 } from '../../../redux/apis/adminApi';
+import { Pagination } from '../../../components/app';
 import { 
     FiArrowLeft, 
     FiCreditCard, 
@@ -16,10 +18,16 @@ import {
 export default function AdminUserCreditHistoryPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     // Queries
-    const { data: user, isLoading: isUserLoading, error: userError } = useReadUserByIdQuery(id || '', { skip: !id });
-    const { data: transactions, isLoading: isTxLoading, error: txError } = useReadUserCreditsHistoryQuery({ user_id: id || '', limit: 100 }, { skip: !id });
+    const { data: userRes, isLoading: isUserLoading, error: userError } = useReadUserByIdQuery(id || '', { skip: !id });
+    const { data: transactionsRes, isLoading: isTxLoading, error: txError } = useReadUserCreditsHistoryQuery({ user_id: id || '', page, limit: pageSize }, { skip: !id });
+
+    const user = userRes;
+    const transactions = transactionsRes?.data || [];
+    const totalItems = transactionsRes?.pagination?.totalDocumentCount || 0;
 
     if (isUserLoading || isTxLoading) {
         return (
@@ -185,6 +193,17 @@ export default function AdminUserCreditHistoryPage() {
                                 </tbody>
                             </table>
                         </div>
+                        <Pagination
+                            currentPage={page}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={setPage}
+                            onPageSizeChange={(newPageSize) => {
+                                setPageSize(newPageSize);
+                                setPage(1);
+                            }}
+                            pageSizeOptions={[5, 10, 20, 50]}
+                        />
 
                         {/* Mobile Cards Layout */}
                         <div className="grid grid-cols-1 gap-4 lg:hidden p-4 bg-slate-50/50">

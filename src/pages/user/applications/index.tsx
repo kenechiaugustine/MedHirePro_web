@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGetMyApplicationsQuery } from '../../../redux/apis/applicationsApi';
+import { Pagination } from '../../../components/app';
 import { 
     FiCompass, 
     FiLoader, 
@@ -11,8 +12,11 @@ import {
 } from 'react-icons/fi';
 
 export default function ProfessionalApplicationsPage() {
-    // Fetch all applications submitted by current professional
-    const { data: applications, isLoading, error } = useGetMyApplicationsQuery();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const { data: applicationsRes, isLoading, error } = useGetMyApplicationsQuery({ page, limit: pageSize });
+    const applications = applicationsRes?.data || [];
+    const totalItems = applicationsRes?.pagination?.totalDocumentCount || 0;
 
     const [selectedApp, setSelectedApp] = useState<any | null>(null);
 
@@ -212,6 +216,17 @@ export default function ProfessionalApplicationsPage() {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination
+                        currentPage={page}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                    />
                 </div>
             )}
 

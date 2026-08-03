@@ -4,6 +4,7 @@ import {
     useGetReferredUsersQuery, 
     useApplyReferralMutation 
 } from '../../../redux/apis/referralApi';
+import { Pagination } from '../../../components/app';
 import { 
     FiGift, 
     FiCopy, 
@@ -16,9 +17,15 @@ import {
 import toast from 'react-hot-toast';
 
 export default function UserReferralsPage() {
-    const { data: details, isLoading: isDetailsLoading, refetch: refetchDetails } = useGetReferralDetailsQuery();
-    const { data: referredUsers, isLoading: isUsersLoading, refetch: refetchUsers } = useGetReferredUsersQuery();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+    const { data: detailsRes, isLoading: isDetailsLoading, refetch: refetchDetails } = useGetReferralDetailsQuery();
+    const { data: referredUsersRes, isLoading: isUsersLoading, refetch: refetchUsers } = useGetReferredUsersQuery({ page, limit: pageSize });
     const [applyReferral, { isLoading: isApplying }] = useApplyReferralMutation();
+
+    const details = detailsRes;
+    const referredUsers = referredUsersRes?.data || [];
+    const totalItems = referredUsersRes?.pagination?.totalDocumentCount || 0;
 
     const [referralInput, setReferralInput] = useState('');
     const [copied, setCopied] = useState(false);
@@ -257,6 +264,17 @@ export default function UserReferralsPage() {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination
+                        currentPage={page}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                    />
                 </div>
             </div>
         </div>

@@ -95,7 +95,7 @@ export default function AdminVerificationsPage() {
         );
     }
 
-    const pendingSubmissions = data?.submissions || [];
+    const pendingSubmissions = data?.data || [];
 
     // Cast details safely based on user role
     const getProfessionalDetails = (details: any) => details as IProfessionalOnboardingSubmit;

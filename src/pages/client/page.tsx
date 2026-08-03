@@ -17,8 +17,11 @@ import {
 export default function ClientDashboardPage() {
     const { data: user, isLoading: isUserLoading } = useGetMeQuery();
     const { data: onboarding, isLoading: isOnboardingLoading } = useGetOnboardingStatusQuery();
-    const { data: myListings, isLoading: isListingsLoading } = useGetMyJobListingsQuery();
-    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery();
+    const { data: myListingsRes, isLoading: isListingsLoading } = useGetMyJobListingsQuery({ limit: 5 });
+    const { data: applicationsRes, isLoading: isAppsLoading } = useGetApplicationsQuery({ limit: 5 });
+
+    const myListings = myListingsRes?.data || [];
+    const applications = applicationsRes?.data || [];
 
     const isLoading = isUserLoading || isOnboardingLoading || isListingsLoading || isAppsLoading;
 
@@ -41,10 +44,6 @@ export default function ClientDashboardPage() {
     const totalApps = applications?.length || 0;
     const pendingApps = applications?.filter(a => a.application_status === 'SUBMITTED' || a.application_status === 'CREDENTIALING_REVIEW').length || 0;
     const shortlistedApps = applications?.filter(a => a.is_shortlisted).length || 0;
-
-    // Latest items
-    const latestListings = myListings ? [...myListings].slice(-5).reverse() : [];
-    const latestApplications = applications ? [...applications].slice(-5).reverse() : [];
 
     return (
         <div className="space-y-8 animate-fadeIn duration-300">
@@ -214,14 +213,14 @@ export default function ClientDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {latestListings.length === 0 ? (
+                                {myListings.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
                                             No active job campaigns posted.
                                         </td>
                                     </tr>
                                 ) : (
-                                    latestListings.map((job) => (
+                                    myListings.map((job) => (
                                         <tr key={job._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
                                             <td className="px-6 py-3.5">
                                                 <div className="font-extrabold text-slate-800 truncate max-w-[170px]">
@@ -280,14 +279,14 @@ export default function ClientDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {latestApplications.length === 0 ? (
+                                {applications.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
                                             No clinician applications received yet.
                                         </td>
                                     </tr>
                                 ) : (
-                                    latestApplications.map((app) => (
+                                    applications.map((app) => (
                                         <tr key={app._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
                                             <td className="px-6 py-3.5">
                                                 <div className="font-extrabold text-slate-800">

@@ -8,6 +8,8 @@ import {
     useUpdateApplicationStatusMutation
 } from '../../../redux/apis/applicationsApi';
 import { CLIENT_ROUTES } from '../routes.enum';
+import { usePagination } from '../../../hooks/usePagination';
+import { Pagination } from '../../../components/app';
 import { 
     FiArrowLeft, 
     FiBriefcase, 
@@ -33,9 +35,11 @@ export default function ClientJobDetailsPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
+    const [pageSize, setPageSize] = useState(10);
     // Queries
     const { data: job, isLoading: isJobLoading, error: jobError, refetch: refetchJob } = useGetJobListingDetailsQuery(id || '', { skip: !id });
-    const { data: applications, isLoading: isAppsLoading, refetch: refetchApps } = useGetApplicationsQuery({ vacancy_id: id || '' }, { skip: !id });
+    const { data: applicationsRes, isLoading: isAppsLoading, refetch: refetchApps } = useGetApplicationsQuery({ vacancy_id: id || '', limit: pageSize }, { skip: !id });
+    const applications = applicationsRes?.data || [];
 
     // Mutations
     const [shortlistApplication, { isLoading: isShortlisting }] = useShortlistApplicationMutation();
@@ -67,6 +71,14 @@ export default function ClientJobDetailsPage() {
             return true;
         });
     }, [applications, activeTab]);
+
+    const {
+        currentPage,
+        setCurrentPage,
+        paginatedItems: paginatedFilteredApps,
+        totalItems,
+    } = usePagination(filteredApps, pageSize);
+
 
     const handleShortlist = async (appId: string, currentShortlisted: boolean) => {
         setProcessingAppId(appId);
@@ -564,7 +576,7 @@ export default function ClientJobDetailsPage() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 text-xs text-slate-750">
-                                        {filteredApps.map((app) => {
+                                        {paginatedFilteredApps.map((app) => {
                                             const isProcessing = processingAppId === app._id;
                                             
                                             return (
@@ -693,6 +705,14 @@ export default function ClientJobDetailsPage() {
                                     </tbody>
                                 </table>
                             </div>
+                            <Pagination
+                                currentPage={currentPage}
+                                totalItems={totalItems}
+                                pageSize={pageSize}
+                                onPageChange={setCurrentPage}
+                                onPageSizeChange={setPageSize}
+                                pageSizeOptions={[5, 10, 20, 50]}
+                            />
                         </div>
 
                         {/* Mobile Responsive Cards Layout */}

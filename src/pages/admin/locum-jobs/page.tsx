@@ -8,6 +8,7 @@ import {
     useUnflagJobMutation
 } from '../../../redux/apis/jobsApi';
 import { useReadAllUsersQuery } from '../../../redux/apis/adminApi';
+import { Pagination } from '../../../components/app';
 import {
     FiLoader,
     FiSearch,
@@ -40,7 +41,7 @@ export default function AdminLocumJobsPage() {
     const [selectedSpecialty, setSelectedSpecialty] = useState<string>('ALL');
     const [selectedSetting, setSelectedSetting] = useState<string>('ALL');
     const [selectedStatus, setSelectedStatus] = useState<JobStatus | 'ALL'>('ALL');
-    const page = 1;
+    const [page, setPage] = useState(1);
 
     // Dialog / Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -73,18 +74,24 @@ export default function AdminLocumJobsPage() {
         on_call_requirements: ''
     });
 
+    const [pageSize, setPageSize] = useState(10);
+
     // API hooks
     const jobParams: any = {
         job_type: 'LOCUM',
         page,
-        limit: 100,
+        limit: pageSize,
     };
     if (selectedSpecialty !== 'ALL') jobParams.clinical_specialty = selectedSpecialty;
     if (selectedSetting !== 'ALL') jobParams.clinical_setting = selectedSetting;
     if (selectedStatus !== 'ALL') jobParams.status = selectedStatus;
 
-    const { data: jobs, isLoading: isJobsLoading, refetch: refetchJobs } = useGetJobListingsQuery(jobParams);
-    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 100 });
+    const { data: jobsRes, isLoading: isJobsLoading, refetch: refetchJobs } = useGetJobListingsQuery(jobParams);
+    const { data: usersRes, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 50000 });
+
+    const jobs = jobsRes?.data || [];
+    const users = usersRes?.data || [];
+    const totalItems = jobsRes?.pagination?.totalDocumentCount || 0;
 
     const [postLocumJob, { isLoading: isCreating }] = usePostLocumJobMutation();
     const [reassignJob, { isLoading: isReassigning }] = useReassignJobMutation();
@@ -269,6 +276,8 @@ export default function AdminLocumJobsPage() {
         );
     }) || [];
 
+
+
     if (isJobsLoading || isUsersLoading) {
         return (
             <div className="flex h-96 items-center justify-center">
@@ -396,7 +405,8 @@ export default function AdminLocumJobsPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                        <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-150 text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -516,6 +526,18 @@ export default function AdminLocumJobsPage() {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination
+                        currentPage={page}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                    />
+                    </>
                 )}
             </div>
 

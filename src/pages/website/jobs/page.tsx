@@ -24,7 +24,8 @@ import ShareJobModal from '../../../components/app/ShareJobModal';
 
 export default function PublicJobsPage() {
     const navigate = useNavigate();
-    const { data: jobListings, isLoading, isError } = useGetJobListingsQuery();
+    const { data: jobListingsRes, isLoading, isError } = useGetJobListingsQuery({ limit: 50000 });
+    const jobListings = jobListingsRes?.data || [];
 
     // Search and filter states
     const [searchTerm, setSearchTerm] = useState('');

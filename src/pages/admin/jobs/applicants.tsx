@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { useGetApplicationsQuery } from '../../../redux/apis/applicationsApi';
 import { useReadAllUsersQuery } from '../../../redux/apis/adminApi';
+import { Pagination } from '../../../components/app';
 import { 
     FiShield, 
     FiLoader, 
@@ -19,11 +20,16 @@ import ShareJobModal from '../../../components/app/ShareJobModal';
 export default function AdminJobApplicantsPage() {
     const { id } = useParams<{ id: string }>();
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     // Fetch API details
     const { data: job, isLoading: isJobLoading } = useGetJobListingDetailsQuery(id || '');
-    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery({ vacancy_id: id });
-    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery();
+    const { data: applicationsRes, isLoading: isAppsLoading } = useGetApplicationsQuery({ vacancy_id: id, page, limit: pageSize });
+    const { data: usersRes, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 10 });
+    const applications = applicationsRes?.data || [];
+    const users = usersRes?.data || [];
+    const totalItems = applicationsRes?.pagination?.totalDocumentCount || 0;
 
     const isLoading = isJobLoading || isAppsLoading || isUsersLoading;
 
@@ -230,6 +236,18 @@ export default function AdminJobApplicantsPage() {
                                 </tbody>
                             </table>
                         </div>
+                        <Pagination
+                            currentPage={page}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={setPage}
+                            onPageSizeChange={(newPageSize) => {
+                                setPageSize(newPageSize);
+                                setPage(1);
+                            }}
+                            pageSizeOptions={[5, 10, 20, 50]}
+                        />
+
 
                         {/* Mobile View Card Grid */}
                         <div className="grid grid-cols-1 gap-4 p-4 md:hidden">

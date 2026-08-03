@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
     useReadUserByIdQuery, 
     useReadUserReferralsQuery 
 } from '../../../redux/apis/adminApi';
-import { Avatar } from '../../../components/app';
+import { Avatar, Pagination } from '../../../components/app';
 import { 
     FiArrowLeft, 
     FiUsers, 
@@ -15,10 +16,16 @@ import {
 export default function AdminUserReferralsPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     // Queries
-    const { data: user, isLoading: isUserLoading, error: userError } = useReadUserByIdQuery(id || '', { skip: !id });
-    const { data: referrals, isLoading: isRefLoading, error: refError } = useReadUserReferralsQuery({ user_id: id || '', limit: 100 }, { skip: !id });
+    const { data: userRes, isLoading: isUserLoading, error: userError } = useReadUserByIdQuery(id || '', { skip: !id });
+    const { data: referralsRes, isLoading: isRefLoading, error: refError } = useReadUserReferralsQuery({ user_id: id || '', page, limit: pageSize }, { skip: !id });
+
+    const user = userRes;
+    const referrals = referralsRes?.data || [];
+    const totalItems = referralsRes?.pagination?.totalDocumentCount || 0;
 
     if (isUserLoading || isRefLoading) {
         return (
@@ -139,7 +146,7 @@ export default function AdminUserReferralsPage() {
                                         <th className="px-6 py-4">Active State</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 text-xs text-slate-750">
+                                <tbody className="divide-y divide-slate-100 text-xs text-slate-755">
                                     {referrals.map((ref: any) => {
                                         const refName = ref.role === 'institute' 
                                             ? (ref.facility_name || 'Host Clinic') 
@@ -202,6 +209,17 @@ export default function AdminUserReferralsPage() {
                                 </tbody>
                             </table>
                         </div>
+                        <Pagination
+                            currentPage={page}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={setPage}
+                            onPageSizeChange={(newPageSize) => {
+                                setPageSize(newPageSize);
+                                setPage(1);
+                            }}
+                            pageSizeOptions={[5, 10, 20, 50]}
+                        />
 
                         {/* Mobile Cards Layout */}
                         <div className="grid grid-cols-1 gap-4 lg:hidden p-4 bg-slate-50/50">

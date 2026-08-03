@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '../../api';
+import type { IPaginatedResponse, ISingleResponse } from '../../types';
 import type {
     IJobListingResponse,
     IPermanentJobListingCreate,
@@ -20,6 +21,7 @@ export const jobsApi = createApi({
                 method: 'POST',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<IJobListingResponse>) => res.data,
             invalidatesTags: ['JobListings', 'UserJobListings'],
         }),
         postLocumJob: builder.mutation<IJobListingResponse, ILocumJobListingCreate>({
@@ -28,16 +30,17 @@ export const jobsApi = createApi({
                 method: 'POST',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<IJobListingResponse>) => res.data,
             invalidatesTags: ['JobListings', 'UserJobListings'],
         }),
-        getJobListings: builder.query<IJobListingResponse[], IGetJobListingsParams | void>({
+        getJobListings: builder.query<IPaginatedResponse<IJobListingResponse>, IGetJobListingsParams | void>({
             query: (params) => ({
                 url: '/jobs',
                 params: params || {},
             }),
             providesTags: ['JobListings'],
         }),
-        getMyJobListings: builder.query<IJobListingResponse[], IGetJobListingsParams | void>({
+        getMyJobListings: builder.query<IPaginatedResponse<IJobListingResponse>, IGetJobListingsParams | void>({
             query: (params) => ({
                 url: '/jobs/my-listings',
                 params: params || {},
@@ -48,6 +51,7 @@ export const jobsApi = createApi({
             query: (id) => ({
                 url: `/jobs/${id}`,
             }),
+            transformResponse: (res: ISingleResponse<IJobListingResponse>) => res.data,
             providesTags: (_result, _error, id) => [{ type: 'JobDetails', id }],
         }),
         updateJobListing: builder.mutation<IJobListingResponse, { id: string; body: IJobListingUpdate }>({
@@ -56,6 +60,7 @@ export const jobsApi = createApi({
                 method: 'PUT',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<IJobListingResponse>) => res.data,
             invalidatesTags: (_result, _error, { id }) => [
                 'JobListings',
                 'UserJobListings',
@@ -75,29 +80,32 @@ export const jobsApi = createApi({
                 method: 'PUT',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<IJobListingResponse>) => res.data,
             invalidatesTags: (_result, _error, { id }) => [
                 'JobListings',
                 'UserJobListings',
                 { type: 'JobDetails', id },
             ],
         }),
-        flagJob: builder.mutation<IJobListingResponse, { id: string; body: { reason: string } }>({
+        flagJob: builder.mutation<{ message: string; updated_job: IJobListingResponse }, { id: string; body: { reason: string } }>({
             query: ({ id, body }) => ({
                 url: `/admin/jobs/${id}/flag`,
                 method: 'PUT',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<{ message: string; updated_job: IJobListingResponse }>) => res.data,
             invalidatesTags: (_result, _error, { id }) => [
                 'JobListings',
                 'UserJobListings',
                 { type: 'JobDetails', id },
             ],
         }),
-        unflagJob: builder.mutation<IJobListingResponse, string>({
+        unflagJob: builder.mutation<{ message: string; updated_job: IJobListingResponse }, string>({
             query: (id) => ({
                 url: `/admin/jobs/${id}/unflag`,
                 method: 'PUT',
             }),
+            transformResponse: (res: ISingleResponse<{ message: string; updated_job: IJobListingResponse }>) => res.data,
             invalidatesTags: (_result, _error, id) => [
                 'JobListings',
                 'UserJobListings',

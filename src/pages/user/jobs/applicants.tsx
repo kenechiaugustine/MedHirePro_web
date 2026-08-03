@@ -28,10 +28,11 @@ export default function ProfessionalLocumApplicantsPage() {
 
     // Queries
     const { data: job, isLoading: isJobLoading } = useGetJobListingDetailsQuery(jobId || '', { skip: !jobId });
-    const { data: applicants, isLoading: isApplicantsLoading, refetch: refetchApplicants } = useGetApplicationsQuery(
+    const { data: applicantsRes, isLoading: isApplicantsLoading, refetch: refetchApplicants } = useGetApplicationsQuery(
         jobId ? { vacancy_id: jobId } : undefined,
         { skip: !jobId }
     );
+    const applicants = applicantsRes?.data || [];
 
     // Mutations
     const [shortlistApplication] = useShortlistApplicationMutation();

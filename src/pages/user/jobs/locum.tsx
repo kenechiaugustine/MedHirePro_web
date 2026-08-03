@@ -26,15 +26,19 @@ export default function ProfessionalLocumSearchPage() {
     const navigate = useNavigate();
 
     // Fetch only open locum shifts
-    const { data: jobs, isLoading: isJobsLoading, error: jobsError } = useGetJobListingsQuery({
+    const { data: jobsRes, isLoading: isJobsLoading, error: jobsError } = useGetJobListingsQuery({
         job_type: 'LOCUM',
-        status: 'OPEN'
+        status: 'OPEN',
+        limit: 50000
     });
+    const jobs = jobsRes?.data || [];
 
     // Fetch current user's posted locum shifts
-    const { data: myJobs, isLoading: isMyJobsLoading } = useGetMyJobListingsQuery({
-        job_type: 'LOCUM'
+    const { data: myJobsRes, isLoading: isMyJobsLoading } = useGetMyJobListingsQuery({
+        job_type: 'LOCUM',
+        limit: 50000
     });
+    const myJobs = myJobsRes?.data || [];
 
     const isLoading = isJobsLoading || isMyJobsLoading;
     const error = jobsError;

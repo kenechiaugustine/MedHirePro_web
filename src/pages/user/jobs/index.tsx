@@ -19,11 +19,12 @@ import {
 export default function ProfessionalJobSearchPage() {
     const navigate = useNavigate();
     
-    // Fetch only open permanent vacancies
-    const { data: jobs, isLoading, error } = useGetJobListingsQuery({
+    const { data: jobsRes, isLoading, error } = useGetJobListingsQuery({
         job_type: 'PERMANENT',
-        status: 'OPEN'
+        status: 'OPEN',
+        limit: 50000
     });
+    const jobs = jobsRes?.data || [];
 
     const [searchTerm, setSearchTerm] = useState('');
     const [specialtyFilter, setSpecialtyFilter] = useState<string>('ALL');

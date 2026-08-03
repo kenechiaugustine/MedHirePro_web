@@ -14,9 +14,13 @@ import {
 } from "react-icons/fi";
 
 export default function AdminDashboardPage() {
-    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 5 });
-    const { data: jobs, isLoading: isJobsLoading } = useGetJobListingsQuery({ limit: 5 });
-    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery({ limit: 5 });
+    const { data: usersRes, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 5 });
+    const { data: jobsRes, isLoading: isJobsLoading } = useGetJobListingsQuery({ limit: 5 });
+    const { data: applicationsRes, isLoading: isAppsLoading } = useGetApplicationsQuery({ limit: 5 });
+
+    const users = usersRes?.data || [];
+    const jobs = jobsRes?.data || [];
+    const applications = applicationsRes?.data || [];
 
     const isLoading = isUsersLoading || isJobsLoading || isAppsLoading;
 
@@ -44,10 +48,6 @@ export default function AdminDashboardPage() {
     const totalApps = applications?.length || 0;
     const pendingApps = applications?.filter(a => a.application_status === 'SUBMITTED' || a.application_status === 'CREDENTIALING_REVIEW').length || 0;
     const shortlistedApps = applications?.filter(a => a.is_shortlisted).length || 0;
-
-    // Get items
-    const latestUsers = users ? [...users].slice(-5).reverse() : [];
-    const latestJobs = jobs ? [...jobs].slice(-5).reverse() : [];
 
     return (
         <div className="space-y-8 animate-fadeIn duration-300">
@@ -149,14 +149,14 @@ export default function AdminDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {latestUsers.length === 0 ? (
+                                {users.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
                                             No user accounts registered yet.
                                         </td>
                                     </tr>
                                 ) : (
-                                    latestUsers.map((item) => (
+                                    users.map((item) => (
                                         <tr key={item._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
                                             <td className="px-6 py-3.5">
                                                 <div className="font-extrabold text-slate-800 truncate max-w-[160px]">
@@ -223,14 +223,14 @@ export default function AdminDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {latestJobs.length === 0 ? (
+                                {jobs.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
                                             No job listings posted yet.
                                         </td>
                                     </tr>
                                 ) : (
-                                    latestJobs.map((job) => (
+                                    jobs.map((job) => (
                                         <tr key={job._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
                                             <td className="px-6 py-3.5">
                                                 <div className="font-extrabold text-slate-800 truncate max-w-[170px]">

@@ -4,7 +4,7 @@ import {
     useReadAllUsersQuery, 
     useAdminUpdateUserDetailsMutation 
 } from '../../../redux/apis/adminApi';
-import { Avatar } from '../../../components/app';
+import { Avatar, Pagination } from '../../../components/app';
 import { 
     FiShield, 
     FiLoader, 
@@ -49,9 +49,11 @@ export default function AdminUserManagementPage() {
         banned_from_applying: false
     });
 
+    const [pageSize, setPageSize] = useState(10);
+
     const params: any = {
         page,
-        limit: 100, // Fetch up to 100 users for a solid overview
+        limit: pageSize,
     };
     if (selectedRole !== 'ALL') {
         params.role = selectedRole;
@@ -64,8 +66,11 @@ export default function AdminUserManagementPage() {
     }
 
     // Queries & Mutations
-    const { data: users, isLoading, error, refetch } = useReadAllUsersQuery(params);
+    const { data: usersRes, isLoading, error, refetch } = useReadAllUsersQuery(params);
+    const users = usersRes?.data || [];
+    const totalItems = usersRes?.pagination?.totalDocumentCount || 0;
     const [updateUserDetails, { isLoading: isUpdating }] = useAdminUpdateUserDetailsMutation();
+
 
     const handleEditClick = (user: any) => {
         setSelectedUser(user);
@@ -308,7 +313,8 @@ export default function AdminUserManagementPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                        <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-150 text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -417,6 +423,17 @@ export default function AdminUserManagementPage() {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination
+                        currentPage={page}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
+                    />
+                    </>
                 )}
             </div>
 
