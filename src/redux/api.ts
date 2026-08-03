@@ -62,7 +62,8 @@ export const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, Fetch
                     );
 
                     if (refreshResult.data) {
-                        const { access_token, refresh_token, user_role } = refreshResult.data as IRefreshTokenResponse;
+                        const resData = (refreshResult.data as { data?: IRefreshTokenResponse })?.data || (refreshResult.data as IRefreshTokenResponse);
+                        const { access_token, refresh_token, user_role } = resData;
                         await setTokenItem(TOKEN_KEY.AUTH_TOKEN, access_token);
                         await setTokenItem(TOKEN_KEY.REFRESH_TOKEN, refresh_token);
                         if (user_role) {

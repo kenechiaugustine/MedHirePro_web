@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '../../api';
+import type { IPaginatedResponse, ISingleResponse } from '../../types';
 import type {
     IApplicationResponse,
     IApplicationCreate,
@@ -20,16 +21,17 @@ export const applicationsApi = createApi({
                 method: 'POST',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<IApplicationResponse>) => res.data,
             invalidatesTags: ['Applications', 'UserApplications'],
         }),
-        getApplications: builder.query<IApplicationResponse[], IGetApplicationsParams | void>({
+        getApplications: builder.query<IPaginatedResponse<IApplicationResponse>, IGetApplicationsParams | void>({
             query: (params) => ({
                 url: '/applications',
                 params: params || {},
             }),
             providesTags: ['Applications'],
         }),
-        getMyApplications: builder.query<IApplicationResponse[], IGetApplicationsParams | void>({
+        getMyApplications: builder.query<IPaginatedResponse<IApplicationResponse>, IGetApplicationsParams | void>({
             query: (params) => ({
                 url: '/applications/my-applications',
                 params: params || {},
@@ -41,12 +43,14 @@ export const applicationsApi = createApi({
                 url: '/applications/check-applied',
                 params: { vacancy_id },
             }),
+            transformResponse: (res: ISingleResponse<{ applied: boolean; application: IApplicationResponse | null }>) => res.data,
             providesTags: ['Applications'],
         }),
         getApplicationDetails: builder.query<IApplicationResponse, string>({
             query: (id) => ({
                 url: `/applications/${id}`,
             }),
+            transformResponse: (res: ISingleResponse<IApplicationResponse>) => res.data,
             providesTags: (_result, _error, id) => [{ type: 'ApplicationDetails', id }],
         }),
         shortlistApplication: builder.mutation<IApplicationResponse, { id: string; body: IApplicationShortlistUpdate }>({
@@ -55,6 +59,7 @@ export const applicationsApi = createApi({
                 method: 'PUT',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<IApplicationResponse>) => res.data,
             invalidatesTags: (_result, _error, { id }) => [
                 'Applications',
                 'UserApplications',
@@ -67,6 +72,7 @@ export const applicationsApi = createApi({
                 method: 'PUT',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<IApplicationResponse>) => res.data,
             invalidatesTags: (_result, _error, { id }) => [
                 'Applications',
                 'UserApplications',
@@ -79,6 +85,7 @@ export const applicationsApi = createApi({
                 method: 'PUT',
                 body: { application_status },
             }),
+            transformResponse: (res: ISingleResponse<IApplicationResponse>) => res.data,
             invalidatesTags: (_result, _error, { id }) => [
                 'Applications',
                 'UserApplications',

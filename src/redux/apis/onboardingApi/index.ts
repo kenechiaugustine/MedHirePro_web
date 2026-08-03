@@ -1,12 +1,12 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '../../api';
+import type { IPaginatedResponse, ISingleResponse } from '../../types';
 import type {
     IProfessionalOnboardingSubmit,
     IInstituteOnboardingSubmit,
     IOnboardingStatusResponse,
     IOnboardingSubmissionResponse,
     IPendingOnboardingsParams,
-    IPendingOnboardingsResponse,
     IAdminReviewPayload,
 } from './interface';
 
@@ -24,15 +24,17 @@ export const onboardingApi = createApi({
                 method: 'POST',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<{ message: string; submission: IOnboardingSubmissionResponse }>) => res.data,
             invalidatesTags: ['OnboardingStatus', 'PendingOnboardings'],
         }),
         getOnboardingStatus: builder.query<IOnboardingStatusResponse, void>({
             query: () => ({
                 url: '/onboarding/status',
             }),
+            transformResponse: (res: ISingleResponse<IOnboardingStatusResponse>) => res.data,
             providesTags: ['OnboardingStatus'],
         }),
-        getPendingOnboardings: builder.query<IPendingOnboardingsResponse, IPendingOnboardingsParams | void>({
+        getPendingOnboardings: builder.query<IPaginatedResponse<IOnboardingSubmissionResponse>, IPendingOnboardingsParams | void>({
             query: (params) => ({
                 url: '/onboarding/admin/pending',
                 params: params || {},
@@ -48,6 +50,7 @@ export const onboardingApi = createApi({
                 method: 'POST',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<{ message: string; submission: IOnboardingSubmissionResponse }>) => res.data,
             invalidatesTags: ['OnboardingStatus', 'PendingOnboardings'],
         }),
     }),

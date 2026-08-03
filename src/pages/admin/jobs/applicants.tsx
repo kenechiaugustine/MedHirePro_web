@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import { useGetJobListingDetailsQuery } from '../../../redux/apis/jobsApi';
 import { useGetApplicationsQuery } from '../../../redux/apis/applicationsApi';
 import { useReadAllUsersQuery } from '../../../redux/apis/adminApi';
-import { usePagination } from '../../../hooks/usePagination';
 import { Pagination } from '../../../components/app';
 import { 
     FiShield, 
@@ -21,19 +20,16 @@ import ShareJobModal from '../../../components/app/ShareJobModal';
 export default function AdminJobApplicantsPage() {
     const { id } = useParams<{ id: string }>();
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
     // Fetch API details
     const { data: job, isLoading: isJobLoading } = useGetJobListingDetailsQuery(id || '');
-    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery({ vacancy_id: id, limit: pageSize });
-    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 10 });
-
-    const {
-        currentPage,
-        setCurrentPage,
-        paginatedItems: paginatedApplications,
-        totalItems,
-    } = usePagination(applications || [], pageSize);
+    const { data: applicationsRes, isLoading: isAppsLoading } = useGetApplicationsQuery({ vacancy_id: id, page, limit: pageSize });
+    const { data: usersRes, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 10 });
+    const applications = applicationsRes?.data || [];
+    const users = usersRes?.data || [];
+    const totalItems = applicationsRes?.pagination?.totalDocumentCount || 0;
 
     const isLoading = isJobLoading || isAppsLoading || isUsersLoading;
 
@@ -168,7 +164,7 @@ export default function AdminJobApplicantsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                                    {paginatedApplications.map((app) => {
+                                    {applications.map((app) => {
                                         const candidate = userMap[app.candidate_id];
                                         return (
                                             <tr key={app._id} className="hover:bg-slate-50/40">
@@ -239,15 +235,18 @@ export default function AdminJobApplicantsPage() {
                                     })}
                                 </tbody>
                             </table>
-                            <Pagination
-                                currentPage={currentPage}
-                                totalItems={totalItems}
-                                pageSize={pageSize}
-                                onPageChange={setCurrentPage}
-                                onPageSizeChange={setPageSize}
-                                pageSizeOptions={[5, 10, 20, 50]}
-                            />
                         </div>
+                        <Pagination
+                            currentPage={page}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={setPage}
+                            onPageSizeChange={(newPageSize) => {
+                                setPageSize(newPageSize);
+                                setPage(1);
+                            }}
+                            pageSizeOptions={[5, 10, 20, 50]}
+                        />
 
 
                         {/* Mobile View Card Grid */}

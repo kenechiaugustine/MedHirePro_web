@@ -4,7 +4,6 @@ import {
     useGetReferredUsersQuery, 
     useApplyReferralMutation 
 } from '../../../redux/apis/referralApi';
-import { usePagination } from '../../../hooks/usePagination';
 import { Pagination } from '../../../components/app';
 import { 
     FiGift, 
@@ -18,17 +17,15 @@ import {
 import toast from 'react-hot-toast';
 
 export default function UserReferralsPage() {
+    const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
-    const { data: details, isLoading: isDetailsLoading, refetch: refetchDetails } = useGetReferralDetailsQuery();
-    const { data: referredUsers, isLoading: isUsersLoading, refetch: refetchUsers } = useGetReferredUsersQuery({ limit: pageSize });
+    const { data: detailsRes, isLoading: isDetailsLoading, refetch: refetchDetails } = useGetReferralDetailsQuery();
+    const { data: referredUsersRes, isLoading: isUsersLoading, refetch: refetchUsers } = useGetReferredUsersQuery({ page, limit: pageSize });
     const [applyReferral, { isLoading: isApplying }] = useApplyReferralMutation();
 
-    const {
-        currentPage,
-        setCurrentPage,
-        paginatedItems: paginatedReferredUsers,
-        totalItems,
-    } = usePagination(referredUsers || [], pageSize);
+    const details = detailsRes;
+    const referredUsers = referredUsersRes?.data || [];
+    const totalItems = referredUsersRes?.pagination?.totalDocumentCount || 0;
 
     const [referralInput, setReferralInput] = useState('');
     const [copied, setCopied] = useState(false);
@@ -223,14 +220,14 @@ export default function UserReferralsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50 text-slate-700 font-medium">
-                                {!paginatedReferredUsers || paginatedReferredUsers.length === 0 ? (
+                                {!referredUsers || referredUsers.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="text-center py-16 text-slate-400 font-medium">
                                             No members have registered with your referral code yet.
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedReferredUsers.map((item) => (
+                                    referredUsers.map((item) => (
                                         <tr key={item._id} className="hover:bg-slate-50/40">
                                             <td className="px-6 py-3.5">
                                                 <div className="font-extrabold text-slate-800 truncate max-w-[170px]">
@@ -268,11 +265,14 @@ export default function UserReferralsPage() {
                         </table>
                     </div>
                     <Pagination
-                        currentPage={currentPage}
+                        currentPage={page}
                         totalItems={totalItems}
                         pageSize={pageSize}
-                        onPageChange={setCurrentPage}
-                        onPageSizeChange={setPageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
                         pageSizeOptions={[5, 10, 20, 50]}
                     />
                 </div>

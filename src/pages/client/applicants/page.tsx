@@ -6,7 +6,6 @@ import {
     useAcceptApplicationMutation,
     useUpdateApplicationStatusMutation
 } from '../../../redux/apis/applicationsApi';
-import { usePagination } from '../../../hooks/usePagination';
 import { Pagination } from '../../../components/app';
 import { 
     FiCompass, 
@@ -26,9 +25,12 @@ import { exportApplicantsToExcel } from '../../../lib/utils/exportExcel';
 
 export default function ClientApplicantsPage() {
     const navigate = useNavigate();
+    const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     // Fetch applications for listings posted by this recruiter using dynamic pageSize limit
-    const { data: applications, isLoading, refetch } = useGetApplicationsQuery({ limit: pageSize });
+    const { data: applicationsRes, isLoading, refetch } = useGetApplicationsQuery({ page, limit: pageSize });
+    const applications = applicationsRes?.data || [];
+    const totalItems = applicationsRes?.pagination?.totalDocumentCount || 0;
 
     // Mutations
     const [shortlistApplication] = useShortlistApplicationMutation();
@@ -154,13 +156,6 @@ export default function ClientApplicantsPage() {
         return matchesSearch && matchesStatus && matchesType && matchesShortlisted;
     });
 
-    const {
-        currentPage,
-        setCurrentPage,
-        paginatedItems: paginatedFilteredApps,
-        totalItems,
-    } = usePagination(filteredApps, pageSize);
-
     return (
         <div className="space-y-6 animate-fadeIn duration-200">
             
@@ -278,7 +273,8 @@ export default function ClientApplicantsPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                        <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-150 text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -290,7 +286,7 @@ export default function ClientApplicantsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                                {paginatedFilteredApps.map((app) => {
+                                {filteredApps.map((app) => {
                                     const job = typeof app.vacancy_id === 'object' ? app.vacancy_id : null;
                                     const isProcessing = processingAppId === app._id;
                                     
@@ -452,15 +448,19 @@ export default function ClientApplicantsPage() {
                                 })}
                             </tbody>
                         </table>
-                        <Pagination
-                            currentPage={currentPage}
-                            totalItems={totalItems}
-                            pageSize={pageSize}
-                            onPageChange={setCurrentPage}
-                            onPageSizeChange={setPageSize}
-                            pageSizeOptions={[5, 10, 20, 50]}
-                        />
                     </div>
+                    <Pagination
+                        currentPage={page}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                    />
+                    </>
                 )}
             </div>
 

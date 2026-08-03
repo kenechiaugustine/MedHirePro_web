@@ -8,7 +8,8 @@ import { Avatar } from '../../../components/app';
 import toast from 'react-hot-toast';
 
 export default function AdminReviewsPage() {
-    const { data: reviews, isLoading, error, refetch } = useGetReviewsQuery();
+    const { data: reviewsRes, isLoading, error, refetch } = useGetReviewsQuery();
+    const reviews = reviewsRes?.data || [];
     const [ratingFilter, setRatingFilter] = useState<number | 'ALL'>('ALL');
     const [roleFilter, setRoleFilter] = useState<'professional' | 'institute' | 'ALL'>('ALL');
     

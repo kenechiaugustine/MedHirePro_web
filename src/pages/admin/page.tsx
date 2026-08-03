@@ -1,10 +1,7 @@
-import { useState } from "react";
 import { useReadAllUsersQuery } from "../../redux/apis/adminApi";
 import { useGetJobListingsQuery } from "../../redux/apis/jobsApi";
 import { useGetApplicationsQuery } from "../../redux/apis/applicationsApi";
 import { Link } from "react-router-dom";
-import { usePagination } from "../../hooks/usePagination";
-import { Pagination } from "../../components/app";
 import {
     FiShield,
     FiUsers,
@@ -17,26 +14,13 @@ import {
 } from "react-icons/fi";
 
 export default function AdminDashboardPage() {
-    const [usersPageSize, setUsersPageSize] = useState(5);
-    const [jobsPageSize, setJobsPageSize] = useState(5);
+    const { data: usersRes, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 5 });
+    const { data: jobsRes, isLoading: isJobsLoading } = useGetJobListingsQuery({ limit: 5 });
+    const { data: applicationsRes, isLoading: isAppsLoading } = useGetApplicationsQuery({ limit: 5 });
 
-    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: usersPageSize });
-    const { data: jobs, isLoading: isJobsLoading } = useGetJobListingsQuery({ limit: jobsPageSize });
-    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery({ limit: 10 });
-
-    const {
-        currentPage: usersPage,
-        setCurrentPage: setUsersPage,
-        paginatedItems: paginatedUsers,
-        totalItems: totalUsersCount,
-    } = usePagination(users || [], usersPageSize);
-
-    const {
-        currentPage: jobsPage,
-        setCurrentPage: setJobsPage,
-        paginatedItems: paginatedJobs,
-        totalItems: totalJobsCount,
-    } = usePagination(jobs || [], jobsPageSize);
+    const users = usersRes?.data || [];
+    const jobs = jobsRes?.data || [];
+    const applications = applicationsRes?.data || [];
 
     const isLoading = isUsersLoading || isJobsLoading || isAppsLoading;
 
@@ -165,14 +149,14 @@ export default function AdminDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {paginatedUsers.length === 0 ? (
+                                {users.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
                                             No user accounts registered yet.
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedUsers.map((item) => (
+                                    users.map((item) => (
                                         <tr key={item._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
                                             <td className="px-6 py-3.5">
                                                 <div className="font-extrabold text-slate-800 truncate max-w-[160px]">
@@ -213,14 +197,6 @@ export default function AdminDashboardPage() {
                             </tbody>
                         </table>
                     </div>
-                    <Pagination
-                        currentPage={usersPage}
-                        totalItems={totalUsersCount}
-                        pageSize={usersPageSize}
-                        onPageChange={setUsersPage}
-                        onPageSizeChange={setUsersPageSize}
-                        pageSizeOptions={[5, 10, 20]}
-                    />
                 </div>
 
                 {/* Recent Job Listings Panel */}
@@ -247,14 +223,14 @@ export default function AdminDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {paginatedJobs.length === 0 ? (
+                                {jobs.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
                                             No job listings posted yet.
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedJobs.map((job) => (
+                                    jobs.map((job) => (
                                         <tr key={job._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
                                             <td className="px-6 py-3.5">
                                                 <div className="font-extrabold text-slate-800 truncate max-w-[170px]">
@@ -289,14 +265,6 @@ export default function AdminDashboardPage() {
                             </tbody>
                         </table>
                     </div>
-                    <Pagination
-                        currentPage={jobsPage}
-                        totalItems={totalJobsCount}
-                        pageSize={jobsPageSize}
-                        onPageChange={setJobsPage}
-                        onPageSizeChange={setJobsPageSize}
-                        pageSizeOptions={[5, 10, 20]}
-                    />
                 </div>
             </div>
         </div>

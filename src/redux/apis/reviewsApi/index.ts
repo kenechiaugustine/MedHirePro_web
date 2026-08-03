@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '../../api';
+import type { IPaginatedResponse, ISingleResponse } from '../../types';
 import type { IReviewCreate, IReviewResponse, IReviewListParams } from './interface';
 
 export const reviewsApi = createApi({
@@ -13,9 +14,10 @@ export const reviewsApi = createApi({
                 method: 'POST',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<IReviewResponse>) => res.data,
             invalidatesTags: ['Reviews'],
         }),
-        getReviews: builder.query<IReviewResponse[], IReviewListParams | void>({
+        getReviews: builder.query<IPaginatedResponse<IReviewResponse>, IReviewListParams | void>({
             query: (params) => ({
                 url: '/reviews',
                 method: 'GET',
@@ -29,6 +31,7 @@ export const reviewsApi = createApi({
                 method: 'PUT',
                 params: { is_public },
             }),
+            transformResponse: (res: ISingleResponse<IReviewResponse>) => res.data,
             invalidatesTags: ['Reviews'],
         }),
     }),

@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '../../api';
+import type { IPaginatedResponse, ISingleResponse } from '../../types';
 import type {
     IApplyReferralRequest,
     IApplyReferralResponse,
@@ -18,6 +19,7 @@ export const referralApi = createApi({
                 method: 'POST',
                 body,
             }),
+            transformResponse: (res: ISingleResponse<IApplyReferralResponse>) => res.data,
             invalidatesTags: ['ReferralDetails', 'ReferredUsers'],
         }),
         getReferralDetails: builder.query<IUserReferralDetailsResponse, void>({
@@ -25,9 +27,10 @@ export const referralApi = createApi({
                 url: '/referral/details',
                 method: 'GET',
             }),
+            transformResponse: (res: ISingleResponse<IUserReferralDetailsResponse>) => res.data,
             providesTags: ['ReferralDetails'],
         }),
-        getReferredUsers: builder.query<IReferredUser[], { page?: number; limit?: number } | void>({
+        getReferredUsers: builder.query<IPaginatedResponse<IReferredUser>, { page?: number; limit?: number } | void>({
             query: (params) => ({
                 url: '/referral/users',
                 method: 'GET',

@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '../../api';
+import type { ISingleResponse } from '../../types';
 import type { IUser, IUpdateProfileRequest } from './interface';
 
 export const userApi = createApi({
@@ -9,6 +10,7 @@ export const userApi = createApi({
     endpoints: (builder) => ({
         getMe: builder.query<IUser, void>({
             query: () => '/user/me',
+            transformResponse: (response: ISingleResponse<IUser>) => response.data,
             providesTags: ['Profile'],
         }),
         updateProfile: builder.mutation<IUser, IUpdateProfileRequest>({
@@ -17,6 +19,7 @@ export const userApi = createApi({
                 method: 'PUT',
                 body,
             }),
+            transformResponse: (response: ISingleResponse<IUser>) => response.data,
             invalidatesTags: ['Profile'],
         }),
         deleteMe: builder.mutation<void, void>({

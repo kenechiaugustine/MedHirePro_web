@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '../../api';
+import type { ISingleResponse } from '../../types';
 import type {
     IMedia,
     IUploadMediaResponse,
@@ -17,6 +18,7 @@ export const mediaApi = createApi({
                 method: 'POST',
                 body: formData,
             }),
+            transformResponse: (res: ISingleResponse<IUploadMediaResponse>) => res.data,
             invalidatesTags: ['Media'],
         }),
         getMediaInfo: builder.query<IMedia, string>({
@@ -24,6 +26,7 @@ export const mediaApi = createApi({
                 url: `/media/${mediaId}`,
                 method: 'GET',
             }),
+            transformResponse: (res: ISingleResponse<IMedia>) => res.data,
             providesTags: (_result, _error, mediaId) => [{ type: 'Media', id: mediaId }],
         }),
         deleteMedia: builder.mutation<IDeleteMediaResponse, string>({
@@ -31,6 +34,7 @@ export const mediaApi = createApi({
                 url: `/media/${mediaId}`,
                 method: 'DELETE',
             }),
+            transformResponse: (res: ISingleResponse<IDeleteMediaResponse>) => res.data,
             invalidatesTags: (_result, _error, mediaId) => [
                 { type: 'Media', id: mediaId },
                 'Media',

@@ -8,7 +8,6 @@ import {
     useUnflagJobMutation
 } from '../../../redux/apis/jobsApi';
 import { useReadAllUsersQuery } from '../../../redux/apis/adminApi';
-import { usePagination } from '../../../hooks/usePagination';
 import { Pagination } from '../../../components/app';
 import {
     FiLoader,
@@ -42,7 +41,7 @@ export default function AdminLocumJobsPage() {
     const [selectedSpecialty, setSelectedSpecialty] = useState<string>('ALL');
     const [selectedSetting, setSelectedSetting] = useState<string>('ALL');
     const [selectedStatus, setSelectedStatus] = useState<JobStatus | 'ALL'>('ALL');
-    const page = 1;
+    const [page, setPage] = useState(1);
 
     // Dialog / Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -87,8 +86,12 @@ export default function AdminLocumJobsPage() {
     if (selectedSetting !== 'ALL') jobParams.clinical_setting = selectedSetting;
     if (selectedStatus !== 'ALL') jobParams.status = selectedStatus;
 
-    const { data: jobs, isLoading: isJobsLoading, refetch: refetchJobs } = useGetJobListingsQuery(jobParams);
-    const { data: users, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 50000 });
+    const { data: jobsRes, isLoading: isJobsLoading, refetch: refetchJobs } = useGetJobListingsQuery(jobParams);
+    const { data: usersRes, isLoading: isUsersLoading } = useReadAllUsersQuery({ limit: 50000 });
+
+    const jobs = jobsRes?.data || [];
+    const users = usersRes?.data || [];
+    const totalItems = jobsRes?.pagination?.totalDocumentCount || 0;
 
     const [postLocumJob, { isLoading: isCreating }] = usePostLocumJobMutation();
     const [reassignJob, { isLoading: isReassigning }] = useReassignJobMutation();
@@ -273,13 +276,6 @@ export default function AdminLocumJobsPage() {
         );
     }) || [];
 
-    const {
-        currentPage,
-        setCurrentPage,
-        paginatedItems: paginatedLocumJobs,
-        totalItems,
-    } = usePagination(filteredJobs, pageSize);
-
 
 
     if (isJobsLoading || isUsersLoading) {
@@ -409,7 +405,8 @@ export default function AdminLocumJobsPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                        <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-150 text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -422,7 +419,7 @@ export default function AdminLocumJobsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                                {paginatedLocumJobs.map((job) => {
+                                {filteredJobs.map((job) => {
                                     const postedById = typeof job.posted_by === 'object' ? job.posted_by._id : job.posted_by;
                                     const posterName = (typeof job.posted_by === 'object' ? (job.posted_by.facility_name || job.posted_by.full_name) : null) || userMap[postedById] || 'MedHire Host Clinic';
 
@@ -528,15 +525,19 @@ export default function AdminLocumJobsPage() {
                                 })}
                             </tbody>
                         </table>
-                        <Pagination
-                            currentPage={currentPage}
-                            totalItems={totalItems}
-                            pageSize={pageSize}
-                            onPageChange={setCurrentPage}
-                            onPageSizeChange={setPageSize}
-                            pageSizeOptions={[5, 10, 20, 50]}
-                        />
                     </div>
+                    <Pagination
+                        currentPage={page}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                    />
+                    </>
                 )}
             </div>
 

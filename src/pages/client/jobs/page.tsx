@@ -5,7 +5,6 @@ import {
     useDeleteJobListingMutation 
 } from '../../../redux/apis/jobsApi';
 import { CLIENT_ROUTES } from '../routes.enum';
-import { usePagination } from '../../../hooks/usePagination';
 import { Pagination } from '../../../components/app';
 import { 
     FiPlus, 
@@ -26,8 +25,11 @@ import toast from 'react-hot-toast';
 
 export default function ClientJobListingsPage() {
     const navigate = useNavigate();
+    const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const { data: jobs, isLoading, refetch } = useGetMyJobListingsQuery({ limit: pageSize });
+    const { data: jobsRes, isLoading, refetch } = useGetMyJobListingsQuery({ page, limit: pageSize });
+    const jobs = jobsRes?.data || [];
+    const totalItems = jobsRes?.pagination?.totalDocumentCount || 0;
     const [deleteJobListing, { isLoading: isDeleting }] = useDeleteJobListingMutation();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -75,13 +77,6 @@ export default function ClientJobListingsPage() {
 
         return matchesSearch && matchesType && matchesStatus;
     });
-
-    const {
-        currentPage,
-        setCurrentPage,
-        paginatedItems: paginatedJobs,
-        totalItems,
-    } = usePagination(filteredJobs, pageSize);
 
 
     const formatCurrency = (amount: number) => {
@@ -181,7 +176,8 @@ export default function ClientJobListingsPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                        <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -195,7 +191,7 @@ export default function ClientJobListingsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50 text-xs">
-                                {paginatedJobs.map((job) => {
+                                {filteredJobs.map((job) => {
                                     const formattedRate = `${formatCurrency(job.rate_amount_min)} - ${formatCurrency(job.rate_amount_max)}`;
                                     
                                     return (
@@ -322,15 +318,19 @@ export default function ClientJobListingsPage() {
                                 })}
                             </tbody>
                         </table>
-                        <Pagination
-                            currentPage={currentPage}
-                            totalItems={totalItems}
-                            pageSize={pageSize}
-                            onPageChange={setCurrentPage}
-                            onPageSizeChange={setPageSize}
-                            pageSizeOptions={[5, 10, 20, 50]}
-                        />
                     </div>
+                    <Pagination
+                        currentPage={page}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                    />
+                    </>
                 )}
             </div>
 

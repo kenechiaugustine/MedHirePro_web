@@ -5,7 +5,6 @@ import {
     useAdminUpdateUserDetailsMutation 
 } from '../../../redux/apis/adminApi';
 import { Avatar, Pagination } from '../../../components/app';
-import { usePagination } from '../../../hooks/usePagination';
 import { 
     FiShield, 
     FiLoader, 
@@ -50,7 +49,7 @@ export default function AdminUserManagementPage() {
         banned_from_applying: false
     });
 
-    const [pageSize, setPageSize] = useState(500);
+    const [pageSize, setPageSize] = useState(10);
 
     const params: any = {
         page,
@@ -67,15 +66,10 @@ export default function AdminUserManagementPage() {
     }
 
     // Queries & Mutations
-    const { data: users, isLoading, error, refetch } = useReadAllUsersQuery(params);
+    const { data: usersRes, isLoading, error, refetch } = useReadAllUsersQuery(params);
+    const users = usersRes?.data || [];
+    const totalItems = usersRes?.pagination?.totalDocumentCount || 0;
     const [updateUserDetails, { isLoading: isUpdating }] = useAdminUpdateUserDetailsMutation();
-
-    const {
-        currentPage,
-        setCurrentPage,
-        paginatedItems: paginatedUsersList,
-        totalItems,
-    } = usePagination(users || [], pageSize);
 
 
     const handleEditClick = (user: any) => {
@@ -319,7 +313,8 @@ export default function AdminUserManagementPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                        <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-150 text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -332,7 +327,7 @@ export default function AdminUserManagementPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                                {paginatedUsersList.map((user) => {
+                                {users.map((user) => {
                                     const displayName = user.role === 'institute' 
                                         ? (user.facility_name || 'Host Clinic')
                                         : (user.full_name || 'Candidate Practitioner');
@@ -427,14 +422,18 @@ export default function AdminUserManagementPage() {
                                 })}
                             </tbody>
                         </table>
-                        <Pagination
-                            currentPage={currentPage}
-                            totalItems={totalItems}
-                            pageSize={pageSize}
-                            onPageChange={setCurrentPage}
-                            onPageSizeChange={setPageSize}
-                        />
                     </div>
+                    <Pagination
+                        currentPage={page}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(newPageSize) => {
+                            setPageSize(newPageSize);
+                            setPage(1);
+                        }}
+                    />
+                    </>
                 )}
             </div>
 

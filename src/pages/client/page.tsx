@@ -1,11 +1,8 @@
-import { useState } from 'react';
 import { useGetMeQuery } from "../../redux/apis/userApi";
 import { useGetOnboardingStatusQuery } from "../../redux/apis/onboardingApi";
 import { useGetMyJobListingsQuery } from "../../redux/apis/jobsApi";
 import { useGetApplicationsQuery } from "../../redux/apis/applicationsApi";
 import { Link } from "react-router-dom";
-import { usePagination } from "../../hooks/usePagination";
-import { Pagination } from "../../components/app";
 import {
     FiAward,
     FiShield,
@@ -18,27 +15,13 @@ import {
 } from "react-icons/fi";
 
 export default function ClientDashboardPage() {
-    const [listingsPageSize, setListingsPageSize] = useState(5);
-    const [appsPageSize, setAppsPageSize] = useState(5);
-
     const { data: user, isLoading: isUserLoading } = useGetMeQuery();
     const { data: onboarding, isLoading: isOnboardingLoading } = useGetOnboardingStatusQuery();
-    const { data: myListings, isLoading: isListingsLoading } = useGetMyJobListingsQuery({ limit: listingsPageSize });
-    const { data: applications, isLoading: isAppsLoading } = useGetApplicationsQuery({ limit: appsPageSize });
+    const { data: myListingsRes, isLoading: isListingsLoading } = useGetMyJobListingsQuery({ limit: 5 });
+    const { data: applicationsRes, isLoading: isAppsLoading } = useGetApplicationsQuery({ limit: 5 });
 
-    const {
-        currentPage: listingsPage,
-        setCurrentPage: setListingsPage,
-        paginatedItems: paginatedListings,
-        totalItems: totalListingsCount,
-    } = usePagination(myListings || [], listingsPageSize);
-
-    const {
-        currentPage: appsPage,
-        setCurrentPage: setAppsPage,
-        paginatedItems: paginatedApplications,
-        totalItems: totalAppsCount,
-    } = usePagination(applications || [], appsPageSize);
+    const myListings = myListingsRes?.data || [];
+    const applications = applicationsRes?.data || [];
 
     const isLoading = isUserLoading || isOnboardingLoading || isListingsLoading || isAppsLoading;
 
@@ -230,14 +213,14 @@ export default function ClientDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {paginatedListings.length === 0 ? (
+                                {myListings.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
                                             No active job campaigns posted.
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedListings.map((job) => (
+                                    myListings.map((job) => (
                                         <tr key={job._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
                                             <td className="px-6 py-3.5">
                                                 <div className="font-extrabold text-slate-800 truncate max-w-[170px]">
@@ -272,14 +255,6 @@ export default function ClientDashboardPage() {
                             </tbody>
                         </table>
                     </div>
-                    <Pagination
-                        currentPage={listingsPage}
-                        totalItems={totalListingsCount}
-                        pageSize={listingsPageSize}
-                        onPageChange={setListingsPage}
-                        onPageSizeChange={setListingsPageSize}
-                        pageSizeOptions={[5, 10, 20]}
-                    />
                 </div>
 
                 {/* Recent applications */}
@@ -304,14 +279,14 @@ export default function ClientDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {paginatedApplications.length === 0 ? (
+                                {applications.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="text-center py-8 text-slate-400 font-medium">
                                             No clinician applications received yet.
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedApplications.map((app) => (
+                                    applications.map((app) => (
                                         <tr key={app._id} className="hover:bg-slate-50/40 font-medium text-slate-700">
                                             <td className="px-6 py-3.5">
                                                 <div className="font-extrabold text-slate-800">
@@ -340,14 +315,6 @@ export default function ClientDashboardPage() {
                             </tbody>
                         </table>
                     </div>
-                    <Pagination
-                        currentPage={appsPage}
-                        totalItems={totalAppsCount}
-                        pageSize={appsPageSize}
-                        onPageChange={setAppsPage}
-                        onPageSizeChange={setAppsPageSize}
-                        pageSizeOptions={[5, 10, 20]}
-                    />
                 </div>
             </div>
         </div>

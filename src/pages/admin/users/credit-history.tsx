@@ -4,7 +4,6 @@ import {
     useReadUserByIdQuery, 
     useReadUserCreditsHistoryQuery 
 } from '../../../redux/apis/adminApi';
-import { usePagination } from '../../../hooks/usePagination';
 import { Pagination } from '../../../components/app';
 import { 
     FiArrowLeft, 
@@ -19,18 +18,16 @@ import {
 export default function AdminUserCreditHistoryPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
     // Queries
-    const { data: user, isLoading: isUserLoading, error: userError } = useReadUserByIdQuery(id || '', { skip: !id });
-    const { data: transactions, isLoading: isTxLoading, error: txError } = useReadUserCreditsHistoryQuery({ user_id: id || '', limit: pageSize }, { skip: !id });
+    const { data: userRes, isLoading: isUserLoading, error: userError } = useReadUserByIdQuery(id || '', { skip: !id });
+    const { data: transactionsRes, isLoading: isTxLoading, error: txError } = useReadUserCreditsHistoryQuery({ user_id: id || '', page, limit: pageSize }, { skip: !id });
 
-    const {
-        currentPage,
-        setCurrentPage,
-        paginatedItems: paginatedTransactions,
-        totalItems,
-    } = usePagination(transactions || [], pageSize);
+    const user = userRes;
+    const transactions = transactionsRes?.data || [];
+    const totalItems = transactionsRes?.pagination?.totalDocumentCount || 0;
 
     if (isUserLoading || isTxLoading) {
         return (
@@ -155,7 +152,7 @@ export default function AdminUserCreditHistoryPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                                    {paginatedTransactions.map((tx: any) => (
+                                    {transactions.map((tx: any) => (
                                         <tr key={tx._id || tx.id} className="hover:bg-slate-50/50 transition-colors">
                                             <td className="px-6 py-4.5 whitespace-nowrap">
                                                 <p className="font-extrabold text-slate-800">
@@ -195,15 +192,18 @@ export default function AdminUserCreditHistoryPage() {
                                     ))}
                                 </tbody>
                             </table>
-                            <Pagination
-                                currentPage={currentPage}
-                                totalItems={totalItems}
-                                pageSize={pageSize}
-                                onPageChange={setCurrentPage}
-                                onPageSizeChange={setPageSize}
-                                pageSizeOptions={[5, 10, 20, 50]}
-                            />
                         </div>
+                        <Pagination
+                            currentPage={page}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={setPage}
+                            onPageSizeChange={(newPageSize) => {
+                                setPageSize(newPageSize);
+                                setPage(1);
+                            }}
+                            pageSizeOptions={[5, 10, 20, 50]}
+                        />
 
                         {/* Mobile Cards Layout */}
                         <div className="grid grid-cols-1 gap-4 lg:hidden p-4 bg-slate-50/50">

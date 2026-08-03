@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '../../api';
+import type { IPaginatedResponse, ISingleResponse } from '../../types';
 import type { IUser } from '../userApi/interface';
 import type { ICreditTransaction } from '../creditsApi/interface';
 import type {
@@ -16,7 +17,7 @@ export const adminApi = createApi({
     baseQuery: baseQueryWithReauth,
     tagTypes: ['AdminUsers', 'AdminUserCredits', 'AdminUserReferrals'],
     endpoints: (builder) => ({
-        readAllUsers: builder.query<IUser[], IAdminUsersParams | void>({
+        readAllUsers: builder.query<IPaginatedResponse<IUser>, IAdminUsersParams | void>({
             query: (params) => ({
                 url: '/admin/users',
                 method: 'GET',
@@ -24,7 +25,7 @@ export const adminApi = createApi({
             }),
             providesTags: ['AdminUsers'],
         }),
-        readUserCreditsHistory: builder.query<ICreditTransaction[], IAdminUserCreditsParams>({
+        readUserCreditsHistory: builder.query<IPaginatedResponse<ICreditTransaction>, IAdminUserCreditsParams>({
             query: ({ user_id, ...params }) => ({
                 url: `/admin/users/${user_id}/credits`,
                 method: 'GET',
@@ -35,7 +36,7 @@ export const adminApi = createApi({
                 'AdminUserCredits',
             ],
         }),
-        readUserReferrals: builder.query<IUser[], IAdminUserReferralsParams>({
+        readUserReferrals: builder.query<IPaginatedResponse<IUser>, IAdminUserReferralsParams>({
             query: ({ user_id, ...params }) => ({
                 url: `/admin/users/${user_id}/referrals`,
                 method: 'GET',
@@ -52,6 +53,7 @@ export const adminApi = createApi({
                 method: 'PUT',
                 body: { new_owner_id, job_type },
             }),
+            transformResponse: (res: ISingleResponse<IAdminReassignJobResponse>) => res.data,
             invalidatesTags: ['AdminUsers'],
         }),
         readUserById: builder.query<IUser, string>({
@@ -59,6 +61,7 @@ export const adminApi = createApi({
                 url: `/admin/users/${user_id}`,
                 method: 'GET',
             }),
+            transformResponse: (res: ISingleResponse<IUser>) => res.data,
             providesTags: (_result, _error, user_id) => [{ type: 'AdminUsers', id: user_id }, 'AdminUsers'],
         }),
         adminUpdateUserDetails: builder.mutation<IUser, IAdminUserUpdateRequest>({
@@ -67,6 +70,7 @@ export const adminApi = createApi({
                 method: 'PUT',
                 body: payload,
             }),
+            transformResponse: (res: ISingleResponse<IUser>) => res.data,
             invalidatesTags: (_result, _error, { user_id }) => [
                 { type: 'AdminUsers', id: user_id },
                 'AdminUsers',

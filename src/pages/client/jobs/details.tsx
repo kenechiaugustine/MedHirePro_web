@@ -38,7 +38,8 @@ export default function ClientJobDetailsPage() {
     const [pageSize, setPageSize] = useState(10);
     // Queries
     const { data: job, isLoading: isJobLoading, error: jobError, refetch: refetchJob } = useGetJobListingDetailsQuery(id || '', { skip: !id });
-    const { data: applications, isLoading: isAppsLoading, refetch: refetchApps } = useGetApplicationsQuery({ vacancy_id: id || '', limit: pageSize }, { skip: !id });
+    const { data: applicationsRes, isLoading: isAppsLoading, refetch: refetchApps } = useGetApplicationsQuery({ vacancy_id: id || '', limit: pageSize }, { skip: !id });
+    const applications = applicationsRes?.data || [];
 
     // Mutations
     const [shortlistApplication, { isLoading: isShortlisting }] = useShortlistApplicationMutation();
@@ -703,15 +704,15 @@ export default function ClientJobDetailsPage() {
                                         })}
                                     </tbody>
                                 </table>
-                                <Pagination
-                                    currentPage={currentPage}
-                                    totalItems={totalItems}
-                                    pageSize={pageSize}
-                                    onPageChange={setCurrentPage}
-                                    onPageSizeChange={setPageSize}
-                                    pageSizeOptions={[5, 10, 20, 50]}
-                                />
                             </div>
+                            <Pagination
+                                currentPage={currentPage}
+                                totalItems={totalItems}
+                                pageSize={pageSize}
+                                onPageChange={setCurrentPage}
+                                onPageSizeChange={setPageSize}
+                                pageSizeOptions={[5, 10, 20, 50]}
+                            />
                         </div>
 
                         {/* Mobile Responsive Cards Layout */}
