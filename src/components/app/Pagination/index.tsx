@@ -18,7 +18,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     pageSize,
     onPageChange,
     onPageSizeChange,
-    pageSizeOptions = [5, 10, 20, 50, 100, 500],
+    pageSizeOptions = [5, 10, 20, 50, 100],
     className = '',
     showRangeText = true,
 }) => {
@@ -28,7 +28,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     const startItem = totalItems === 0 ? 0 : (safeCurrentPage - 1) * pageSize + 1;
     const endItem = Math.min(safeCurrentPage * pageSize, totalItems);
 
-    // Generate page numbers array with ellipsis if needed
+    // Generate page numbers array with ellipsis if needed for larger screens
     const getPageNumbers = () => {
         const pages: (number | string)[] = [];
         const maxPagesToShow = 5;
@@ -70,9 +70,9 @@ export const Pagination: React.FC<PaginationProps> = ({
     };
 
     return (
-        <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-slate-50/80 border-t border-slate-150 text-xs ${className}`}>
-            {/* Left: Per page selector & Info */}
-            <div className="flex items-center gap-4 flex-wrap text-slate-600 font-medium">
+        <div className={`flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-3.5 bg-slate-50/90 border-t border-slate-150 text-xs ${className}`}>
+            {/* Top (Mobile) / Left (Desktop): Per page selector & Range Info */}
+            <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-3 text-slate-600 font-medium">
                 {onPageSizeChange && (
                     <div className="flex items-center gap-2">
                         <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Per page</span>
@@ -82,7 +82,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                                 onPageSizeChange(Number(e.target.value));
                                 onPageChange(1); // Reset to page 1 on page size change
                             }}
-                            className="bg-white border border-slate-250 hover:border-slate-350 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 shadow-xs cursor-pointer transition-colors"
+                            className="bg-white border border-slate-250 hover:border-slate-350 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 shadow-2xs cursor-pointer transition-colors"
                         >
                             {pageSizeOptions.map((option) => (
                                 <option key={option} value={option}>
@@ -97,9 +97,9 @@ export const Pagination: React.FC<PaginationProps> = ({
                     <div className="text-[11px] font-bold text-slate-500">
                         {totalItems > 0 ? (
                             <>
-                                Showing <span className="font-extrabold text-slate-800">{startItem}</span> to{' '}
-                                <span className="font-extrabold text-slate-800">{endItem}</span> of{' '}
-                                <span className="font-extrabold text-slate-800">{totalItems}</span> items
+                                <span className="hidden xs:inline">Showing </span>
+                                <span className="font-extrabold text-slate-800">{startItem}-{endItem}</span> of{' '}
+                                <span className="font-extrabold text-slate-800">{totalItems}</span>
                             </>
                         ) : (
                             'No items'
@@ -108,22 +108,27 @@ export const Pagination: React.FC<PaginationProps> = ({
                 )}
             </div>
 
-            {/* Right: Page Navigation & Current Page Indicator */}
-            <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Bottom (Mobile) / Right (Desktop): Page Navigation */}
+            <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2">
                 {/* Prev Button */}
                 <button
                     type="button"
                     onClick={() => onPageChange(safeCurrentPage - 1)}
                     disabled={safeCurrentPage <= 1}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white cursor-pointer transition-colors shadow-xs"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white cursor-pointer transition-colors shadow-2xs text-xs"
                     aria-label="Previous Page"
                 >
                     <FiChevronLeft className="w-4 h-4" />
-                    <span>Prev</span>
+                    <span className="hidden sm:inline">Prev</span>
                 </button>
 
-                {/* Page Numbers Indicator */}
-                <div className="flex items-center gap-1">
+                {/* Mobile Compact Page Indicator */}
+                <div className="sm:hidden font-extrabold text-slate-700 text-[11px] px-2 py-1 bg-white border border-slate-200 rounded-md shadow-2xs">
+                    {safeCurrentPage} / {totalPages}
+                </div>
+
+                {/* Desktop Full Page Numbers */}
+                <div className="hidden sm:flex items-center gap-1">
                     {getPageNumbers().map((page, idx) => {
                         if (typeof page === 'string') {
                             return (
@@ -141,7 +146,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                                 onClick={() => onPageChange(page)}
                                 className={`min-w-[32px] h-[32px] px-2 rounded-lg font-extrabold text-xs transition-all cursor-pointer flex items-center justify-center ${
                                     isActive
-                                        ? 'bg-teal-600 text-white shadow-sm border border-teal-600 scale-105'
+                                        ? 'bg-teal-600 text-white shadow-xs border border-teal-600 scale-105'
                                         : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                                 }`}
                             >
@@ -156,10 +161,10 @@ export const Pagination: React.FC<PaginationProps> = ({
                     type="button"
                     onClick={() => onPageChange(safeCurrentPage + 1)}
                     disabled={safeCurrentPage >= totalPages}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white cursor-pointer transition-colors shadow-xs"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white cursor-pointer transition-colors shadow-2xs text-xs"
                     aria-label="Next Page"
                 >
-                    <span>Next</span>
+                    <span className="hidden sm:inline">Next</span>
                     <FiChevronRight className="w-4 h-4" />
                 </button>
             </div>
